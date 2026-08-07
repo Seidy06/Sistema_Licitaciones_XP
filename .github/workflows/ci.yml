@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Obtener repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restaurar dependencias
+        run: dotnet restore Licitaciones.sln
+
+      - name: Compilar solución
+        run: dotnet build Licitaciones.sln --configuration Release --no-restore
+
+      - name: Ejecutar pruebas
+        run: dotnet test Licitaciones.sln --configuration Release --no-build
