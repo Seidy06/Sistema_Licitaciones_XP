@@ -38,35 +38,46 @@ posteriores.
 | HU-17 | Verificar el sistema con pruebas automatizadas | Alta | 8 puntos |
 | HU-18 | Integrar cambios continuamente | Alta | 5 puntos |
 
-## HU-01: Registrar proveedor
+## HU-01 - Registrar proveedor
 
 Como encargado de licitaciones,\
 quiero registrar un proveedor,\
-para asociarlo posteriormente con sus ofertas económicas.
+para asociarlo con futuras ofertas económicas.
 
-**Prioridad inicial:** Alta\
-**Estimación inicial propuesta:** 3 puntos\
-**Iteración prevista:** 1
+**GitHub Issue:** #8  
+**Prioridad:** Alta  
+**Estimación:** 3 puntos  
+**Iteración:** Iteración 1 - Base y proveedores  
+**Estado:** En desarrollo
 
 ### Criterios de aceptación
 
-1. El nombre del proveedor es obligatorio.
-2. El nombre debe ser único después de normalizarlo.
-3. Se eliminan los espacios al inicio y al final.
-4. Se reducen los espacios repetidos a un solo espacio.
-5. Se normalizan las diferencias entre mayúsculas y minúsculas para comprobar
-   la unicidad.
+1. El nombre es obligatorio.
+2. El nombre debe almacenarse normalizado.
+3. Se eliminan espacios laterales.
+4. Se reducen espacios repetidos.
+5. La comparación ignora mayúsculas y minúsculas.
 6. Se aplica normalización Unicode.
 7. Solo se aceptan letras, números, espacios, punto, coma y paréntesis.
-8. El proveedor se almacena en PostgreSQL.
-9. El registro está disponible desde la interfaz MVC y la API REST.
-10. Un nombre duplicado produce un mensaje controlado.
-11. La API devuelve `201 Created` cuando el registro es válido.
-12. La API devuelve `409 Conflict` cuando el proveedor ya existe.
+8. El nombre normalizado debe ser único.
+9. El proveedor debe persistirse en PostgreSQL.
+10. Debe poder registrarse mediante MVC.
+11. Debe poder registrarse mediante API REST.
+12. La API debe responder `201` para un registro válido.
+13. La API debe responder `409` para un duplicado.
 
 Las reglas de validación y unicidad deben aplicarse de forma coherente en la
 interfaz, el servidor y PostgreSQL. Por ejemplo, `Empresa Central`,
 `empresa central` y `EMPRESA CENTRAL` deben considerarse nombres equivalentes.
+
+### Pruebas relacionadas
+
+- Normalización de espacios.
+- Normalización de mayúsculas y minúsculas.
+- Normalización Unicode.
+- Caracteres permitidos.
+- Rechazo de duplicados.
+- Índice único en PostgreSQL.
 
 ## HU-02: Consultar proveedores
 
