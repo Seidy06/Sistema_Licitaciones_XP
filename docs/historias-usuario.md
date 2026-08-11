@@ -48,7 +48,7 @@ para asociarlo con futuras ofertas económicas.
 **Prioridad:** Alta  
 **Estimación:** 3 puntos  
 **Iteración:** Iteración 1 - Base y proveedores  
-**Estado:** En desarrollo
+**Estado:** Implementada en la rama `hu/01-proveedores`
 
 ### Criterios de aceptación
 
@@ -78,6 +78,20 @@ interfaz, el servidor y PostgreSQL. Por ejemplo, `Empresa Central`,
 - Caracteres permitidos.
 - Rechazo de duplicados.
 - Índice único en PostgreSQL.
+
+### Implementación entregada
+
+- Dominio: validación, normalización Unicode y creación de `Proveedor`.
+- Application: `CrearProveedorService` comprueba duplicidad y coordina el
+  registro mediante `IProveedorRepository`.
+- Infrastructure: Entity Framework Core, migración e índice único
+  `UX_Proveedores_NombreNormalizado` sobre PostgreSQL.
+- API: `POST /api/v1/proveedores`, con respuestas `201`, `400` y `409`.
+- MVC: `GET` y `POST /Proveedores/Create`, validación junto al campo y mensajes
+  comprensibles de éxito, formato inválido y duplicidad.
+
+**Evidencias:** Issue #8, Pull Request #9 y commits `f274b20`, `f597141`,
+`0fd4129`, `89f0768` y `1516d2c`.
 
 ## HU-02: Consultar proveedores
 
