@@ -3,9 +3,9 @@
 ## Documentación general
 
 - [Visión y alcance](vision-alcance.md)
-- [Historias de usuario](historias-usuario.md)
-- [Plan XP](plan-xp.md)
-- [Bitácora XP](bitacora-xp.md)
+- [Historias de usuario](historias-usuario.md) — catálogo aprobado HU-00 a HU-37 y trazabilidad histórica.
+- [Plan XP](plan-xp.md) — distribución de historias en cuatro iteraciones.
+- [Bitácora XP](bitacora-xp.md) — evidencia de ejecución y decisiones de planificación.
 - [Arquitectura general](arquitectura-general.md)
 - [Modelo de datos](modelo-datos.md)
 - [API REST](api.md)

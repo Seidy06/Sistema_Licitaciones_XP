@@ -83,7 +83,7 @@ oferta, su clasificación de ahorro y el nivel de aprobación correspondiente.
 ## Restricciones técnicas
 
 - El proyecto debe aplicar exclusivamente Extreme Programming (XP); no se
-  utilizarán Scrum, Kanban ni marcos híbridos como metodología rectora.
+  utilizarán marcos ágiles alternativos como metodología rectora.
 - La solución debe ser modular. Puede implementarse como monolito modular o
   mediante microservicios únicamente si la separación está técnicamente
   justificada.
