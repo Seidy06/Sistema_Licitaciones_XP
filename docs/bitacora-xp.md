@@ -60,3 +60,24 @@ sesiones anteriores no se infieren cuando no existe una evidencia registrada.
   prueba la solución con PostgreSQL 16 para cada pull request dirigido a
   `main`. El resultado de la ejecución se consulta en los checks del
   [PR #9](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/9/checks).
+
+## Actualización de planificación posterior a la auditoría de la Iteración 1
+
+Después de la auditoría de la Iteración 1, el equipo adoptó formalmente el
+catálogo HU-00 a HU-37 y reorganizó la planificación en cuatro iteraciones:
+HU-00 a HU-09, HU-10 a HU-17, HU-18 a HU-27 y HU-28 a HU-37.
+
+La evidencia auditada de proveedores conserva la numeración que estaba vigente
+cuando se produjo. Para continuar el proyecto se aplica esta equivalencia:
+
+| Historia auditada anteriormente | Historia del catálogo actual |
+| --- | --- |
+| HU-01 — Registrar proveedor | HU-06 — Registrar proveedor |
+| HU-02 — Consultar proveedores | HU-09 — Listar y consultar proveedores |
+| HU-03 — Editar proveedor | HU-07 — Editar proveedor |
+| HU-04 — Eliminar proveedor | HU-08 — Eliminar lógicamente proveedor |
+
+Los commits históricos, incluidos los citados en esta bitácora, no se
+modificarán ni se reescribirán porque constituyen evidencia XP del repositorio.
+La equivalencia anterior permite relacionarlos con el catálogo actual sin
+alterar el historial.
