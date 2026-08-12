@@ -1,9 +1,25 @@
+using Licitaciones.Application.Proveedores;
+using Licitaciones.Application.Proveedores.Crear;
+using Licitaciones.Infrastructure.Persistence;
+
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<CrearProveedorService>();
+builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
+builder.Services.AddDbContext<LicitacionesDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Licitaciones")));
 
 var app = builder.Build();
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<LicitacionesDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

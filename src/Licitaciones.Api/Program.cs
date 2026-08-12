@@ -1,23 +1,32 @@
+using Licitaciones.Application.Proveedores;
+using Licitaciones.Application.Proveedores.Crear;
+using Licitaciones.Infrastructure.Persistence;
+
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
+builder.Services.AddScoped<CrearProveedorService>();
+builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
+builder.Services.AddDbContext<LicitacionesDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Licitaciones")));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+app.UseExceptionHandler();
 
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+
+public partial class Program;
