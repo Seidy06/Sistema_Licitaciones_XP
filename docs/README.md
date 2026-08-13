@@ -18,6 +18,7 @@
 ## Documentación por módulo
 
 - [Proveedores](modulos/proveedores.md)
+- [HU-09: listado y consulta de proveedores](hu-09-listar-consultar-proveedores.md)
 - [Licitaciones](modulos/licitaciones.md)
 - [Ofertas](modulos/ofertas.md)
 - [Niveles de aprobación](modulos/niveles-aprobacion.md)
