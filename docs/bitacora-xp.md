@@ -81,3 +81,35 @@ Los commits históricos, incluidos los citados en esta bitácora, no se
 modificarán ni se reescribirán porque constituyen evidencia XP del repositorio.
 La equivalencia anterior permite relacionarlos con el catálogo actual sin
 alterar el historial.
+
+## HU-06 - Validación Unicode y duplicidad concurrente
+
+Después de adoptar el catálogo actual se amplió la evidencia de registro de
+proveedores en el [Pull Request
+#12](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/12).
+
+### Ciclo TDD
+
+1. Rojo — `1666a8d`
+   - Se agregaron pruebas para Unicode compuesto y descompuesto de extremo a
+     extremo.
+   - Se reprodujo una carrera en la que dos solicitudes equivalentes superan
+     la consulta previa de duplicidad.
+   - Se exigió que el contrato HTTP produzca `201 Created` y `409 Conflict`, sin
+     propagar un error `500`.
+
+2. Verde — `23aa497`
+   - Domain centralizó Unicode Form C, espacios y el valor comparable.
+   - Infrastructure capturó específicamente la violación PostgreSQL `23505` de
+     `UX_Proveedores_NombreNormalizado` y la tradujo a
+     `ProveedorDuplicadoException`.
+   - MVC y API conservaron controladores delgados y delegaron las reglas al
+     dominio y a Application.
+
+3. Refactorización — `276d9af`
+   - `ProveedorNombreNormalizer` pasó a producir conjuntamente el nombre
+     legible y `NombreNormalizado`, evitando cálculos repetidos.
+   - El nombre del índice único se centralizó en la configuración de
+     persistencia para compartirlo con la traducción del conflicto.
+   - El comportamiento permaneció verde: 25 pruebas unitarias, 11 de
+     integración y 1 funcional, para un total de 37 pruebas superadas.

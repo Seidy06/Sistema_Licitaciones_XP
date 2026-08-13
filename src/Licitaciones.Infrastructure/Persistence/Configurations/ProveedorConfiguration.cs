@@ -7,6 +7,9 @@ namespace Licitaciones.Infrastructure.Persistence.Configurations;
 public sealed class ProveedorConfiguration
     : IEntityTypeConfiguration<Proveedor>
 {
+    internal const string IndiceUnicoNombreNormalizado =
+        "UX_Proveedores_NombreNormalizado";
+
     public void Configure(EntityTypeBuilder<Proveedor> builder)
     {
         builder.ToTable("Proveedores");
@@ -34,7 +37,7 @@ public sealed class ProveedorConfiguration
 
         builder.HasIndex(x => x.NombreNormalizado)
             .IsUnique()
-            .HasDatabaseName("UX_Proveedores_NombreNormalizado");
+            .HasDatabaseName(IndiceUnicoNombreNormalizado);
 
         builder.Property(x => x.Version)
             .IsRowVersion();

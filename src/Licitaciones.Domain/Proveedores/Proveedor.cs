@@ -1,5 +1,3 @@
-using System.Text;
-using System.Text.RegularExpressions;
 using Licitaciones.Domain.Common;
 
 namespace Licitaciones.Domain.Proveedores;
@@ -24,30 +22,21 @@ public sealed class Proveedor : IAuditableEntity
 
     public static Proveedor Crear(string nombre)
     {
-        if (string.IsNullOrWhiteSpace(nombre))
-        {
-            throw new ArgumentException(
-                "El nombre del proveedor es obligatorio.",
-                nameof(nombre));
-        }
+        var (nombreLegible, nombreNormalizado) =
+            ProveedorNombreNormalizer.NormalizarAmbos(nombre);
 
-        if (!ProveedorNombreValidator.EsValido(nombre))
+        if (!ProveedorNombreValidator.EsValido(nombreLegible))
         {
             throw new ArgumentException(
                 "El nombre del proveedor contiene caracteres no permitidos.",
                 nameof(nombre));
         }
 
-        var nombreLegible = Regex.Replace(
-            nombre.Normalize(NormalizationForm.FormC).Trim(),
-            @"\s+",
-            " ");
-
         return new Proveedor
         {
             Id = Guid.NewGuid(),
             Nombre = nombreLegible,
-            NombreNormalizado = ProveedorNombreNormalizer.Normalizar(nombreLegible),
+            NombreNormalizado = nombreNormalizado,
             Version = 0
         };
     }
