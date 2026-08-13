@@ -1,0 +1,18 @@
+@model Licitaciones.Web.Models.Proveedores.ProveedorDetalleViewModel
+
+@{
+    ViewData["Title"] = "Detalle del proveedor";
+}
+
+<h1>Detalle del proveedor</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Nombre</dt>
+    <dd class="col-sm-9">@Model.Nombre</dd>
+    <dt class="col-sm-3">Fecha de creación</dt>
+    <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
+    <dt class="col-sm-3">Última actualización</dt>
+    <dd class="col-sm-9">@Model.UpdatedAt.ToString("g")</dd>
+</dl>
+
+<a asp-action="Index" class="btn btn-outline-secondary">Volver al listado</a>
