@@ -18,6 +18,21 @@ public class ProveedorTests
     }
 
     [Theory]
+    [InlineData("Café Central", "Café Central")]
+    [InlineData("Cafe\u0301 Central", "Café Central")]
+    [InlineData(" CAFÉ   CENTRAL ", "CAFÉ CENTRAL")]
+    [Trait("HU", "HU-06-Auditoria")]
+    public void Crear_DebeNormalizarUnicodeAntesDeValidar(
+        string nombre,
+        string nombreLegibleEsperado)
+    {
+        var proveedor = Proveedor.Crear(nombre);
+
+        Assert.Equal(nombreLegibleEsperado, proveedor.Nombre);
+        Assert.Equal("CAFÉ CENTRAL", proveedor.NombreNormalizado);
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData("   ")]
     [InlineData("Proveedor #1")]
