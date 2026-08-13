@@ -18,7 +18,10 @@ Tabla: `Proveedores`.
 El índice único `UX_Proveedores_NombreNormalizado` impide duplicados incluso si
 dos operaciones concurrentes superan la comprobación previa de Application.
 Por ejemplo, `Empresa Central`, `empresa central` y `  EMPRESA   CENTRAL  `
-producen `EMPRESA CENTRAL`.
+producen `EMPRESA CENTRAL`. También son equivalentes `Café Central` y su forma
+descompuesta `Cafe\u0301 Central`, porque Domain aplica Unicode Form C antes de
+guardar. Infrastructure reconoce exclusivamente la violación PostgreSQL
+`23505` de este índice y la traduce al conflicto de proveedor duplicado.
 
 ### Migración
 

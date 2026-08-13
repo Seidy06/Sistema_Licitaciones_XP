@@ -112,9 +112,11 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Criterios de aceptación:**
   - Given un nombre válido y único, When se registra el proveedor, Then se persiste con `Id` autogenerado y `CreatedAt` establecido.
   - Given un nombre con espacios repetidos o mayúsculas/minúsculas distintas a uno ya existente tras normalización, When se intenta registrar, Then se rechaza con código 409/mensaje "proveedor duplicado".
+  - Given dos representaciones Unicode canónicamente equivalentes, When se registran, Then ambas producen el mismo `NombreNormalizado` y la segunda se rechaza como duplicada.
+  - Given dos solicitudes concurrentes con nombres equivalentes, When ambas superan la consulta previa, Then el índice único permite una sola inserción y la otra solicitud recibe `409 Conflict`, nunca `500 Internal Server Error`.
   - Given un nombre con caracteres no permitidos (fuera de letras, números, espacios, `.`, `,`, `(` y `)`), When se intenta registrar, Then se rechaza con mensaje de validación específico.
-  - Given la validación, When ocurre, Then se aplica en cliente (JS), servidor (FluentValidation/DataAnnotations) y base de datos (índice único).
-- **Notas técnicas:** Normalización = `Trim()` + colapsar espacios múltiples + `Normalize(NormalizationForm.FormKC)` + `ToUpperInvariant()` (o `ILower`/`citext` en PostgreSQL) antes de comparar/guardar en `NombreNormalizado`. Índice único filtrado por `DeletedAt IS NULL`.
+  - Given la validación del nombre, When se procesa una solicitud MVC o API, Then las reglas se ejecutan en Domain sin duplicarse en los controladores ni en sus modelos de entrada.
+- **Notas técnicas:** `ProveedorNombreNormalizer` es la única estrategia de normalización: aplica Unicode Form C, `Trim()`, colapsa espacios múltiples y usa `ToUpperInvariant()` para `NombreNormalizado`. PostgreSQL protege la unicidad mediante `UX_Proveedores_NombreNormalizado`; Infrastructure traduce específicamente su violación `23505` a `ProveedorDuplicadoException`.
 
 ### HU-07: Editar proveedor
 - **Rol:** Como usuario administrador

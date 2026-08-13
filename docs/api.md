@@ -35,7 +35,10 @@ Los identificadores y fechas del ejemplo son ilustrativos.
 | Estado | Condición | Respuesta |
 | --- | --- | --- |
 | `400 Bad Request` | Nombre vacío o con caracteres no permitidos. | `ProblemDetails` con detalle comprensible. |
-| `409 Conflict` | Ya existe el nombre normalizado. | `ProblemDetails` con título `Proveedor duplicado`. |
+| `409 Conflict` | Ya existe el nombre normalizado, incluida una inserción concurrente rechazada por `UX_Proveedores_NombreNormalizado`. | `ProblemDetails` con título `Proveedor duplicado`. |
 
 La API y MVC usan el mismo `CrearProveedorService`; por eso no duplican reglas
-de negocio en sus controladores.
+de negocio en sus controladores. La normalización Unicode Form C reside en
+Domain. Infrastructure traduce específicamente la violación `23505` del índice
+único a `ProveedorDuplicadoException`, por lo que una carrera esperada responde
+`409 Conflict` y nunca `500 Internal Server Error`.
