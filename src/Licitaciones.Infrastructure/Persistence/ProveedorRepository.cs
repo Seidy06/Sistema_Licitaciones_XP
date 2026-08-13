@@ -1,6 +1,8 @@
 using Licitaciones.Application.Proveedores;
+using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Domain.Proveedores;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Licitaciones.Infrastructure.Persistence;
 
@@ -27,6 +29,25 @@ public sealed class ProveedorRepository : IProveedorRepository
         CancellationToken cancellationToken = default)
     {
         await _context.Proveedores.AddAsync(proveedor, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception)
+            when (EsConflictoDeNombreNormalizado(exception))
+        {
+            throw new ProveedorDuplicadoException(proveedor.Nombre);
+        }
+    }
+
+    private static bool EsConflictoDeNombreNormalizado(
+        DbUpdateException exception)
+    {
+        return exception.InnerException is PostgresException
+        {
+            SqlState: PostgresErrorCodes.UniqueViolation,
+            ConstraintName: "UX_Proveedores_NombreNormalizado"
+        };
     }
 }

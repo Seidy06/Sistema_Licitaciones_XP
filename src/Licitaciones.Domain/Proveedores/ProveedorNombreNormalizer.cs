@@ -5,7 +5,7 @@ namespace Licitaciones.Domain.Proveedores;
 
 public static class ProveedorNombreNormalizer
 {
-    public static string Normalizar(string nombre)
+    public static string NormalizarLegible(string nombre)
     {
         if (string.IsNullOrWhiteSpace(nombre))
         {
@@ -20,6 +20,11 @@ public static class ProveedorNombreNormalizer
 
         normalizado = Regex.Replace(normalizado, @"\s+", " ");
 
-        return normalizado.ToUpperInvariant();
+        return normalizado;
+    }
+
+    public static string Normalizar(string nombre)
+    {
+        return NormalizarLegible(nombre).ToUpperInvariant();
     }
 }
