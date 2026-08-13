@@ -1,5 +1,6 @@
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Crear;
+using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Domain.Proveedores;
 using Licitaciones.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,7 @@ using Npgsql;
 
 namespace Licitaciones.Infrastructure.Persistence;
 
-public sealed class ProveedorRepository : IProveedorRepository
+public sealed class ProveedorRepository : IProveedorRepository, IProveedorConsultaRepository
 {
     private readonly LicitacionesDbContext _context;
 
@@ -40,6 +41,60 @@ public sealed class ProveedorRepository : IProveedorRepository
         {
             throw new ProveedorDuplicadoException(proveedor.Nombre);
         }
+    }
+
+    public Task<Proveedor?> ObtenerPorIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return _context.Proveedores
+            .AsNoTracking()
+            .SingleOrDefaultAsync(proveedor => proveedor.Id == id, cancellationToken);
+    }
+
+    public async Task<PaginaProveedores> ListarAsync(
+        ConsultarProveedoresRequest consulta,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<Proveedor> query = _context.Proveedores.AsNoTracking();
+
+        if (consulta.Nombre is not null)
+        {
+            var nombreNormalizado = ProveedorNombreNormalizer.Normalizar(consulta.Nombre);
+            query = query.Where(proveedor =>
+                proveedor.NombreNormalizado.Contains(nombreNormalizado));
+        }
+
+        var total = await query.CountAsync(cancellationToken);
+        var ordenada = Ordenar(query, consulta.OrdenarPor, consulta.Descendente);
+        var items = await ordenada
+            .Skip((consulta.Pagina - 1) * consulta.TamanoPagina)
+            .Take(consulta.TamanoPagina)
+            .ToListAsync(cancellationToken);
+
+        return new PaginaProveedores(items, total);
+    }
+
+    private static IOrderedQueryable<Proveedor> Ordenar(
+        IQueryable<Proveedor> query,
+        ProveedorOrden ordenarPor,
+        bool descendente)
+    {
+        return (ordenarPor, descendente) switch
+        {
+            (ProveedorOrden.FechaCreacion, true) => query
+                .OrderByDescending(proveedor => proveedor.CreatedAt)
+                .ThenBy(proveedor => proveedor.Id),
+            (ProveedorOrden.FechaCreacion, false) => query
+                .OrderBy(proveedor => proveedor.CreatedAt)
+                .ThenBy(proveedor => proveedor.Id),
+            (ProveedorOrden.Nombre, true) => query
+                .OrderByDescending(proveedor => proveedor.NombreNormalizado)
+                .ThenBy(proveedor => proveedor.Id),
+            _ => query
+                .OrderBy(proveedor => proveedor.NombreNormalizado)
+                .ThenBy(proveedor => proveedor.Id)
+        };
     }
 
     private static bool EsConflictoDeNombreNormalizado(
