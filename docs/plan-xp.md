@@ -13,6 +13,10 @@ El proyecto se organiza en cuatro iteraciones de duración uniforme. Cada
 iteración concluye con una pequeña liberación verificable y alimenta la
 planificación de la siguiente.
 
+La velocidad planificada inicial es de **36 puntos de historia por iteración**.
+Este valor se revisa al cierre de cada iteración con la velocidad realmente
+observada, sin ampliar artificialmente el alcance de una iteración en curso.
+
 | Iteración | Historias seleccionadas | Objetivo de la pequeña liberación |
 | --- | --- | --- |
 | Iteración 1 | HU-00 a HU-09 | Establecer la base técnica, el modelo persistente y la gestión de proveedores. |

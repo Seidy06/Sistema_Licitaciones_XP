@@ -25,9 +25,11 @@ public sealed class ProveedorConfiguration
             .HasMaxLength(200);
 
         builder.Property(x => x.CreatedAt)
+            .HasColumnType("timestamp with time zone")
             .IsRequired();
 
         builder.Property(x => x.UpdatedAt)
+            .HasColumnType("timestamp with time zone")
             .IsRequired();
 
         builder.HasIndex(x => x.NombreNormalizado)

@@ -1,9 +1,10 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using Licitaciones.Domain.Common;
 
 namespace Licitaciones.Domain.Proveedores;
 
-public sealed class Proveedor
+public sealed class Proveedor : IAuditableEntity
 {
     private Proveedor()
     {
@@ -41,15 +42,12 @@ public sealed class Proveedor
             nombre.Normalize(NormalizationForm.FormC).Trim(),
             @"\s+",
             " ");
-        var ahora = DateTimeOffset.UtcNow;
 
         return new Proveedor
         {
             Id = Guid.NewGuid(),
             Nombre = nombreLegible,
             NombreNormalizado = ProveedorNombreNormalizer.Normalizar(nombreLegible),
-            CreatedAt = ahora,
-            UpdatedAt = ahora,
             Version = 0
         };
     }

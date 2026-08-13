@@ -7,15 +7,13 @@ public class ProveedorTests
     [Fact]
     public void Crear_DebeInicializarProveedorValido()
     {
-        var antes = DateTimeOffset.UtcNow;
-
         var proveedor = Proveedor.Crear("  Servicios   Costa Rica, S.A.  ");
 
         Assert.NotEqual(Guid.Empty, proveedor.Id);
         Assert.Equal("Servicios Costa Rica, S.A.", proveedor.Nombre);
         Assert.Equal("SERVICIOS COSTA RICA, S.A.", proveedor.NombreNormalizado);
-        Assert.Equal(proveedor.CreatedAt, proveedor.UpdatedAt);
-        Assert.InRange(proveedor.CreatedAt, antes, DateTimeOffset.UtcNow);
+        Assert.Equal(default, proveedor.CreatedAt);
+        Assert.Equal(default, proveedor.UpdatedAt);
         Assert.Equal(0u, proveedor.Version);
     }
 

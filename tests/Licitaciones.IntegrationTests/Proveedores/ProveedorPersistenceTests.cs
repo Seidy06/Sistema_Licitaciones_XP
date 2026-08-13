@@ -34,6 +34,8 @@ public sealed class ProveedorPersistenceTests : IClassFixture<PostgreSqlFixture>
 
         Assert.Equal(nombre, proveedor.Nombre);
         Assert.Equal(nombre.ToUpperInvariant(), proveedor.NombreNormalizado);
+        Assert.NotEqual(default, proveedor.CreatedAt);
+        Assert.Equal(proveedor.CreatedAt, proveedor.UpdatedAt);
     }
 
     [Fact]

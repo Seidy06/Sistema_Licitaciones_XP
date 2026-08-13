@@ -1,19 +1,68 @@
+using Licitaciones.Domain.Aprobaciones;
+using Licitaciones.Domain.Common;
+using Licitaciones.Domain.Licitaciones;
+using Licitaciones.Domain.Ofertas;
 using Licitaciones.Domain.Proveedores;
+using Licitaciones.Domain.TiposCambio;
+using Licitaciones.Infrastructure.Time;
 using Microsoft.EntityFrameworkCore;
 
 namespace Licitaciones.Infrastructure.Persistence;
 
 public sealed class LicitacionesDbContext : DbContext
 {
-    public LicitacionesDbContext(DbContextOptions<LicitacionesDbContext> options)
+    private readonly IClock _clock;
+
+    public LicitacionesDbContext(
+        DbContextOptions<LicitacionesDbContext> options,
+        IClock? clock = null)
         : base(options)
     {
+        _clock = clock ?? new SystemClock();
     }
 
     public DbSet<Proveedor> Proveedores => Set<Proveedor>();
+    public DbSet<Licitacion> Licitaciones => Set<Licitacion>();
+    public DbSet<Oferta> Ofertas => Set<Oferta>();
+    public DbSet<NivelAprobacion> NivelesAprobacion => Set<NivelAprobacion>();
+    public DbSet<TipoCambio> TiposCambio => Set<TipoCambio>();
+    public DbSet<EstadoLicitacionCatalogo> EstadosLicitacion => Set<EstadoLicitacionCatalogo>();
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        AplicarMarcasDeTiempo();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default)
+    {
+        AplicarMarcasDeTiempo();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LicitacionesDbContext).Assembly);
+    }
+
+    private void AplicarMarcasDeTiempo()
+    {
+        var ahora = _clock.UtcNow();
+
+        foreach (var entry in ChangeTracker.Entries<IAuditableEntity>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Property(nameof(IAuditableEntity.CreatedAt)).CurrentValue = ahora;
+                entry.Property(nameof(IAuditableEntity.UpdatedAt)).CurrentValue = ahora;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Property(nameof(IAuditableEntity.CreatedAt)).IsModified = false;
+                entry.Property(nameof(IAuditableEntity.UpdatedAt)).CurrentValue = ahora;
+            }
+        }
     }
 }

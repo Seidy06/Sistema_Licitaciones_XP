@@ -1,4 +1,5 @@
 using Licitaciones.Infrastructure.Persistence;
+using Licitaciones.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
 
@@ -28,13 +29,13 @@ public sealed class PostgreSqlFixture : IAsyncLifetime
 
     public string ConnectionString { get; private set; } = string.Empty;
 
-    public LicitacionesDbContext CrearContexto()
+    public LicitacionesDbContext CrearContexto(IClock? clock = null)
     {
         var options = new DbContextOptionsBuilder<LicitacionesDbContext>()
             .UseNpgsql(ConnectionString)
             .Options;
 
-        return new LicitacionesDbContext(options);
+        return new LicitacionesDbContext(options, clock);
     }
 
     public async Task InitializeAsync()
