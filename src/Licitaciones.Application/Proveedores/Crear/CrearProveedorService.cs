@@ -17,16 +17,14 @@ public sealed class CrearProveedorService
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var nombreNormalizado = ProveedorNombreNormalizer.Normalizar(request.Nombre);
+        var proveedor = Proveedor.Crear(request.Nombre);
 
         if (await _repository.ExisteNombreNormalizadoAsync(
-                nombreNormalizado,
+                proveedor.NombreNormalizado,
                 cancellationToken))
         {
             throw new ProveedorDuplicadoException(request.Nombre);
         }
-
-        var proveedor = Proveedor.Crear(request.Nombre);
 
         await _repository.AgregarAsync(proveedor, cancellationToken);
 

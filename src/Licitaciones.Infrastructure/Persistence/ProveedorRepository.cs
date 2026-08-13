@@ -1,6 +1,7 @@
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Domain.Proveedores;
+using Licitaciones.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -47,7 +48,7 @@ public sealed class ProveedorRepository : IProveedorRepository
         return exception.InnerException is PostgresException
         {
             SqlState: PostgresErrorCodes.UniqueViolation,
-            ConstraintName: "UX_Proveedores_NombreNormalizado"
+            ConstraintName: ProveedorConfiguration.IndiceUnicoNombreNormalizado
         };
     }
 }

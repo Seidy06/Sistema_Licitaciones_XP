@@ -7,6 +7,17 @@ public static class ProveedorNombreNormalizer
 {
     public static string NormalizarLegible(string nombre)
     {
+        return NormalizarAmbos(nombre).NombreLegible;
+    }
+
+    public static string Normalizar(string nombre)
+    {
+        return NormalizarAmbos(nombre).NombreNormalizado;
+    }
+
+    internal static (string NombreLegible, string NombreNormalizado) NormalizarAmbos(
+        string nombre)
+    {
         if (string.IsNullOrWhiteSpace(nombre))
         {
             throw new ArgumentException(
@@ -20,11 +31,6 @@ public static class ProveedorNombreNormalizer
 
         normalizado = Regex.Replace(normalizado, @"\s+", " ");
 
-        return normalizado;
-    }
-
-    public static string Normalizar(string nombre)
-    {
-        return NormalizarLegible(nombre).ToUpperInvariant();
+        return (normalizado, normalizado.ToUpperInvariant());
     }
 }

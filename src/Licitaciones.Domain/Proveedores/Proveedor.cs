@@ -22,14 +22,8 @@ public sealed class Proveedor : IAuditableEntity
 
     public static Proveedor Crear(string nombre)
     {
-        if (string.IsNullOrWhiteSpace(nombre))
-        {
-            throw new ArgumentException(
-                "El nombre del proveedor es obligatorio.",
-                nameof(nombre));
-        }
-
-        var nombreLegible = ProveedorNombreNormalizer.NormalizarLegible(nombre);
+        var (nombreLegible, nombreNormalizado) =
+            ProveedorNombreNormalizer.NormalizarAmbos(nombre);
 
         if (!ProveedorNombreValidator.EsValido(nombreLegible))
         {
@@ -42,7 +36,7 @@ public sealed class Proveedor : IAuditableEntity
         {
             Id = Guid.NewGuid(),
             Nombre = nombreLegible,
-            NombreNormalizado = ProveedorNombreNormalizer.Normalizar(nombreLegible),
+            NombreNormalizado = nombreNormalizado,
             Version = 0
         };
     }
