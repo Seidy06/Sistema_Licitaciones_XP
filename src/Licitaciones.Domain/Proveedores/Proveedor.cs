@@ -40,4 +40,20 @@ public sealed class Proveedor : IAuditableEntity
             Version = 0
         };
     }
+
+    public void Editar(string nombre)
+    {
+        var (nombreLegible, nombreNormalizado) =
+            ProveedorNombreNormalizer.NormalizarAmbos(nombre);
+
+        if (!ProveedorNombreValidator.EsValido(nombreLegible))
+        {
+            throw new ArgumentException(
+                "El nombre del proveedor contiene caracteres no permitidos.",
+                nameof(nombre));
+        }
+
+        Nombre = nombreLegible;
+        NombreNormalizado = nombreNormalizado;
+    }
 }

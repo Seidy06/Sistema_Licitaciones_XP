@@ -1,11 +1,13 @@
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Consultar;
+using Licitaciones.Application.Proveedores.Editar;
 
 using Microsoft.AspNetCore.Mvc;
 
 using ApplicationRequest = Licitaciones.Application.Proveedores.Crear.CrearProveedorRequest;
 using HttpRequest = Licitaciones.Api.Contracts.Proveedores.CrearProveedorRequest;
+using HttpEditRequest = Licitaciones.Api.Contracts.Proveedores.EditarProveedorRequest;
 
 namespace Licitaciones.Api.Controllers;
 
@@ -15,6 +17,7 @@ public sealed class ProveedoresController : ControllerBase
 {
     private readonly CrearProveedorService _crearService;
     private readonly ConsultarProveedorService? _consultarService;
+    private readonly EditarProveedorService? _editarService;
 
     public ProveedoresController(CrearProveedorService service)
     {
@@ -28,6 +31,60 @@ public sealed class ProveedoresController : ControllerBase
         _crearService = crearService;
         _consultarService = consultarService;
     }
+
+    public ProveedoresController(
+        CrearProveedorService crearService,
+        ConsultarProveedorService consultarService,
+        EditarProveedorService editarService)
+        : this(crearService, consultarService)
+    {
+        _editarService = editarService;
+    }
+
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType<ProveedorDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ProveedorDto>> Editar(
+        Guid id,
+        HttpEditRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var proveedor = await _editarService!.EditarAsync(
+                id,
+                new Licitaciones.Application.Proveedores.Editar.EditarProveedorRequest(
+                    request.Nombre, request.Version),
+                cancellationToken);
+            return Ok(proveedor);
+        }
+        catch (ProveedorNoEncontradoException exception)
+        {
+            return NotFound(CrearProblema(404, "Proveedor no encontrado", exception.Message));
+        }
+        catch (ProveedorConcurrenciaException exception)
+        {
+            return Conflict(CrearProblema(409, "Conflicto de actualización", exception.Message));
+        }
+        catch (Licitaciones.Application.Proveedores.Editar.ProveedorDuplicadoException exception)
+        {
+            return Conflict(CrearProblema(409, "Proveedor duplicado", exception.Message));
+        }
+        catch (ArgumentException exception)
+        {
+            return BadRequest(CrearProblema(400, "Nombre de proveedor inválido", exception.Message));
+        }
+    }
+
+    private ProblemDetails CrearProblema(int status, string title, string detail) => new()
+    {
+        Status = status,
+        Title = title,
+        Detail = detail,
+        Type = $"https://httpstatuses.com/{status}",
+        Instance = HttpContext.Request.Path
+    };
 
     [HttpGet]
     [ProducesResponseType<PaginaResultado<ProveedorDto>>(StatusCodes.Status200OK)]
@@ -74,7 +131,7 @@ public sealed class ProveedoresController : ControllerBase
 
             return Created($"/api/v1/proveedores/{proveedor.Id}", proveedor);
         }
-        catch (ProveedorDuplicadoException)
+        catch (Licitaciones.Application.Proveedores.Crear.ProveedorDuplicadoException)
         {
             return Conflict(new ProblemDetails
             {

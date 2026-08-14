@@ -1,5 +1,6 @@
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Consultar;
+using Licitaciones.Application.Proveedores.Editar;
 using Licitaciones.Web.Models.Proveedores;
 
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,7 @@ public sealed class ProveedoresController : Controller
 {
     private readonly CrearProveedorService _crearService;
     private readonly ConsultarProveedorService _consultarService;
+    private readonly EditarProveedorService? _editarService;
 
     public ProveedoresController(
         CrearProveedorService crearService,
@@ -17,6 +19,80 @@ public sealed class ProveedoresController : Controller
     {
         _crearService = crearService;
         _consultarService = consultarService;
+    }
+
+    public ProveedoresController(
+        CrearProveedorService crearService,
+        ConsultarProveedorService consultarService,
+        EditarProveedorService editarService)
+        : this(crearService, consultarService)
+    {
+        _editarService = editarService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
+    {
+        var proveedor = await _consultarService.ObtenerPorIdAsync(id, cancellationToken);
+        if (proveedor is null)
+        {
+            return NotFound();
+        }
+
+        return View(new EditarProveedorViewModel
+        {
+            Id = proveedor.Id,
+            Nombre = proveedor.Nombre,
+            Version = proveedor.Version
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        Guid id,
+        EditarProveedorViewModel model,
+        CancellationToken cancellationToken)
+    {
+        if (id != model.Id)
+        {
+            return BadRequest();
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        try
+        {
+            await _editarService!.EditarAsync(
+                id,
+                new EditarProveedorRequest(model.Nombre, model.Version),
+                cancellationToken);
+        }
+        catch (ProveedorNoEncontradoException)
+        {
+            return NotFound();
+        }
+        catch (ProveedorConcurrenciaException exception)
+        {
+            ModelState.AddModelError(string.Empty, exception.Message);
+            return View(model);
+        }
+        catch (Licitaciones.Application.Proveedores.Editar.ProveedorDuplicadoException exception)
+        {
+            ModelState.AddModelError(nameof(model.Nombre), exception.Message);
+            return View(model);
+        }
+        catch (ArgumentException exception)
+        {
+            ModelState.AddModelError(nameof(model.Nombre), exception.Message);
+            return View(model);
+        }
+
+        TempData["MensajeExito"] = "El proveedor se actualizó correctamente.";
+        return RedirectToAction(nameof(Details), new { id });
     }
 
     [HttpGet]
@@ -89,7 +165,7 @@ public sealed class ProveedoresController : Controller
                 new CrearProveedorRequest(model.Nombre),
                 cancellationToken);
         }
-        catch (ProveedorDuplicadoException)
+        catch (Licitaciones.Application.Proveedores.Crear.ProveedorDuplicadoException)
         {
             ModelState.AddModelError(
                 nameof(CrearProveedorViewModel.Nombre),
