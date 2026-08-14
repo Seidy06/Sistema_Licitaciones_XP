@@ -1,6 +1,7 @@
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Consultar;
+using Licitaciones.Application.Proveedores.Editar;
 using Licitaciones.Domain.Common;
 using Licitaciones.Infrastructure.Persistence;
 using Licitaciones.Infrastructure.Time;
@@ -13,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<CrearProveedorService>();
 builder.Services.AddScoped<ConsultarProveedorService>();
+builder.Services.AddScoped<EditarProveedorService>();
 builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
 builder.Services.AddScoped<IProveedorConsultaRepository, ProveedorRepository>();
 builder.Services.AddSingleton<IClock, SystemClock>();

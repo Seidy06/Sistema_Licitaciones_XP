@@ -1,6 +1,7 @@
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Consultar;
+using Licitaciones.Application.Proveedores.Editar;
 using Licitaciones.Domain.Proveedores;
 using Licitaciones.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +40,8 @@ public sealed class ProveedorRepository : IProveedorRepository, IProveedorConsul
         catch (DbUpdateException exception)
             when (EsConflictoDeNombreNormalizado(exception))
         {
-            throw new ProveedorDuplicadoException(proveedor.Nombre);
+            throw new Licitaciones.Application.Proveedores.Crear.ProveedorDuplicadoException(
+                proveedor.Nombre);
         }
     }
 
@@ -73,6 +75,49 @@ public sealed class ProveedorRepository : IProveedorRepository, IProveedorConsul
             .ToListAsync(cancellationToken);
 
         return new PaginaProveedores(items, total);
+    }
+
+    public Task<Proveedor?> ObtenerParaEditarAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return _context.Proveedores.SingleOrDefaultAsync(
+            proveedor => proveedor.Id == id,
+            cancellationToken);
+    }
+
+    public Task<bool> ExisteNombreNormalizadoAsync(
+        string nombreNormalizado,
+        Guid excluirProveedorId,
+        CancellationToken cancellationToken = default)
+    {
+        return _context.Proveedores.AnyAsync(
+            proveedor => proveedor.Id != excluirProveedorId
+                && proveedor.NombreNormalizado == nombreNormalizado,
+            cancellationToken);
+    }
+
+    public async Task ActualizarAsync(
+        Proveedor proveedor,
+        uint versionEsperada,
+        CancellationToken cancellationToken = default)
+    {
+        _context.Entry(proveedor).Property(item => item.Version).OriginalValue = versionEsperada;
+
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ProveedorConcurrenciaException(proveedor.Id);
+        }
+        catch (DbUpdateException exception)
+            when (EsConflictoDeNombreNormalizado(exception))
+        {
+            throw new Licitaciones.Application.Proveedores.Editar.ProveedorDuplicadoException(
+                proveedor.Nombre);
+        }
     }
 
     private static IOrderedQueryable<Proveedor> Ordenar(
