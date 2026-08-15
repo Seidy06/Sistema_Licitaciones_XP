@@ -1,65 +1,64 @@
 # Modelo de datos
 
+El modelo ejecutable está definido por `LicitacionesDbContext`, las configuraciones Fluent API y tres migraciones: `CreateProviders`, `CompleteInitialDomain` y `AddProveedorSoftDelete`.
+
+```mermaid
+erDiagram
+    ESTADOS_LICITACION ||--o{ LICITACIONES : clasifica
+    LICITACIONES ||--o{ OFERTAS : recibe
+    PROVEEDORES ||--o{ OFERTAS : presenta
+    PROVEEDORES { uuid Id PK
+        varchar Nombre
+        varchar NombreNormalizado
+        timestamptz CreatedAt
+        timestamptz UpdatedAt
+        timestamptz DeletedAt
+        xid xmin }
+    ESTADOS_LICITACION { int Id PK
+        varchar Nombre UK }
+    LICITACIONES { uuid Id PK
+        varchar Codigo UK
+        varchar Titulo
+        decimal Presupuesto
+        timestamptz FechaCierre
+        int Estado FK }
+    OFERTAS { uuid Id PK
+        uuid LicitacionId FK
+        uuid ProveedorId FK
+        decimal Monto
+        timestamptz FechaRegistro }
+    NIVELES_APROBACION { int Id PK
+        varchar Nombre
+        decimal MontoMinimo
+        decimal MontoMaximo }
+    TIPOS_CAMBIO { int Id PK
+        varchar MonedaOrigen
+        varchar MonedaDestino
+        decimal Valor
+        date Fecha
+        bool Activo }
+```
+
 ## Proveedores
 
-Tabla: `Proveedores`.
-
-| Columna | Tipo PostgreSQL | Restricción |
+| Columna | Tipo PostgreSQL | Regla |
 | --- | --- | --- |
-| `Id` | `uuid` | Clave primaria; generado por el dominio. |
-| `Nombre` | `varchar(200)` | Obligatorio; representación legible. |
-| `NombreNormalizado` | `varchar(200)` | Obligatorio; valor comparable y único. |
-| `CreatedAt` | `timestamp with time zone` | Obligatorio; fecha UTC de creación. |
-| `UpdatedAt` | `timestamp with time zone` | Obligatorio; fecha UTC de actualización. |
-| `xmin` | `xid` | Versión de fila administrada por PostgreSQL. |
+| `Id` | `uuid` | Clave primaria; Guid generado por Domain. |
+| `Nombre` | `varchar(200)` | Obligatorio; forma legible normalizada. |
+| `NombreNormalizado` | `varchar(200)` | Obligatorio; forma comparable. |
+| `CreatedAt` | `timestamp with time zone` | Obligatorio; asignado al insertar. |
+| `UpdatedAt` | `timestamp with time zone` | Obligatorio; actualizado al modificar. |
+| `DeletedAt` | `timestamp with time zone` | Nullable; indica baja lógica. |
+| `xmin` | `xid` | Token de concurrencia administrado por PostgreSQL. |
 
-### Unicidad
+El índice parcial único `UX_Proveedores_NombreNormalizado`, filtrado por `"DeletedAt" IS NULL`, impide dos proveedores activos equivalentes y permite reutilizar el nombre de uno dado de baja. El filtro global de EF Core excluye por defecto las filas con `DeletedAt`.
 
-El índice único `UX_Proveedores_NombreNormalizado` impide duplicados incluso si
-dos operaciones concurrentes superan la comprobación previa de Application.
-Por ejemplo, `Empresa Central`, `empresa central` y `  EMPRESA   CENTRAL  `
-producen `EMPRESA CENTRAL`. También son equivalentes `Café Central` y su forma
-descompuesta `Cafe\u0301 Central`, porque Domain aplica Unicode Form C antes de
-guardar. Infrastructure reconoce exclusivamente la violación PostgreSQL
-`23505` de este índice y la traduce al conflicto de proveedor duplicado.
+## Modelo base aún sin interfaz funcional
 
-### Migración
+- `EstadosLicitacion`: catálogo único con Borrador, Publicada, Cerrada, Adjudicada y Cancelada.
+- `Licitaciones`: código único, título de hasta 250 caracteres, presupuesto `numeric(18,2)` positivo, cierre, estado y auditoría.
+- `Ofertas`: relaciones restrictivas con licitación y proveedor, monto `numeric(18,2)` positivo y unicidad por `(LicitacionId, ProveedorId)`.
+- `NivelesAprobacion`: límites `numeric(18,2)` y semillas Operativo, Gerencial y Directivo. La configuración actual contiene checks de mínimo y rango; no hay una restricción de exclusión de traslapes.
+- `TiposCambio`: valor `numeric(18,6)` positivo, fecha, indicador activo, índice único parcial sobre el registro activo y semilla USD/CRC con valor 500.
 
-La migración `20260810005236_CreateProviders` crea la tabla y el índice. La Web
-ejecuta `Database.MigrateAsync()` al iniciar para aplicar migraciones pendientes
-antes de atender solicitudes.
-
-## Licitaciones y estados
-
-`EstadosLicitacion` contiene los cinco estados parametrizados: Borrador,
-Publicada, Cerrada, Adjudicada y Cancelada. `Licitaciones` referencia ese
-catálogo mediante llave foránea y almacena presupuesto como `numeric(18,2)`,
-con `CHECK` positivo, fecha de cierre y marcas de tiempo en UTC.
-
-## Ofertas
-
-`Ofertas` referencia a `Licitaciones` y `Proveedores` mediante llaves foráneas
-restrictivas. El monto usa `numeric(18,2)` y tiene un `CHECK` que exige un valor
-positivo. El índice único compuesto por licitación y proveedor evita más de una
-oferta del mismo proveedor en una licitación.
-
-## Niveles de aprobación
-
-`NivelesAprobacion` usa límites `numeric(18,2)`. La restricción de exclusión
-`EX_NivelesAprobacion_SinTraslape` impide rangos superpuestos. La semilla inicial
-contiene los niveles Operativo, Gerencial y Directivo con intervalos contiguos.
-
-## Tipos de cambio
-
-`TiposCambio` guarda el valor como `numeric(18,6)`, exige que sea positivo y
-mantiene un único registro activo mediante el índice parcial
-`UX_TiposCambio_Activo`. La semilla inicial registra USD/CRC activo.
-
-## Auditoría temporal
-
-Todas las entidades auditables incluyen `CreatedAt` y `UpdatedAt`. El
-`LicitacionesDbContext` asigna ambas marcas automáticamente al insertar y
-actualiza `UpdatedAt` al modificar, usando el servicio `IClock` inyectado.
-
-La migración `CompleteInitialDomain` es la fuente ejecutable de tablas,
-relaciones, semillas y restricciones de esta primera versión completa.
+Las entidades auditables reciben `CreatedAt` y `UpdatedAt` desde `LicitacionesDbContext` mediante `IClock`.

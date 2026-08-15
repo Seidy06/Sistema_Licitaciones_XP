@@ -1,33 +1,24 @@
 # Uso de inteligencia artificial
 
-## HU-01 - Registrar proveedor
+## Alcance declarado en la Iteración 1
 
-La IA se utilizó como apoyo de programación en pareja para revisar la
-implementación MVC, contrastarla con las capas existentes, ejecutar las pruebas
-y mantener la documentación técnica consistente.
+Se utilizó IA como apoyo de programación en pareja y documentación para revisar la estructura de la solución, contrastar los flujos de proveedores entre capas, proponer casos de prueba, ejecutar verificaciones y mantener los documentos técnicos alineados con el repositorio.
 
-### Actividades asistidas
+## Módulos asistidos
 
-- Inspección de Domain, Application, Infrastructure, API y Web.
-- Revisión de que el controlador delegara en `CrearProveedorService`.
-- Comprobación de mensajes de validación junto al campo.
-- Ejecución de build, pruebas unitarias, integración y prueba HTTP del flujo
-  MVC con antifalsificación.
-- Documentación del caso de uso, modelo de datos, API, integración y ciclo TDD.
+- Proveedores en Domain y Application: normalización, validación, duplicidad, consulta, edición, concurrencia y baja lógica.
+- Persistencia: mapeos de EF Core, migraciones, índice único parcial y filtro de bajas.
+- Entradas HTTP: API REST y MVC de proveedores.
+- Pruebas: revisión de escenarios unitarios e integrados con PostgreSQL real.
+- Documentación: arquitectura, datos, API, pruebas, Docker y bitácora XP.
 
-### Decisiones humanas conservadas
+## Ejemplos de apoyo y validación humana
 
-- La historia, criterios de aceptación, rama, Issue #8 y Pull Request #9 fueron
-  definidos por el equipo.
-- La rotación confirmada fue Persona B como Driver y Persona A como Navigator
-  para la interfaz MVC.
-- El equipo conserva la responsabilidad de revisar el código, validar los
-  resultados de GitHub Actions y aprobar la integración del Pull Request.
+| Apoyo de IA | Validación conservada por el equipo |
+| --- | --- |
+| Comparar contratos HTTP con controladores. | Revisión directa de rutas, DTO, estados y pruebas. |
+| Detectar documentación desactualizada. | Contraste con migraciones, configuración y `git log`. |
+| Sugerir comandos reproducibles. | Ejecución local de build y pruebas. |
+| Ayudar a describir ciclos TDD. | Confirmación con la secuencia de commits rojo, verde y refactorización. |
 
-### Controles
-
-- No se enviaron credenciales ni datos personales a servicios externos.
-- No se aceptaron resultados sin contrastarlos con el repositorio y las
-  pruebas ejecutables.
-- La IA no sustituyó las reglas de negocio existentes ni las duplicó en los
-  controladores.
+La IA no define por sí sola historias, estimaciones, aceptación ni autoría. Las decisiones y la integración permanecen bajo responsabilidad de Seidy y Tiffany. No se deben enviar credenciales, secretos ni datos personales a herramientas externas, y ningún resultado se acepta sin contrastarlo con código, pruebas o historial verificable.

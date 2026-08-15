@@ -1,44 +1,66 @@
-# API REST
+# API REST implementada
 
-## Registrar proveedor
+La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedores`. Los ejemplos de identificadores, fechas y versiones son ilustrativos. El proyecto conserva además `GET /WeatherForecast`, generado por la plantilla; es un endpoint de muestra y no forma parte del dominio de licitaciones.
 
-`POST /api/v1/proveedores`
+## Resumen
 
-### Solicitud
+| Método y ruta | Resultado exitoso | Errores controlados |
+| --- | --- | --- |
+| `GET /api/v1/proveedores` | `200 OK` | No hay un contrato de error personalizado para esta acción. |
+| `GET /api/v1/proveedores/{id}` | `200 OK` | `404 Not Found`. |
+| `POST /api/v1/proveedores` | `201 Created` | `400 Bad Request`, `409 Conflict`. |
+| `PUT /api/v1/proveedores/{id}` | `200 OK` | `400 Bad Request`, `404 Not Found`, `409 Conflict`. |
+| `DELETE /api/v1/proveedores/{id}` | `204 No Content` | `404 Not Found`. |
 
-```json
-{
-  "nombre": "Empresa Central"
-}
+## Listar y consultar
+
+`GET /api/v1/proveedores` acepta `pagina` (1), `tamanoPagina` (20, máximo 100), `nombre`, `ordenarPor` (`Nombre` o `FechaCreacion`) y `descendente` (`false`).
+
+```http
+GET /api/v1/proveedores?pagina=1&tamanoPagina=10&nombre=central&ordenarPor=Nombre&descendente=false
 ```
 
-### Respuesta exitosa
+```json
+{"items":[],"total":0,"pagina":1,"tamanoPagina":10}
+```
 
-Estado: `201 Created`. La cabecera `Location` apunta a
-`/api/v1/proveedores/{id}`.
+`GET /api/v1/proveedores/{id}` devuelve el DTO siguiente o 404:
 
 ```json
 {
   "id": "7d9413f2-2bde-4bc9-af45-39a66f8fcce5",
   "nombre": "Empresa Central",
   "nombreNormalizado": "EMPRESA CENTRAL",
-  "createdAt": "2026-08-11T18:00:00+00:00",
-  "updatedAt": "2026-08-11T18:00:00+00:00",
-  "version": 0
+  "createdAt": "2026-08-15T12:00:00+00:00",
+  "updatedAt": "2026-08-15T12:00:00+00:00",
+  "version": 1
 }
 ```
 
-Los identificadores y fechas del ejemplo son ilustrativos.
+## Registrar
 
-### Errores
+```http
+POST /api/v1/proveedores
+Content-Type: application/json
 
-| Estado | Condición | Respuesta |
-| --- | --- | --- |
-| `400 Bad Request` | Nombre vacío o con caracteres no permitidos. | `ProblemDetails` con detalle comprensible. |
-| `409 Conflict` | Ya existe el nombre normalizado, incluida una inserción concurrente rechazada por `UX_Proveedores_NombreNormalizado`. | `ProblemDetails` con título `Proveedor duplicado`. |
+{"nombre":"Empresa Central"}
+```
 
-La API y MVC usan el mismo `CrearProveedorService`; por eso no duplican reglas
-de negocio en sus controladores. La normalización Unicode Form C reside en
-Domain. Infrastructure traduce específicamente la violación `23505` del índice
-único a `ProveedorDuplicadoException`, por lo que una carrera esperada responde
-`409 Conflict` y nunca `500 Internal Server Error`.
+Devuelve `201 Created`, el DTO y una cabecera `Location` hacia el detalle. Un nombre inválido devuelve 400; un nombre activo equivalente devuelve 409 con `ProblemDetails` titulado `Proveedor duplicado`.
+
+## Editar
+
+```http
+PUT /api/v1/proveedores/7d9413f2-2bde-4bc9-af45-39a66f8fcce5
+Content-Type: application/json
+
+{"nombre":"Empresa Central Actualizada","version":1}
+```
+
+Devuelve `200 OK` con el DTO actualizado. Devuelve 404 si no existe un proveedor activo; 409 por nombre duplicado o versión desactualizada; y 400 por nombre inválido. `version` corresponde al token `xmin` serializado como entero sin signo.
+
+## Dar de baja
+
+`DELETE /api/v1/proveedores/{id}` establece `DeletedAt`: no elimina la fila. Devuelve 204 sin cuerpo o 404 si el proveedor activo no existe. Tras la baja, el listado y el detalle ordinarios dejan de encontrarlo.
+
+La aplicación registra OpenAPI y publica el documento solo en Development con `MapOpenApi()`. No existe Swagger UI en esta iteración.
