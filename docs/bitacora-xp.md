@@ -1,115 +1,99 @@
 # Bitácora XP
 
-## Iteración 1 - Base y proveedores
+## Iteración 1 — Base técnica y proveedores
 
-### HU-01 - Registrar proveedor
+### Objetivo
 
-**Issue:** [#8](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/8)
+Establecer una solución .NET 9 por capas, persistencia reproducible en PostgreSQL, reloj abstraído e integración continua, y entregar la gestión completa de proveedores mediante MVC y API REST.
 
-**Pull Request:** [#9](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/9)
+### Estado de las historias
 
-**Rama:** `hu/01-proveedores`
+La valoración corresponde al catálogo vigente en `historias-usuario.md`.
 
-### Ciclo TDD
+| Historia | SP | Estado y evidencia observable |
+| --- | ---: | --- |
+| HU-00 — Inicializar repositorio | 2 | Terminada: solución y carpetas `src`, `tests`, `docs`, `docker` y `k8s` existentes. Commits `234005c`, `1db3d2b`. |
+| HU-01 — Documentar plan XP e historias | 2 | Terminada: plan, catálogo, visión y estructura documental. Commits `64f1aa5`, `70aeefc`, `f8c9079`, `7e9c8e2`, `8fa5928`. |
+| HU-02 — Modelar entidades de dominio | 5 | Terminada como base de dominio: proveedor, licitación, oferta, nivel, tipo de cambio y estados; Domain no referencia EF Core ni ASP.NET. Commit `145e83e`. |
+| HU-03 — Configurar EF Core y PostgreSQL | 5 | Terminada: contexto, Npgsql, mapeos y auditoría automática. Commits `5cf842f`, `145e83e`. |
+| HU-04 — Migraciones y semillas | 3 | Terminada: tres migraciones, cinco estados, tres niveles y tipo de cambio USD/CRC. Commits `5cf842f`, `145e83e`, `cc43bd2`. |
+| HU-05 — Abstraer el reloj | 2 | Terminada: `IClock`, `SystemClock` y `FixedClock`; usada por auditoría y baja lógica. Commit `145e83e`. |
+| HU-06 — Registrar proveedor | 3 | Terminada en MVC y API con normalización Unicode y conflicto concurrente controlado. Commits `1666a8d`, `23aa497`, `276d9af`, `9903e00`. |
+| HU-07 — Editar proveedor | 2 | Terminada en MVC y API con unicidad y concurrencia mediante `xmin`. Commits `18dd3fc`, `dac1452`. |
+| HU-08 — Dar de baja proveedor | 3 | Terminada: confirmación MVC, DELETE en API, `DeletedAt`, filtro global e histórico interno con `IgnoreQueryFilters()`. No existe una pantalla de reportes históricos. Commits `a74b9cd`, `cc43bd2`, `aed1feb`, `38efa9f`. |
+| HU-09 — Listar y consultar proveedores | 3 | Terminada: detalle, paginación, filtro y ordenamiento en MVC y API. Commits `01f2499`, `334e618`, `6631011`. |
+| **Total observado** | **30** | **HU-00 a HU-09 cuentan con evidencia ejecutable o documental en el alcance definido.** |
 
-1. Rojo
-   - Se escribieron pruebas de normalización de espacios, mayúsculas/minúsculas
-     y Unicode, caracteres permitidos, creación y duplicidad.
-   - Se agregaron pruebas de integración para persistencia e índice único en
-     PostgreSQL.
-   - Las pruebas fallaron antes de existir la implementación necesaria.
+Las entidades distintas de proveedores son una base de HU-02 a HU-05; no implican que los casos de uso de iteraciones posteriores estén implementados.
 
-2. Verde
-   - Se implementaron `ProveedorNombreNormalizer`,
-     `ProveedorNombreValidator`, la entidad `Proveedor` y
-     `CrearProveedorService` con el comportamiento mínimo requerido.
-   - Se añadió el repositorio de Entity Framework Core, la migración, el
-     endpoint REST y el formulario MVC.
-   - Las pruebas pasaron satisfactoriamente.
+### Programación en pareja y rotaciones
 
-3. Refactorización
-   - Se centralizó la normalización en `ProveedorNombreNormalizer`.
-   - El controlador MVC quedó limitado a coordinar HTTP y delegar las reglas en
-     `CrearProveedorService` y el dominio.
-   - Se mantuvo el comportamiento observable durante la refactorización.
+Git registra autoría, pero no guarda el rol Navigator. La tabla reconstruye las rotaciones a partir de los commits alternados: quien figura como autor del incremento se registra como Driver y la otra integrante como Navigator. No se atribuyen sesiones que no tengan esa evidencia.
 
-### Persistencia
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| Pruebas iniciales de registro | Seidy | Tiffany | `ad3f311`, `be3c836` |
+| Implementación inicial de registro | Tiffany | Seidy | `f274b20`, `f597141` |
+| Pruebas de Unicode y concurrencia | Seidy | Tiffany | `1666a8d` |
+| Corrección verde de HU-06 | Tiffany | Seidy | `23aa497` |
+| Refactorización de HU-06 | Seidy | Tiffany | `276d9af` |
+| Pruebas de HU-09 | Tiffany | Seidy | `01f2499` |
+| Implementación de HU-09 | Seidy | Tiffany | `334e618` |
+| Pruebas de HU-07 | Seidy | Tiffany | `18dd3fc` |
+| Implementación de HU-07 | Tiffany | Seidy | `dac1452` |
+| Pruebas de HU-08 | Tiffany | Seidy | `a74b9cd` |
+| Persistencia y caso de uso HU-08 | Seidy | Tiffany | `cc43bd2`, `aed1feb` |
+| Pruebas finales del CRUD API | Seidy | Tiffany | `ece009f` |
 
-La unicidad del proveedor se valida tanto en Application como en PostgreSQL
-mediante el índice único `UX_Proveedores_NombreNormalizado`. La aplicación Web
-aplica las migraciones pendientes al iniciar antes de aceptar solicitudes.
+### Evidencia TDD rojo–verde–refactor
 
-### Driver / Navigator
+| Historia | Rojo | Verde | Refactorización o consolidación |
+| --- | --- | --- | --- |
+| Registro histórico, luego HU-06 | `ad3f311`, `be3c836`, `0fd4129` agregaron pruebas antes del comportamiento completo. | `f274b20`, `f597141`, `89f0768`, `1516d2c` incorporaron dominio, servicio, API y MVC. | `1b1aed4` simplificó registro y normalización. |
+| HU-06 | `1666a8d` reprodujo equivalencia Unicode y carrera concurrente. | `23aa497` normalizó Unicode y tradujo la violación única a 409. | `276d9af` unificó el cálculo de nombre legible/comparable y centralizó el nombre del índice. |
+| HU-09 | `01f2499` fijó contratos de consulta, paginación, filtro, API y MVC. | `334e618` agregó servicio, repositorio, endpoints y vistas. | La proyección a DTO y ViewModel dejó las entidades EF fuera de las interfaces; no hay un commit `refactor` separado. |
+| HU-07 | `18dd3fc` fijó edición, duplicidad y versión desactualizada. | `dac1452` agregó edición con `xmin` y contratos MVC/API. | Reutilizó el normalizador y validador existentes; no hay un commit `refactor` separado. |
+| HU-08 | `a74b9cd` fijó reloj, filtro, conservación histórica, 204/404 y confirmación MVC. | `cc43bd2` y `aed1feb` agregaron persistencia y baja lógica. | El filtro global concentró la exclusión de bajas; no hay un commit `refactor` separado. |
 
-| Actividad registrada | Driver | Navigator |
-| --- | --- | --- |
-| Interfaz MVC de proveedores | Persona B | Persona A |
+### Refactorizaciones relevantes
 
-Esta es la rotación confirmada para la actividad documentada. Las rotaciones de
-sesiones anteriores no se infieren cuando no existe una evidencia registrada.
+- Centralización de normalización y validación en Domain.
+- Controladores MVC y API delegan en servicios de Application.
+- DTO y ViewModel separan interfaces públicas de entidades persistidas.
+- Nombre del índice único compartido para traducir solo el conflicto esperado.
+- `IClock` evita tiempo global en auditoría y baja lógica.
+- Filtro global evita repetir `DeletedAt == null` en cada consulta activa.
 
-### Evidencias
+### Integración continua
 
-- [Issue #8](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/8).
-- [Pull Request #9](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/9).
-- Commits principales: `f274b20` (normalización), `f597141` (servicio y
-  duplicidad), `0fd4129` (persistencia), `89f0768` (API) y `1516d2c` (MVC).
-- Validación local: `dotnet build Licitaciones.sln` sin advertencias ni errores.
-- Pruebas locales: 18 unitarias, 3 de integración y 1 funcional; 22 superadas.
-- GitHub Actions: el workflow `.github/workflows/ci.yml` restaura, compila y
-  prueba la solución con PostgreSQL 16 para cada pull request dirigido a
-  `main`. El resultado de la ejecución se consulta en los checks del
-  [PR #9](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/9/checks).
+`69316c7` agregó `.github/workflows/ci.yml` y `4cd33eb` incorporó PostgreSQL para integración. El workflow se activa en push y pull request hacia `main`, usa Ubuntu, .NET 9 y PostgreSQL 16, y ejecuta restore, build Release y test. Los incrementos se integraron mediante los PR #9 y #11 a #16. El workflow actual no incluye cobertura, análisis estático ni construcción Docker.
 
-## Actualización de planificación posterior a la auditoría de la Iteración 1
+### Resultado de pruebas
 
-Después de la auditoría de la Iteración 1, el equipo adoptó formalmente el
-catálogo HU-00 a HU-37 y reorganizó la planificación en cuatro iteraciones:
-HU-00 a HU-09, HU-10 a HU-17, HU-18 a HU-27 y HU-28 a HU-37.
+Verificación local reproducida el 15 de agosto de 2026 con `dotnet test Licitaciones.sln --configuration Release`:
 
-La evidencia auditada de proveedores conserva la numeración que estaba vigente
-cuando se produjo. Para continuar el proyecto se aplica esta equivalencia:
+- 35 unitarias superadas.
+- 47 de integración superadas contra PostgreSQL real.
+- 0 fallidas y 0 omitidas; 82 ejecutadas.
+- El proyecto funcional compila, pero no contiene pruebas detectables.
 
-| Historia auditada anteriormente | Historia del catálogo actual |
-| --- | --- |
-| HU-01 — Registrar proveedor | HU-06 — Registrar proveedor |
-| HU-02 — Consultar proveedores | HU-09 — Listar y consultar proveedores |
-| HU-03 — Editar proveedor | HU-07 — Editar proveedor |
-| HU-04 — Eliminar proveedor | HU-08 — Eliminar lógicamente proveedor |
+### Retroalimentación incorporada
 
-Los commits históricos, incluidos los citados en esta bitácora, no se
-modificarán ni se reescribirán porque constituyen evidencia XP del repositorio.
-La equivalencia anterior permite relacionarlos con el catálogo actual sin
-alterar el historial.
+- La auditoría de la numeración anterior produjo la equivalencia histórica entre HU-01/HU-02/HU-03/HU-04 de proveedores y HU-06/HU-09/HU-07/HU-08 del catálogo vigente; no se reescribió el historial.
+- La revisión técnica del registro pidió equivalencia Unicode y manejo de inserciones concurrentes; se incorporó en HU-06 con pruebas y respuestas 409.
+- La revisión del cierre pidió cubrir el CRUD REST completo; `ece009f` añadió esa evidencia.
 
-## HU-06 - Validación Unicode y duplicidad concurrente
+No hay en el repositorio un acta o comentario atribuible al cliente con retroalimentación adicional; por eso no se inventa una aceptación externa.
 
-Después de adoptar el catálogo actual se amplió la evidencia de registro de
-proveedores en el [Pull Request
-#12](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/12).
+### Velocidad
 
-### Ciclo TDD
+- Velocidad planificada inicial: **36 SP**, registrada en `plan-xp.md`.
+- Alcance seleccionado real HU-00 a HU-09: **30 SP** según el catálogo vigente.
+- Velocidad observada: **30 SP**, porque las diez historias tienen evidencia terminada.
+- Diferencia frente a la previsión inicial: **−6 SP**. La diferencia proviene de que la suma vigente del alcance seleccionado es 30, no 36; no se agregan historias futuras para completar la cifra.
 
-1. Rojo — `1666a8d`
-   - Se agregaron pruebas para Unicode compuesto y descompuesto de extremo a
-     extremo.
-   - Se reprodujo una carrera en la que dos solicitudes equivalentes superan
-     la consulta previa de duplicidad.
-   - Se exigió que el contrato HTTP produzca `201 Created` y `409 Conflict`, sin
-     propagar un error `500`.
+### Resultado de la demostración
 
-2. Verde — `23aa497`
-   - Domain centralizó Unicode Form C, espacios y el valor comparable.
-   - Infrastructure capturó específicamente la violación PostgreSQL `23505` de
-     `UX_Proveedores_NombreNormalizado` y la tradujo a
-     `ProveedorDuplicadoException`.
-   - MVC y API conservaron controladores delgados y delegaron las reglas al
-     dominio y a Application.
+La demostración técnica reproducible del incremento permite registrar, listar, filtrar, ordenar, consultar, editar con control de versión y dar de baja proveedores desde MVC y API. La baja conserva la fila y la excluye de consultas activas. El recorrido está respaldado por 82 pruebas automatizadas superadas, incluidas pruebas HTTP del CRUD.
 
-3. Refactorización — `276d9af`
-   - `ProveedorNombreNormalizer` pasó a producir conjuntamente el nombre
-     legible y `NombreNormalizado`, evitando cálculos repetidos.
-   - El nombre del índice único se centralizó en la configuración de
-     persistencia para compartirlo con la traducción del conflicto.
-   - El comportamiento permaneció verde: 25 pruebas unitarias, 11 de
-     integración y 1 funcional, para un total de 37 pruebas superadas.
+No existe en el repositorio un acta de demostración presencial ni una aprobación firmada del cliente. El resultado documentado es, por tanto, la demostración técnica verificable del incremento y no una aceptación externa inferida.
