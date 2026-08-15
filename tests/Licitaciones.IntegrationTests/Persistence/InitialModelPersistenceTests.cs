@@ -28,6 +28,19 @@ public sealed class InitialModelPersistenceTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
+    public async Task Migraciones_DebenEstarAplicadasEnPostgreSqlReal()
+    {
+        await using var context = _database.CrearContexto();
+
+        var aplicadas = (await context.Database.GetAppliedMigrationsAsync()).ToArray();
+        var pendientes = (await context.Database.GetPendingMigrationsAsync()).ToArray();
+
+        Assert.Contains("20260810005236_CreateProviders", aplicadas);
+        Assert.Contains("20260815003821_AddProveedorSoftDelete", aplicadas);
+        Assert.Empty(pendientes);
+    }
+
+    [Fact]
     public async Task SaveChanges_DebeAsignarTimestampsConRelojInyectado()
     {
         var instante = new DateTimeOffset(2026, 8, 12, 15, 30, 0, TimeSpan.Zero);

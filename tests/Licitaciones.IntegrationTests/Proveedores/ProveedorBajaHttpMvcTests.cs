@@ -34,7 +34,7 @@ public sealed class ProveedorBajaHttpMvcTests : IClassFixture<PostgreSqlFixture>
 
     [Fact]
     [Trait("HU", "HU-08")]
-    public async Task Delete_ProveedorActivo_DebeResponderNoContentYOcultarlo()
+    public async Task Delete_ProveedorActivo_DebeResponderNoContentYOcultarloDelListadoActivo()
     {
         var creado = await CrearProveedorAsync($"API baja {Guid.NewGuid():N}");
         await using var context = _database.CrearContexto();
@@ -43,6 +43,19 @@ public sealed class ProveedorBajaHttpMvcTests : IClassFixture<PostgreSqlFixture>
             .Eliminar(creado.Id, CancellationToken.None);
 
         Assert.IsType<NoContentResult>(response);
+
+        var listado = await CrearApiController(context).Listar(
+            pagina: 1,
+            tamanoPagina: 20,
+            nombre: creado.Nombre,
+            ordenarPor: ProveedorOrden.Nombre,
+            descendente: false,
+            CancellationToken.None);
+        var ok = Assert.IsType<OkObjectResult>(listado.Result);
+        var pagina = Assert.IsType<PaginaResultado<Licitaciones.Application.Proveedores.ProveedorDto>>(
+            ok.Value);
+        Assert.DoesNotContain(pagina.Items, proveedor => proveedor.Id == creado.Id);
+
         await using var verificationContext = _database.CrearContexto();
         Assert.False(await verificationContext.Proveedores.AnyAsync(
             proveedor => proveedor.Id == creado.Id));

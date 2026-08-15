@@ -42,6 +42,53 @@ public sealed class ProveedorHttpTests : IClassFixture<PostgreSqlFixture>
     }
 
     [Fact]
+    public async Task Post_DatosValidos_DebeResponderCreated()
+    {
+        await using var context = _database.CrearContexto();
+        var controller = CrearController(context);
+
+        var respuesta = await controller.Crear(
+            new HttpRequest { Nombre = $"Proveedor API {Guid.NewGuid():N}" },
+            CancellationToken.None);
+
+        var created = Assert.IsType<CreatedResult>(respuesta.Result);
+        Assert.Equal(StatusCodes.Status201Created, created.StatusCode);
+        var proveedor = Assert.IsType<ProveedorDto>(created.Value);
+        Assert.Equal($"/api/v1/proveedores/{proveedor.Id}", created.Location);
+    }
+
+    [Fact]
+    public async Task Post_NombreDuplicado_DebeResponderConflict()
+    {
+        var nombre = $"Proveedor duplicado API {Guid.NewGuid():N}";
+        await using var context = _database.CrearContexto();
+        var controller = CrearController(context);
+        await controller.Crear(new HttpRequest { Nombre = nombre }, CancellationToken.None);
+
+        var respuesta = await controller.Crear(
+            new HttpRequest { Nombre = $"  {nombre.ToUpperInvariant()}  " },
+            CancellationToken.None);
+
+        var conflict = Assert.IsType<ConflictObjectResult>(respuesta.Result);
+        Assert.Equal(StatusCodes.Status409Conflict, conflict.StatusCode);
+        Assert.IsType<ProblemDetails>(conflict.Value);
+    }
+
+    [Fact]
+    public async Task Post_NombreInvalido_DebeResponderBadRequest()
+    {
+        await using var context = _database.CrearContexto();
+
+        var respuesta = await CrearController(context).Crear(
+            new HttpRequest { Nombre = "   " },
+            CancellationToken.None);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(respuesta.Result);
+        Assert.Equal(StatusCodes.Status400BadRequest, badRequest.StatusCode);
+        Assert.IsType<ProblemDetails>(badRequest.Value);
+    }
+
+    [Fact]
     [Trait("HU", "HU-06-Auditoria")]
     public async Task PostConcurrente_DeNombresEquivalentes_DebeResponderCreatedYConflict()
     {
@@ -74,6 +121,20 @@ public sealed class ProveedorHttpTests : IClassFixture<PostgreSqlFixture>
         var service = new CrearProveedorService(
             new RepositorioConConsultaSincronizada(repository, barrera));
         var controller = new ProveedoresController(service)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            }
+        };
+        controller.HttpContext.Request.Path = "/api/v1/proveedores";
+        return controller;
+    }
+
+    private static ProveedoresController CrearController(LicitacionesDbContext context)
+    {
+        var controller = new ProveedoresController(
+            new CrearProveedorService(new ProveedorRepository(context)))
         {
             ControllerContext = new ControllerContext
             {

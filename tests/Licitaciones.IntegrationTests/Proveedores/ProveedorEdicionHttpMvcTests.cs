@@ -57,6 +57,29 @@ public sealed class ProveedorEdicionHttpMvcTests : IClassFixture<PostgreSqlFixtu
 
     [Fact]
     [Trait("HU", "HU-07")]
+    public async Task Put_NombreDuplicado_DebeResponderConflict()
+    {
+        var existente = await CrearProveedorAsync($"API existente {Guid.NewGuid():N}");
+        var editable = await CrearProveedorAsync($"API editable {Guid.NewGuid():N}");
+        await using var context = _database.CrearContexto();
+
+        var response = await CrearApiController(context).Editar(
+            editable.Id,
+            new HttpEditRequest
+            {
+                Nombre = $"  {existente.Nombre.ToUpperInvariant()}  ",
+                Version = editable.Version
+            },
+            CancellationToken.None);
+
+        var conflict = Assert.IsType<ConflictObjectResult>(response.Result);
+        var details = Assert.IsType<ProblemDetails>(conflict.Value);
+        Assert.Equal(StatusCodes.Status409Conflict, details.Status);
+        Assert.Contains("duplicado", details.Title!, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    [Trait("HU", "HU-07")]
     public async Task Put_ProveedorInexistente_DebeResponderNotFound()
     {
         await using var context = _database.CrearContexto();
@@ -117,6 +140,36 @@ public sealed class ProveedorEdicionHttpMvcTests : IClassFixture<PostgreSqlFixtu
         Assert.Equal(creado.Id, model.Id);
         Assert.Equal(creado.Nombre, model.Nombre);
         Assert.Equal(creado.Version, model.Version);
+    }
+
+    [Fact]
+    [Trait("HU", "HU-07")]
+    public async Task EditPost_DatosValidos_DebePersistirYRedirigirAlDetalle()
+    {
+        var creado = await CrearProveedorAsync($"MVC original {Guid.NewGuid():N}");
+        var nombreEditado = $"MVC editado {creado.Id:N}";
+        await using var context = _database.CrearContexto();
+        var controller = CrearMvcController(context);
+        controller.TempData = CrearTempData();
+
+        var response = await controller.Edit(
+            creado.Id,
+            new EditarProveedorViewModel
+            {
+                Id = creado.Id,
+                Nombre = nombreEditado,
+                Version = creado.Version
+            },
+            CancellationToken.None);
+
+        var redirect = Assert.IsType<RedirectToActionResult>(response);
+        Assert.Equal(nameof(MvcController.Details), redirect.ActionName);
+        Assert.Equal("El proveedor se actualizó correctamente.", controller.TempData["MensajeExito"]);
+
+        await using var verificationContext = _database.CrearContexto();
+        var guardado = await verificationContext.Proveedores.FindAsync(creado.Id);
+        Assert.NotNull(guardado);
+        Assert.Equal(nombreEditado, guardado.Nombre);
     }
 
     [Fact]
@@ -193,6 +246,23 @@ public sealed class ProveedorEdicionHttpMvcTests : IClassFixture<PostgreSqlFixtu
             new CrearProveedorService(repository),
             new ConsultarProveedorService(repository),
             new EditarProveedorService(repository));
+    }
+
+    private static Microsoft.AspNetCore.Mvc.ViewFeatures.ITempDataDictionary CrearTempData()
+    {
+        return new Microsoft.AspNetCore.Mvc.ViewFeatures.TempDataDictionary(
+            new DefaultHttpContext(),
+            new TempDataProvider());
+    }
+
+    private sealed class TempDataProvider : Microsoft.AspNetCore.Mvc.ViewFeatures.ITempDataProvider
+    {
+        public IDictionary<string, object> LoadTempData(HttpContext context) =>
+            new Dictionary<string, object>();
+
+        public void SaveTempData(HttpContext context, IDictionary<string, object> values)
+        {
+        }
     }
 
     private async Task<Licitaciones.Application.Proveedores.ProveedorDto> CrearProveedorAsync(
