@@ -1,53 +1,49 @@
-# Pruebas
+# Pruebas de la Iteración 1
 
-## Estrategia para HU-06
+## Cobertura existente
 
-### Unitarias
+- `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; además de pruebas iniciales de licitación y oferta.
+- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC y contrato HTTP del CRUD de proveedores.
+- `Licitaciones.FunctionalTests`: el proyecto existe y compila, pero actualmente no contiene pruebas detectables.
 
-- Normalización de espacios laterales y repetidos.
-- Comparación sin distinguir mayúsculas y minúsculas.
-- equivalencia de Unicode compuesto y descompuesto.
-- Aceptación y rechazo de caracteres.
-- Creación válida de la entidad.
-- Coordinación del servicio y rechazo de duplicados.
+Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, Testcontainers inicia `postgres:16-alpine`; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
 
-### Integración
+## Comandos reproducibles
 
-Las pruebas usan PostgreSQL real mediante Testcontainers y aplican las
-migraciones del proyecto. Verifican:
-
-- persistencia y recuperación del proveedor;
-- rechazo de nombres normalizados duplicados;
-- equivalencia extremo a extremo de Unicode compuesto y descompuesto;
-- dos registros concurrentes equivalentes: uno se crea y el otro se traduce a
-  `ProveedorDuplicadoException`;
-- contrato HTTP concurrente con respuestas `201 Created` y `409 Conflict`, sin
-  errores `500`;
-- existencia y naturaleza única de
-  `UX_Proveedores_NombreNormalizado`.
-
-### Comandos
+Desde la raíz del repositorio, con .NET SDK 9 y Docker activos:
 
 ```powershell
-dotnet build Licitaciones.sln
-dotnet test Licitaciones.sln
+dotnet restore Licitaciones.sln
+dotnet build Licitaciones.sln --configuration Release --no-restore
+dotnet test Licitaciones.sln --configuration Release --no-build
 ```
 
-Resultado local registrado después de la refactorización de HU-06:
+Ejecución directa dejando que Testcontainers cree PostgreSQL:
 
-| Proyecto | Superadas | Fallidas |
-| --- | ---: | ---: |
-| `Licitaciones.UnitTests` | 25 | 0 |
-| `Licitaciones.IntegrationTests` | 11 | 0 |
-| `Licitaciones.FunctionalTests` | 1 | 0 |
-| **Total** | **37** | **0** |
+```powershell
+dotnet test Licitaciones.sln --configuration Release
+```
 
-También se verificó manualmente el formulario mediante solicitudes HTTP con
-cookie y token antifalsificación para los casos válido, duplicado e inválido.
+Ejecución contra el PostgreSQL de Compose:
+
+```powershell
+docker compose up -d postgres
+$env:LICITACIONES_INTEGRATION_CONNECTION_STRING = "Host=127.0.0.1;Port=5432;Database=licitaciones_db;Username=licitaciones_user;Password=licitaciones_password"
+dotnet test Licitaciones.sln --configuration Release
+Remove-Item Env:LICITACIONES_INTEGRATION_CONNECTION_STRING
+```
+
+## Resultado verificado para el cierre
+
+Ejecución local del 15 de agosto de 2026:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 35 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 47 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 0 detectadas | 0 | 0 |
+| **Total ejecutado** | **82** | **0** | **0** |
 
 ## Integración continua
 
-El workflow `ci.yml` ejecuta restore, build Release y pruebas en Ubuntu con un
-servicio PostgreSQL 16. La evidencia de la ejecución asociada se conserva en
-los checks del [Pull Request
-#12](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/12/checks).
+`.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, compila Release y ejecuta toda la solución. En esta iteración no mide cobertura, no ejecuta análisis estático y no construye imágenes Docker.
