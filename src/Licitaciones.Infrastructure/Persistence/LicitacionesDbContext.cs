@@ -49,7 +49,10 @@ public sealed class LicitacionesDbContext : DbContext
 
     private void AplicarMarcasDeTiempo()
     {
-        var ahora = _clock.UtcNow();
+        var instante = _clock.UtcNow();
+        var ahora = new DateTimeOffset(
+            instante.Ticks - (instante.Ticks % 10),
+            instante.Offset);
 
         foreach (var entry in ChangeTracker.Entries<IAuditableEntity>())
         {

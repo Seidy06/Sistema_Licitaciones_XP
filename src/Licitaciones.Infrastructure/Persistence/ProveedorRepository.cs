@@ -2,6 +2,7 @@ using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Application.Proveedores.Editar;
+using Licitaciones.Application.Proveedores.Eliminar;
 using Licitaciones.Domain.Proveedores;
 using Licitaciones.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,10 @@ using Npgsql;
 
 namespace Licitaciones.Infrastructure.Persistence;
 
-public sealed class ProveedorRepository : IProveedorRepository, IProveedorConsultaRepository
+public sealed class ProveedorRepository :
+    IProveedorRepository,
+    IProveedorConsultaRepository,
+    IProveedorBajaRepository
 {
     private readonly LicitacionesDbContext _context;
 
@@ -118,6 +122,22 @@ public sealed class ProveedorRepository : IProveedorRepository, IProveedorConsul
             throw new Licitaciones.Application.Proveedores.Editar.ProveedorDuplicadoException(
                 proveedor.Nombre);
         }
+    }
+
+    public Task<Proveedor?> ObtenerActivoParaDarDeBajaAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return _context.Proveedores.SingleOrDefaultAsync(
+            proveedor => proveedor.Id == id,
+            cancellationToken);
+    }
+
+    public async Task ActualizarBajaAsync(
+        Proveedor proveedor,
+        CancellationToken cancellationToken = default)
+    {
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     private static IOrderedQueryable<Proveedor> Ordenar(

@@ -35,8 +35,14 @@ public sealed class ProveedorConfiguration
             .HasColumnType("timestamp with time zone")
             .IsRequired();
 
+        builder.Property(x => x.DeletedAt)
+            .HasColumnType("timestamp with time zone");
+
+        builder.HasQueryFilter(x => x.DeletedAt == null);
+
         builder.HasIndex(x => x.NombreNormalizado)
             .IsUnique()
+            .HasFilter("\"DeletedAt\" IS NULL")
             .HasDatabaseName(IndiceUnicoNombreNormalizado);
 
         builder.Property(x => x.Version)
