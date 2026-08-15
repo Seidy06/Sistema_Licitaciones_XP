@@ -60,15 +60,41 @@ public sealed class ConsultarProveedorServiceTests
         Assert.All(resultado.Items, item => Assert.IsType<ProveedorDto>(item));
     }
 
+    [Fact]
+    [Trait("HU", "HU-08")]
+    public async Task ListarHistoricoAsync_DebeRetornarFechaDeBaja()
+    {
+        var instante = new DateTimeOffset(2026, 8, 15, 18, 0, 0, TimeSpan.Zero);
+        var proveedor = Proveedor.Crear("Proveedor histórico");
+        proveedor.DarDeBaja(instante);
+        var repository = new RepositorioConsultaEnMemoria
+        {
+            PaginaHistorica = new PaginaProveedores([proveedor], 1)
+        };
+        var service = new ConsultarProveedorService(repository);
+
+        var resultado = await service.ListarHistoricoAsync(new ConsultarProveedoresRequest());
+
+        var item = Assert.Single(resultado.Items);
+        Assert.Equal(proveedor.Id, item.Id);
+        Assert.Equal(instante, item.DeletedAt);
+    }
+
     private sealed class RepositorioConsultaEnMemoria : IProveedorConsultaRepository
     {
         public Proveedor? PorId { get; init; }
+        public Proveedor? HistoricoPorId { get; init; }
         public PaginaProveedores Pagina { get; init; } = new([], 0);
+        public PaginaProveedores PaginaHistorica { get; init; } = new([], 0);
         public ConsultarProveedoresRequest? UltimaConsulta { get; private set; }
 
         public Task<Proveedor?> ObtenerPorIdAsync(
             Guid id,
             CancellationToken cancellationToken = default) => Task.FromResult(PorId);
+
+        public Task<Proveedor?> ObtenerHistoricoPorIdAsync(
+            Guid id,
+            CancellationToken cancellationToken = default) => Task.FromResult(HistoricoPorId);
 
         public Task<PaginaProveedores> ListarAsync(
             ConsultarProveedoresRequest consulta,
@@ -76,6 +102,14 @@ public sealed class ConsultarProveedorServiceTests
         {
             UltimaConsulta = consulta;
             return Task.FromResult(Pagina);
+        }
+
+        public Task<PaginaProveedores> ListarHistoricoAsync(
+            ConsultarProveedoresRequest consulta,
+            CancellationToken cancellationToken = default)
+        {
+            UltimaConsulta = consulta;
+            return Task.FromResult(PaginaHistorica);
         }
     }
 }

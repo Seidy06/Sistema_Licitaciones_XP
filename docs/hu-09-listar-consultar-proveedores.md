@@ -70,8 +70,8 @@ Los controladores MVC proyectan los DTOs a
 
 HU-08 implementa `DeletedAt` y un filtro global de EF Core. Las consultas
 activas de HU-09 heredan ese filtro y no incluyen proveedores eliminados. El
-histórico permanece disponible únicamente mediante consultas explícitas con
-`IgnoreQueryFilters()`.
+histórico se expone únicamente mediante las rutas explícitas de HU-08; esas
+consultas usan `IgnoreQueryFilters()` y filtran filas con `DeletedAt`.
 
 ## Evidencia TDD
 

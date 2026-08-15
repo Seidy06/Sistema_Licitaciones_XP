@@ -1,6 +1,6 @@
 # Módulo API REST
 
-`Licitaciones.Api` es una aplicación ASP.NET Core 9 con controladores. En la Iteración 1 su única API de negocio es el CRUD lógico de proveedores en `/api/v1/proveedores`: GET de listado y detalle, POST, PUT y DELETE. También permanece `GET /WeatherForecast`, endpoint de muestra de la plantilla, sin relación con el dominio.
+`Licitaciones.Api` es una aplicación ASP.NET Core 9 con controladores. En la Iteración 1 su única API de negocio es el CRUD lógico de proveedores en `/api/v1/proveedores`: GET de listado y detalle, POST, PUT y DELETE, además de consultas explícitas bajo `/api/v1/proveedores/historico`. También permanece `GET /WeatherForecast`, endpoint de muestra de la plantilla, sin relación con el dominio.
 
 El controlador recibe modelos HTTP para crear y editar, invoca servicios de Application y devuelve `ProveedorDto`; no expone entidades de EF Core. Los errores controlados de creación, edición y baja usan `ProblemDetails`. El 404 del detalle se devuelve sin cuerpo personalizado.
 

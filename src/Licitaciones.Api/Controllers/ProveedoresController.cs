@@ -1,14 +1,14 @@
 using Licitaciones.Application.Proveedores;
-using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Consultar;
+using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Editar;
 using Licitaciones.Application.Proveedores.Eliminar;
 
 using Microsoft.AspNetCore.Mvc;
 
 using ApplicationRequest = Licitaciones.Application.Proveedores.Crear.CrearProveedorRequest;
-using HttpRequest = Licitaciones.Api.Contracts.Proveedores.CrearProveedorRequest;
 using HttpEditRequest = Licitaciones.Api.Contracts.Proveedores.EditarProveedorRequest;
+using HttpRequest = Licitaciones.Api.Contracts.Proveedores.CrearProveedorRequest;
 
 namespace Licitaciones.Api.Controllers;
 
@@ -21,35 +21,15 @@ public sealed class ProveedoresController : ControllerBase
     private readonly EditarProveedorService? _editarService;
     private readonly DarBajaProveedorService? _darBajaService;
 
-    public ProveedoresController(CrearProveedorService service)
-    {
-        _crearService = service;
-    }
-
     public ProveedoresController(
         CrearProveedorService crearService,
-        ConsultarProveedorService consultarService)
+        ConsultarProveedorService? consultarService = null,
+        EditarProveedorService? editarService = null,
+        DarBajaProveedorService? darBajaService = null)
     {
         _crearService = crearService;
         _consultarService = consultarService;
-    }
-
-    public ProveedoresController(
-        CrearProveedorService crearService,
-        ConsultarProveedorService consultarService,
-        EditarProveedorService editarService)
-        : this(crearService, consultarService)
-    {
         _editarService = editarService;
-    }
-
-    public ProveedoresController(
-        CrearProveedorService crearService,
-        ConsultarProveedorService consultarService,
-        EditarProveedorService editarService,
-        DarBajaProveedorService darBajaService)
-        : this(crearService, consultarService, editarService)
-    {
         _darBajaService = darBajaService;
     }
 
@@ -132,6 +112,37 @@ public sealed class ProveedoresController : ControllerBase
             cancellationToken);
 
         return Ok(resultado);
+    }
+
+    [HttpGet("historico")]
+    [ProducesResponseType<PaginaResultado<ProveedorHistoricoDto>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<PaginaResultado<ProveedorHistoricoDto>>> ListarHistorico(
+        int pagina = 1,
+        int tamanoPagina = 20,
+        string? nombre = null,
+        ProveedorOrden ordenarPor = ProveedorOrden.Nombre,
+        bool descendente = false,
+        CancellationToken cancellationToken = default)
+    {
+        var resultado = await _consultarService!.ListarHistoricoAsync(
+            new ConsultarProveedoresRequest(
+                pagina, tamanoPagina, nombre, ordenarPor, descendente),
+            cancellationToken);
+
+        return Ok(resultado);
+    }
+
+    [HttpGet("historico/{id:guid}")]
+    [ProducesResponseType<ProveedorHistoricoDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProveedorHistoricoDto>> ObtenerHistoricoPorId(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var proveedor = await _consultarService!.ObtenerHistoricoPorIdAsync(
+            id,
+            cancellationToken);
+        return proveedor is null ? NotFound() : Ok(proveedor);
     }
 
     [HttpGet("{id:guid}")]

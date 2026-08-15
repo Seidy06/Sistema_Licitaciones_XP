@@ -11,6 +11,8 @@ La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedore
 | `POST /api/v1/proveedores` | `201 Created` | `400 Bad Request`, `409 Conflict`. |
 | `PUT /api/v1/proveedores/{id}` | `200 OK` | `400 Bad Request`, `404 Not Found`, `409 Conflict`. |
 | `DELETE /api/v1/proveedores/{id}` | `204 No Content` | `404 Not Found`. |
+| `GET /api/v1/proveedores/historico` | `200 OK` | No hay un contrato de error personalizado para esta acción. |
+| `GET /api/v1/proveedores/historico/{id}` | `200 OK` | `404 Not Found`. |
 
 ## Listar y consultar
 
@@ -62,5 +64,13 @@ Devuelve `200 OK` con el DTO actualizado. Devuelve 404 si no existe un proveedor
 ## Dar de baja
 
 `DELETE /api/v1/proveedores/{id}` establece `DeletedAt`: no elimina la fila. Devuelve 204 sin cuerpo o 404 si el proveedor activo no existe. Tras la baja, el listado y el detalle ordinarios dejan de encontrarlo.
+
+## Histórico
+
+`GET /api/v1/proveedores/historico` acepta los mismos parámetros de paginación,
+filtro y ordenamiento del listado activo, pero devuelve exclusivamente
+proveedores dados de baja. `GET /api/v1/proveedores/historico/{id}` permite
+consultar su detalle e incluye `deletedAt`. Estas rutas son explícitas para no
+debilitar el filtro global aplicado al resto de las consultas.
 
 La aplicación registra OpenAPI y publica el documento solo en Development con `MapOpenApi()`. No existe Swagger UI en esta iteración.

@@ -75,3 +75,22 @@ mediante esta tabla de equivalencias.
 - Programación en pareja con rotación de Driver y Navigator.
 - Propiedad colectiva del código y estándares compartidos.
 - Ritmo sostenible y retroalimentación frecuente del cliente.
+
+## Definition of Done
+
+La Definition of Done verificable para cada historia seleccionada exige:
+
+- criterios de aceptación implementados y trazables a pruebas;
+- reglas de negocio en Domain/Application, sin duplicación en controladores;
+- persistencia protegida por las restricciones PostgreSQL aplicables;
+- pruebas unitarias e integración proporcionales al cambio;
+- recorridos HTTP reales cuando la historia expone MVC o API;
+- build Release y suite completa sin errores ni pruebas omitidas;
+- `dotnet format --verify-no-changes` correcto;
+- GitHub Actions verde en el commit integrado;
+- documentación y bitácora alineadas con la implementación;
+- árbol de trabajo limpio y pequeña liberación etiquetada al cerrar la iteración.
+
+Una historia no se registra como terminada si alguno de sus criterios permanece
+disponible únicamente como intención documental o prueba directa que omita una
+frontera técnica relevante.

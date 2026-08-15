@@ -1,6 +1,8 @@
-using Licitaciones.Infrastructure.Persistence;
 using Licitaciones.Domain.Common;
+using Licitaciones.Infrastructure.Persistence;
+
 using Microsoft.EntityFrameworkCore;
+
 using Testcontainers.PostgreSql;
 
 namespace Licitaciones.IntegrationTests.Proveedores;

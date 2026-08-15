@@ -1,4 +1,5 @@
 using Licitaciones.Domain.Licitaciones;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

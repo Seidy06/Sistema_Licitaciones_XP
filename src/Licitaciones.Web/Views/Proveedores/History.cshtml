@@ -1,9 +1,9 @@
 @using Licitaciones.Application.Proveedores.Consultar
 @using Licitaciones.Web.Models.Proveedores
-@model PaginaResultado<ProveedorResumenViewModel>
+@model PaginaResultado<ProveedorHistoricoResumenViewModel>
 
 @{
-    ViewData["Title"] = "Proveedores";
+    ViewData["Title"] = "Histórico de proveedores";
     var nombre = ViewData["Nombre"] as string;
     var ordenarPor = (ProveedorOrden)(ViewData["OrdenarPor"] ?? ProveedorOrden.Nombre);
     var descendente = (bool)(ViewData["Descendente"] ?? false);
@@ -11,15 +11,12 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Proveedores</h1>
-    <div>
-        <a asp-action="History" class="btn btn-outline-secondary">Ver histórico</a>
-        <a asp-action="Create" class="btn btn-primary">Registrar proveedor</a>
-    </div>
+    <h1>Histórico de proveedores</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Volver a activos</a>
 </div>
 
-<form asp-action="Index" method="get" class="row g-2 mb-3">
-    <div class="col-md-5">
+<form asp-action="History" method="get" class="row g-2 mb-3">
+    <div class="col-md-6">
         <label for="nombre" class="visually-hidden">Nombre</label>
         <input id="nombre" name="nombre" value="@nombre" class="form-control" placeholder="Filtrar por nombre" />
     </div>
@@ -30,28 +27,23 @@
             <option value="FechaCreacion" selected="@(ordenarPor == ProveedorOrden.FechaCreacion)">Fecha de creación</option>
         </select>
     </div>
-    <div class="col-md-2 form-check align-self-center">
-        <input id="descendente" name="descendente" value="true" type="checkbox" checked="@descendente" class="form-check-input" />
-        <label for="descendente" class="form-check-label">Descendente</label>
-    </div>
-    <div class="col-md-2">
+    <div class="col-md-3">
         <button type="submit" class="btn btn-outline-primary w-100">Aplicar</button>
     </div>
 </form>
 
 <table class="table table-striped align-middle">
     <thead>
-        <tr><th>Nombre</th><th>Fecha de creación</th><th></th></tr>
+        <tr><th>Nombre</th><th>Fecha de baja</th><th></th></tr>
     </thead>
     <tbody>
     @foreach (var proveedor in Model.Items)
     {
         <tr>
             <td>@proveedor.Nombre</td>
-            <td>@proveedor.CreatedAt.ToString("g")</td>
+            <td>@proveedor.DeletedAt.ToString("g")</td>
             <td class="text-end">
-                <a asp-action="Details" asp-route-id="@proveedor.Id">Ver detalle</a>
-                <a asp-action="Delete" asp-route-id="@proveedor.Id" class="ms-2 text-danger">Eliminar</a>
+                <a asp-action="HistoryDetails" asp-route-id="@proveedor.Id">Ver detalle</a>
             </td>
         </tr>
     }
@@ -60,17 +52,17 @@
 
 @if (Model.Items.Count == 0)
 {
-    <p>No se encontraron proveedores.</p>
+    <p>No se encontraron proveedores dados de baja.</p>
 }
 
 @if (totalPaginas > 1)
 {
-    <nav aria-label="Paginación de proveedores">
+    <nav aria-label="Paginación del histórico de proveedores">
         <ul class="pagination">
         @for (var pagina = 1; pagina <= totalPaginas; pagina++)
         {
             <li class="page-item @(pagina == Model.Pagina ? "active" : null)">
-                <a class="page-link" asp-action="Index" asp-route-pagina="@pagina"
+                <a class="page-link" asp-action="History" asp-route-pagina="@pagina"
                    asp-route-tamanoPagina="@Model.TamanoPagina" asp-route-nombre="@nombre"
                    asp-route-ordenarPor="@ordenarPor" asp-route-descendente="@descendente">@pagina</a>
             </li>

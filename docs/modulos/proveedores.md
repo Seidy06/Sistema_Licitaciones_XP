@@ -24,4 +24,8 @@ HU-06 a HU-09 implementan registro, edición, baja lógica, listado y consulta d
 | API | CRUD lógico bajo `/api/v1/proveedores`. |
 | Web | Listado, detalle, creación, edición y confirmación de baja. |
 
-El histórico de proveedores dados de baja solo es accesible internamente con consultas explícitas que ignoren el filtro global; no existe un endpoint ni una vista de reportes históricos en esta iteración.
+El histórico de proveedores dados de baja se consulta explícitamente mediante
+`GET /api/v1/proveedores/historico`, su detalle por identificador y las vistas
+MVC `History`/`HistoryDetails`. Infrastructure usa `IgnoreQueryFilters()` solo
+en esas consultas y exige `DeletedAt != null`, por lo que el histórico no puede
+mezclarse accidentalmente con el catálogo activo.

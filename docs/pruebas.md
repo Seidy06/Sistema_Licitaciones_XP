@@ -3,8 +3,8 @@
 ## Cobertura existente
 
 - `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; además de pruebas iniciales de licitación y oferta.
-- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC y contrato HTTP del CRUD de proveedores.
-- `Licitaciones.FunctionalTests`: el proyecto existe y compila, pero actualmente no contiene pruebas detectables.
+- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales del CRUD mediante `WebApplicationFactory`.
+- `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial y la plantilla MVC.
 
 Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, Testcontainers inicia `postgres:16-alpine`; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
 
@@ -39,11 +39,16 @@ Ejecución local del 15 de agosto de 2026:
 
 | Proyecto | Superadas | Fallidas | Omitidas |
 | --- | ---: | ---: | ---: |
-| `Licitaciones.UnitTests` | 35 | 0 | 0 |
-| `Licitaciones.IntegrationTests` | 47 | 0 | 0 |
-| `Licitaciones.FunctionalTests` | 0 detectadas | 0 | 0 |
-| **Total ejecutado** | **82** | **0** | **0** |
+| `Licitaciones.UnitTests` | 36 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 51 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 1 | 0 | 0 |
+| **Total ejecutado** | **88** | **0** | **0** |
+
+Los recorridos end-to-end crean clientes sobre hosts ASP.NET Core reales. Así
+verifican activación por DI, routing, model binding, serialización, vistas,
+respuestas HTTP y persistencia PostgreSQL, además de las pruebas directas de
+controlador ya existentes.
 
 ## Integración continua
 
-`.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, compila Release y ejecuta toda la solución. En esta iteración no mide cobertura, no ejecuta análisis estático y no construye imágenes Docker.
+`.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release y ejecuta toda la solución. En esta iteración no mide cobertura ni construye imágenes Docker.

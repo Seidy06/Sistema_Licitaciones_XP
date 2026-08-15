@@ -1,6 +1,6 @@
 using Licitaciones.Application.Proveedores;
-using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Consultar;
+using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Editar;
 using Licitaciones.Application.Proveedores.Eliminar;
 using Licitaciones.Domain.Common;
@@ -26,8 +26,9 @@ builder.Services.AddDbContext<LicitacionesDbContext>(options =>
 
 var app = builder.Build();
 
-await using (var scope = app.Services.CreateAsyncScope())
+if (builder.Configuration.GetValue("Database:ApplyMigrationsOnStartup", true))
 {
+    await using var scope = app.Services.CreateAsyncScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<LicitacionesDbContext>();
     await dbContext.Database.MigrateAsync();
 }

@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+
 using Licitaciones.Api.Controllers;
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Domain.Proveedores;
 using Licitaciones.Infrastructure.Persistence;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

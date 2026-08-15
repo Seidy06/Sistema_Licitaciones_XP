@@ -1,5 +1,5 @@
-using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Consultar;
+using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Editar;
 using Licitaciones.Application.Proveedores.Eliminar;
 using Licitaciones.Web.Models.Proveedores;
@@ -17,28 +17,13 @@ public sealed class ProveedoresController : Controller
 
     public ProveedoresController(
         CrearProveedorService crearService,
-        ConsultarProveedorService consultarService)
+        ConsultarProveedorService consultarService,
+        EditarProveedorService? editarService = null,
+        DarBajaProveedorService? darBajaService = null)
     {
         _crearService = crearService;
         _consultarService = consultarService;
-    }
-
-    public ProveedoresController(
-        CrearProveedorService crearService,
-        ConsultarProveedorService consultarService,
-        EditarProveedorService editarService)
-        : this(crearService, consultarService)
-    {
         _editarService = editarService;
-    }
-
-    public ProveedoresController(
-        CrearProveedorService crearService,
-        ConsultarProveedorService consultarService,
-        EditarProveedorService editarService,
-        DarBajaProveedorService darBajaService)
-        : this(crearService, consultarService, editarService)
-    {
         _darBajaService = darBajaService;
     }
 
@@ -170,6 +155,59 @@ public sealed class ProveedoresController : Controller
         ViewData["OrdenarPor"] = ordenarPor;
         ViewData["Descendente"] = descendente;
         return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> History(
+        int pagina = 1,
+        int tamanoPagina = 20,
+        string? nombre = null,
+        ProveedorOrden ordenarPor = ProveedorOrden.Nombre,
+        bool descendente = false,
+        CancellationToken cancellationToken = default)
+    {
+        var resultado = await _consultarService.ListarHistoricoAsync(
+            new ConsultarProveedoresRequest(
+                pagina, tamanoPagina, nombre, ordenarPor, descendente),
+            cancellationToken);
+
+        var model = new PaginaResultado<ProveedorHistoricoResumenViewModel>(
+            resultado.Items
+                .Select(proveedor => new ProveedorHistoricoResumenViewModel(
+                    proveedor.Id,
+                    proveedor.Nombre,
+                    proveedor.CreatedAt,
+                    proveedor.DeletedAt))
+                .ToArray(),
+            resultado.Total,
+            resultado.Pagina,
+            resultado.TamanoPagina);
+
+        ViewData["Nombre"] = nombre;
+        ViewData["OrdenarPor"] = ordenarPor;
+        ViewData["Descendente"] = descendente;
+        return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> HistoryDetails(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var proveedor = await _consultarService.ObtenerHistoricoPorIdAsync(
+            id,
+            cancellationToken);
+        if (proveedor is null)
+        {
+            return NotFound();
+        }
+
+        return View(new ProveedorHistoricoDetalleViewModel(
+            proveedor.Id,
+            proveedor.Nombre,
+            proveedor.CreatedAt,
+            proveedor.UpdatedAt,
+            proveedor.DeletedAt));
     }
 
     [HttpGet]

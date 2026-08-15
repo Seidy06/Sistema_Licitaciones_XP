@@ -1,0 +1,20 @@
+@model Licitaciones.Web.Models.Proveedores.ProveedorHistoricoDetalleViewModel
+
+@{
+    ViewData["Title"] = "Detalle histórico del proveedor";
+}
+
+<h1>Detalle histórico del proveedor</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Nombre</dt>
+    <dd class="col-sm-9">@Model.Nombre</dd>
+    <dt class="col-sm-3">Fecha de creación</dt>
+    <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
+    <dt class="col-sm-3">Última actualización</dt>
+    <dd class="col-sm-9">@Model.UpdatedAt.ToString("g")</dd>
+    <dt class="col-sm-3">Fecha de baja</dt>
+    <dd class="col-sm-9">@Model.DeletedAt.ToString("g")</dd>
+</dl>
+
+<a asp-action="History" class="btn btn-outline-secondary">Volver al histórico</a>

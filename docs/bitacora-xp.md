@@ -20,7 +20,7 @@ La valoración corresponde al catálogo vigente en `historias-usuario.md`.
 | HU-05 — Abstraer el reloj | 2 | Terminada: `IClock`, `SystemClock` y `FixedClock`; usada por auditoría y baja lógica. Commit `145e83e`. |
 | HU-06 — Registrar proveedor | 3 | Terminada en MVC y API con normalización Unicode y conflicto concurrente controlado. Commits `1666a8d`, `23aa497`, `276d9af`, `9903e00`. |
 | HU-07 — Editar proveedor | 2 | Terminada en MVC y API con unicidad y concurrencia mediante `xmin`. Commits `18dd3fc`, `dac1452`. |
-| HU-08 — Dar de baja proveedor | 3 | Terminada: confirmación MVC, DELETE en API, `DeletedAt`, filtro global e histórico interno con `IgnoreQueryFilters()`. No existe una pantalla de reportes históricos. Commits `a74b9cd`, `cc43bd2`, `aed1feb`, `38efa9f`. |
+| HU-08 — Dar de baja proveedor | 3 | Terminada: confirmación MVC, DELETE en API, `DeletedAt`, filtro global e histórico explícito desde MVC y API. Las pruebas conservan filas y ofertas relacionadas. Commits `a74b9cd`, `cc43bd2`, `aed1feb`, `38efa9f` y rama de cierre. |
 | HU-09 — Listar y consultar proveedores | 3 | Terminada: detalle, paginación, filtro y ordenamiento en MVC y API. Commits `01f2499`, `334e618`, `6631011`. |
 | **Total observado** | **30** | **HU-00 a HU-09 cuentan con evidencia ejecutable o documental en el alcance definido.** |
 
@@ -72,16 +72,18 @@ Git registra autoría, pero no guarda el rol Navigator. La tabla reconstruye las
 
 Verificación local reproducida el 15 de agosto de 2026 con `dotnet test Licitaciones.sln --configuration Release`:
 
-- 35 unitarias superadas.
-- 47 de integración superadas contra PostgreSQL real.
-- 0 fallidas y 0 omitidas; 82 ejecutadas.
-- El proyecto funcional compila, pero no contiene pruebas detectables.
+- 36 unitarias superadas.
+- 51 de integración superadas contra PostgreSQL real.
+- 1 funcional HTTP superada.
+- 0 fallidas y 0 omitidas; 88 ejecutadas.
 
 ### Retroalimentación incorporada
 
 - La auditoría de la numeración anterior produjo la equivalencia histórica entre HU-01/HU-02/HU-03/HU-04 de proveedores y HU-06/HU-09/HU-07/HU-08 del catálogo vigente; no se reescribió el historial.
 - La revisión técnica del registro pidió equivalencia Unicode y manejo de inserciones concurrentes; se incorporó en HU-06 con pruebas y respuestas 409.
 - La revisión del cierre pidió cubrir el CRUD REST completo; `ece009f` añadió esa evidencia.
+- La auditoría final detectó que las pruebas anteriores invocaban controladores directamente. La rama de cierre añadió `WebApplicationFactory`, descubrió y corrigió la activación ambigua de controladores, y cubrió API y MVC mediante HTTP real.
+- El histórico de HU-08 quedó disponible mediante rutas explícitas en MVC y API sin alterar las consultas activas.
 
 No hay en el repositorio un acta o comentario atribuible al cliente con retroalimentación adicional; por eso no se inventa una aceptación externa.
 
@@ -94,6 +96,13 @@ No hay en el repositorio un acta o comentario atribuible al cliente con retroali
 
 ### Resultado de la demostración
 
-La demostración técnica reproducible del incremento permite registrar, listar, filtrar, ordenar, consultar, editar con control de versión y dar de baja proveedores desde MVC y API. La baja conserva la fila y la excluye de consultas activas. El recorrido está respaldado por 82 pruebas automatizadas superadas, incluidas pruebas HTTP del CRUD.
+La demostración técnica reproducible del incremento permite registrar, listar, filtrar, ordenar, consultar, editar con control de versión, dar de baja y consultar el histórico desde MVC y API. La baja conserva la fila y sus ofertas, y la excluye de consultas activas. El recorrido está respaldado por 88 pruebas automatizadas superadas, incluidas pruebas HTTP end-to-end del CRUD y una prueba funcional de la plantilla MVC.
 
 No existe en el repositorio un acta de demostración presencial ni una aprobación firmada del cliente. El resultado documentado es, por tanto, la demostración técnica verificable del incremento y no una aceptación externa inferida.
+
+### Pequeña liberación
+
+La Iteración 1 se libera como `v0.1.0` después de superar restore, verificación
+de formato, build Release y las 88 pruebas. La etiqueta identifica el incremento
+HU-00 a HU-09 y no implica que las historias de iteraciones posteriores estén
+terminadas.

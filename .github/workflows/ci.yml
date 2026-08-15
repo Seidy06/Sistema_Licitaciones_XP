@@ -40,6 +40,9 @@ jobs:
       - name: Restaurar dependencias
         run: dotnet restore Licitaciones.sln
 
+      - name: Verificar formato
+        run: dotnet format Licitaciones.sln --verify-no-changes --no-restore
+
       - name: Compilar solución
         run: dotnet build Licitaciones.sln --configuration Release --no-restore
 

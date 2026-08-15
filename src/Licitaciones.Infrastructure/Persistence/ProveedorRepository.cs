@@ -1,11 +1,13 @@
 using Licitaciones.Application.Proveedores;
-using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Consultar;
+using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Editar;
 using Licitaciones.Application.Proveedores.Eliminar;
 using Licitaciones.Domain.Proveedores;
 using Licitaciones.Infrastructure.Persistence.Configurations;
+
 using Microsoft.EntityFrameworkCore;
+
 using Npgsql;
 
 namespace Licitaciones.Infrastructure.Persistence;
@@ -58,6 +60,18 @@ public sealed class ProveedorRepository :
             .SingleOrDefaultAsync(proveedor => proveedor.Id == id, cancellationToken);
     }
 
+    public Task<Proveedor?> ObtenerHistoricoPorIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return _context.Proveedores
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .SingleOrDefaultAsync(
+                proveedor => proveedor.Id == id && proveedor.DeletedAt != null,
+                cancellationToken);
+    }
+
     public async Task<PaginaProveedores> ListarAsync(
         ConsultarProveedoresRequest consulta,
         CancellationToken cancellationToken = default)
@@ -74,6 +88,31 @@ public sealed class ProveedorRepository :
         var total = await query.CountAsync(cancellationToken);
         var ordenada = Ordenar(query, consulta.OrdenarPor, consulta.Descendente);
         var items = await ordenada
+            .Skip((consulta.Pagina - 1) * consulta.TamanoPagina)
+            .Take(consulta.TamanoPagina)
+            .ToListAsync(cancellationToken);
+
+        return new PaginaProveedores(items, total);
+    }
+
+    public async Task<PaginaProveedores> ListarHistoricoAsync(
+        ConsultarProveedoresRequest consulta,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<Proveedor> query = _context.Proveedores
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(proveedor => proveedor.DeletedAt != null);
+
+        if (consulta.Nombre is not null)
+        {
+            var nombreNormalizado = ProveedorNombreNormalizer.Normalizar(consulta.Nombre);
+            query = query.Where(proveedor =>
+                proveedor.NombreNormalizado.Contains(nombreNormalizado));
+        }
+
+        var total = await query.CountAsync(cancellationToken);
+        var items = await Ordenar(query, consulta.OrdenarPor, consulta.Descendente)
             .Skip((consulta.Pagina - 1) * consulta.TamanoPagina)
             .Take(consulta.TamanoPagina)
             .ToListAsync(cancellationToken);

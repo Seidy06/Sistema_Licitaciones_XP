@@ -36,6 +36,6 @@ Web y API registran los servicios por inyección de dependencias. Ambos reutiliz
 - PostgreSQL se accede mediante EF Core 9 y Npgsql.
 - Los nombres de proveedores se normalizan en Domain y la unicidad se refuerza con un índice parcial en PostgreSQL.
 - `xmin` funciona como token de concurrencia optimista para edición.
-- `DeletedAt` y un filtro global implementan la baja lógica.
+- `DeletedAt` y un filtro global implementan la baja lógica; rutas históricas explícitas usan `IgnoreQueryFilters()` sin mezclar bajas con consultas activas.
 - `IClock` permite controlar el tiempo en pruebas.
 - Web usa antifalsificación en operaciones POST. La API usa DTO de entrada y devuelve `ProblemDetails` en los errores controlados implementados.

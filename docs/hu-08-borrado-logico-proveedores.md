@@ -26,8 +26,8 @@ builder.HasQueryFilter(proveedor => proveedor.DeletedAt == null);
 ```
 
 Por ello, listados, detalles, edición y baja sólo encuentran proveedores
-activos. Las consultas históricas explícitas pueden usar `IgnoreQueryFilters()`
-para recuperar la fila preservada.
+activos. Las consultas históricas explícitas usan `IgnoreQueryFilters()` y
+exigen `DeletedAt != null` para recuperar solamente filas preservadas.
 
 El índice `UX_Proveedores_NombreNormalizado` es único únicamente para filas
 activas mediante el filtro PostgreSQL `"DeletedAt" IS NULL`. Esto permite
@@ -46,6 +46,10 @@ sin perder el registro histórico anterior.
 La respuesta 204 no contiene cuerpo. Los endpoints ordinarios de listado y
 detalle dejan de mostrar el proveedor inmediatamente después de la baja.
 
+`GET /api/v1/proveedores/historico` lista exclusivamente las bajas con
+paginación, filtro y ordenamiento. `GET
+/api/v1/proveedores/historico/{id}` devuelve su detalle y fecha de baja.
+
 ## MVC
 
 1. `GET /Proveedores/Delete/{id}` presenta el nombre del proveedor y solicita
@@ -54,6 +58,8 @@ detalle dejan de mostrar el proveedor inmediatamente después de la baja.
 3. `POST /Proveedores/DeleteConfirmed/{id}` ejecuta la baja lógica y redirige
    al listado.
 4. Un identificador inexistente o ya eliminado produce `NotFound`.
+5. `GET /Proveedores/History` y `HistoryDetails/{id}` permiten consultar el
+   histórico preservado.
 
 ## Evidencia TDD
 
@@ -72,6 +78,13 @@ detalle dejan de mostrar el proveedor inmediatamente después de la baja.
 - `aed1feb` implementó el comportamiento de dominio, el caso de uso, el
   repositorio, DELETE en API y la confirmación en MVC.
 - No se incorporó ninguna eliminación física de proveedores.
+
+### CIERRE
+
+- Las pruebas HTTP end-to-end recorren la baja y la consulta histórica desde
+  hosts ASP.NET Core reales.
+- Un escenario con oferta asociada demuestra que se conservan proveedor,
+  oferta y relación histórica.
 
 ## Verificación
 
