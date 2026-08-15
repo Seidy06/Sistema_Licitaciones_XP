@@ -46,7 +46,10 @@
         <tr>
             <td>@proveedor.Nombre</td>
             <td>@proveedor.CreatedAt.ToString("g")</td>
-            <td class="text-end"><a asp-action="Details" asp-route-id="@proveedor.Id">Ver detalle</a></td>
+            <td class="text-end">
+                <a asp-action="Details" asp-route-id="@proveedor.Id">Ver detalle</a>
+                <a asp-action="Delete" asp-route-id="@proveedor.Id" class="ms-2 text-danger">Eliminar</a>
+            </td>
         </tr>
     }
     </tbody>

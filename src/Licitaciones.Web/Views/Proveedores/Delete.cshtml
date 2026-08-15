@@ -1,0 +1,17 @@
+@model Licitaciones.Web.Models.Proveedores.EliminarProveedorViewModel
+
+@{
+    ViewData["Title"] = "Eliminar proveedor";
+}
+
+<h1>Eliminar proveedor</h1>
+
+<div class="alert alert-warning" role="alert">
+    Confirme que desea eliminar al proveedor <strong>@Model.Nombre</strong>.
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input asp-for="Id" type="hidden" />
+    <button type="submit" class="btn btn-danger">Confirmar eliminación</button>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancelar</a>
+</form>
