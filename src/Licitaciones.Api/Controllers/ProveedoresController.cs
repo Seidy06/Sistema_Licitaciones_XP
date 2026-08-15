@@ -2,6 +2,7 @@ using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Application.Proveedores.Editar;
+using Licitaciones.Application.Proveedores.Eliminar;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,7 @@ public sealed class ProveedoresController : ControllerBase
     private readonly CrearProveedorService _crearService;
     private readonly ConsultarProveedorService? _consultarService;
     private readonly EditarProveedorService? _editarService;
+    private readonly DarBajaProveedorService? _darBajaService;
 
     public ProveedoresController(CrearProveedorService service)
     {
@@ -41,6 +43,34 @@ public sealed class ProveedoresController : ControllerBase
         _editarService = editarService;
     }
 
+    public ProveedoresController(
+        CrearProveedorService crearService,
+        ConsultarProveedorService consultarService,
+        EditarProveedorService editarService,
+        DarBajaProveedorService darBajaService)
+        : this(crearService, consultarService, editarService)
+    {
+        _darBajaService = darBajaService;
+    }
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Eliminar(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _darBajaService!.DarDeBajaAsync(id, cancellationToken);
+            return NoContent();
+        }
+        catch (Licitaciones.Application.Proveedores.Eliminar.ProveedorNoEncontradoException exception)
+        {
+            return NotFound(CrearProblema(404, "Proveedor no encontrado", exception.Message));
+        }
+    }
+
     [HttpPut("{id:guid}")]
     [ProducesResponseType<ProveedorDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -59,7 +89,7 @@ public sealed class ProveedoresController : ControllerBase
                 cancellationToken);
             return Ok(proveedor);
         }
-        catch (ProveedorNoEncontradoException exception)
+        catch (Licitaciones.Application.Proveedores.Editar.ProveedorNoEncontradoException exception)
         {
             return NotFound(CrearProblema(404, "Proveedor no encontrado", exception.Message));
         }

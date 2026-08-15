@@ -18,6 +18,10 @@ public sealed class Proveedor : IAuditableEntity
 
     public DateTimeOffset UpdatedAt { get; private set; }
 
+    public DateTimeOffset? DeletedAt { get; private set; }
+
+    public bool EstaEliminado => DeletedAt.HasValue;
+
     public uint Version { get; private set; }
 
     public static Proveedor Crear(string nombre)
@@ -55,5 +59,10 @@ public sealed class Proveedor : IAuditableEntity
 
         Nombre = nombreLegible;
         NombreNormalizado = nombreNormalizado;
+    }
+
+    public void DarDeBaja(DateTimeOffset instante)
+    {
+        DeletedAt ??= instante;
     }
 }

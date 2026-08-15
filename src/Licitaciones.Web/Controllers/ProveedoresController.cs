@@ -1,6 +1,7 @@
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Application.Proveedores.Editar;
+using Licitaciones.Application.Proveedores.Eliminar;
 using Licitaciones.Web.Models.Proveedores;
 
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ public sealed class ProveedoresController : Controller
     private readonly CrearProveedorService _crearService;
     private readonly ConsultarProveedorService _consultarService;
     private readonly EditarProveedorService? _editarService;
+    private readonly DarBajaProveedorService? _darBajaService;
 
     public ProveedoresController(
         CrearProveedorService crearService,
@@ -28,6 +30,52 @@ public sealed class ProveedoresController : Controller
         : this(crearService, consultarService)
     {
         _editarService = editarService;
+    }
+
+    public ProveedoresController(
+        CrearProveedorService crearService,
+        ConsultarProveedorService consultarService,
+        EditarProveedorService editarService,
+        DarBajaProveedorService darBajaService)
+        : this(crearService, consultarService, editarService)
+    {
+        _darBajaService = darBajaService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Delete(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var proveedor = await _consultarService.ObtenerPorIdAsync(id, cancellationToken);
+        if (proveedor is null)
+        {
+            return NotFound();
+        }
+
+        return View(new EliminarProveedorViewModel
+        {
+            Id = proveedor.Id,
+            Nombre = proveedor.Nombre
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _darBajaService!.DarDeBajaAsync(id, cancellationToken);
+        }
+        catch (Licitaciones.Application.Proveedores.Eliminar.ProveedorNoEncontradoException)
+        {
+            return NotFound();
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet]
@@ -71,7 +119,7 @@ public sealed class ProveedoresController : Controller
                 new EditarProveedorRequest(model.Nombre, model.Version),
                 cancellationToken);
         }
-        catch (ProveedorNoEncontradoException)
+        catch (Licitaciones.Application.Proveedores.Editar.ProveedorNoEncontradoException)
         {
             return NotFound();
         }
