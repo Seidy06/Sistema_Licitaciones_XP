@@ -68,10 +68,10 @@ Los controladores MVC proyectan los DTOs a
 
 ## Borrado lógico
 
-HU-08 define el borrado lógico. Cuando el modelo disponga de `DeletedAt` y su
-filtro global de EF Core, las consultas activas de HU-09 heredarán ese filtro y
-no incluirán proveedores eliminados. HU-09 no anticipa esa modificación del
-modelo.
+HU-08 implementa `DeletedAt` y un filtro global de EF Core. Las consultas
+activas de HU-09 heredan ese filtro y no incluyen proveedores eliminados. El
+histórico permanece disponible únicamente mediante consultas explícitas con
+`IgnoreQueryFilters()`.
 
 ## Evidencia TDD
 

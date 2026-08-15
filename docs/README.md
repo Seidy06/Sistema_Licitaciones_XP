@@ -18,6 +18,7 @@
 ## Documentación por módulo
 
 - [Proveedores](modulos/proveedores.md)
+- [HU-08: borrado lógico de proveedores](hu-08-borrado-logico-proveedores.md)
 - [HU-09: listado y consulta de proveedores](hu-09-listar-consultar-proveedores.md)
 - [Licitaciones](modulos/licitaciones.md)
 - [Ofertas](modulos/ofertas.md)
