@@ -1,5 +1,62 @@
 # Bitácora XP
 
+## Iteración 2 — Ciclo de licitaciones y ofertas
+
+**Estado: INICIADA — 18 de agosto de 2026.**
+
+### Objetivo
+
+Completar el ciclo de una licitación —crearla, publicarla y cerrarla— y el
+registro o rechazo explícito de ofertas mediante reglas de negocio, incluyendo
+la determinación de la mejor oferta y su clasificación de ahorro.
+
+### Planning Game de inicio
+
+Se confirma el alcance HU-10 a HU-17 definido en `plan-xp.md`. Las prioridades
+y estimaciones se conservan sin reestimarlas en este inicio formal.
+
+| Orden | Historia | Prioridad | SP | Dependencias para el incremento | Estado inicial |
+| ---: | --- | --- | ---: | --- | --- |
+| 1 | HU-10 — Crear licitación | Alta | 5 | Base de dominio, persistencia y reloj de HU-02 a HU-05. | Seleccionada; no terminada |
+| 2 | HU-11 — Publicar licitación | Alta | 3 | HU-10, porque solo puede publicarse una licitación creada en `Borrador`. | Seleccionada; no terminada |
+| 3 | HU-14 — Registrar oferta | Alta | 5 | HU-11, HU-06 y HU-05: requiere licitación publicada, proveedor y reloj inyectable. | Seleccionada; no terminada |
+| 4 | HU-12 — Editar y cerrar licitación | Alta | 5 | HU-10 y HU-14 para comprobar las restricciones de edición frente a ofertas existentes. | Seleccionada; no terminada |
+| 5 | HU-15 — Rechazar y auditar ofertas inválidas | Alta | 3 | HU-14 y HU-12 para verificar duplicidad, exceso de presupuesto, vencimiento e inmutabilidad tras el cierre. | Seleccionada; no terminada |
+| 6 | HU-16 — Calcular mejor oferta y clasificación de ahorro | Alta | 5 | HU-14 para disponer de ofertas válidas. El nivel de aprobación correspondiente depende de HU-18, planificada para la Iteración 3. | Seleccionada; no terminada |
+| 7 | HU-13 — Listar y consultar licitaciones | Media | 3 | HU-12 y HU-16 para mostrar estado efectivo y mejor oferta. El nivel de aprobación depende de HU-18. | Seleccionada; no terminada |
+| 8 | HU-17 — Listar y consultar ofertas | Media | 2 | HU-14 y HU-16. La presentación alternable en USD depende del servicio de conversión de HU-19, planificado para la Iteración 3. | Seleccionada; no terminada |
+|  | **Total seleccionado** |  | **31** | **26 SP de prioridad alta y 5 SP de prioridad media.** | **Velocidad observada no registrada** |
+
+El orden prioriza primero el recorrido ejecutable crear → publicar → ofertar →
+cerrar; después fija los rechazos, el cálculo y las consultas. Las dependencias
+con HU-18 y HU-19 se registran como límites conocidos del catálogo y no se
+consideran satisfechas ni autorizan a adelantar esas historias.
+
+### Programación en pareja inicial
+
+De acuerdo con el plan de trabajo Seidy–Tiffany, el primer ciclo TDD de HU-10
+inicia con **Seidy como Driver** y **Tiffany como Navigator**. Los roles se
+rotarán en el siguiente incremento; este registro expresa la asignación
+planificada de inicio y no atribuye evidencia de implementación todavía.
+
+### Velocidad planificada
+
+- Velocidad planificada de referencia: **36 SP por iteración**, según
+  `plan-xp.md`.
+- Alcance seleccionado para esta iteración: **31 SP**.
+- Velocidad observada: **no disponible al inicio y no registrada**. Se calculará
+  al cierre únicamente con historias que cumplan la Definition of Done.
+
+### Condiciones de trabajo XP
+
+- Cada historia comenzará con pruebas que expresen sus criterios de aceptación,
+  seguirá con la implementación mínima y cerrará con refactorización.
+- La pareja integrará incrementos pequeños y mantendrá propiedad colectiva del
+  código.
+- Ninguna historia de esta iteración se declara terminada en este inicio.
+
+---
+
 ## Iteración 1 — Base técnica y proveedores
 
 ### Objetivo
