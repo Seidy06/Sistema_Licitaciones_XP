@@ -1,10 +1,10 @@
+using Licitaciones.Application.Licitaciones;
+using Licitaciones.Application.Licitaciones.Crear;
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Editar;
 using Licitaciones.Application.Proveedores.Eliminar;
-using Licitaciones.Application.Licitaciones;
-using Licitaciones.Application.Licitaciones.Crear;
 using Licitaciones.Domain.Common;
 using Licitaciones.Infrastructure.Persistence;
 using Licitaciones.Infrastructure.Time;
