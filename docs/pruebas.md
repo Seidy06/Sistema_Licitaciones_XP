@@ -2,7 +2,7 @@
 
 ## Cobertura existente
 
-- `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear y publicar licitación; reloj determinista y servicio de crear licitación.
+- `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); reloj determinista y servicio de crear licitación.
 - `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales del CRUD mediante `WebApplicationFactory`; persistencia de crear y publicar licitación.
 - `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC y el formulario de crear licitación.
 
@@ -39,10 +39,10 @@ Ejecución local del 19 de agosto de 2026:
 
 | Proyecto | Superadas | Fallidas | Omitidas |
 | --- | ---: | ---: | ---: |
-| `Licitaciones.UnitTests` | 49 | 0 | 0 |
+| `Licitaciones.UnitTests` | 59 | 0 | 0 |
 | `Licitaciones.IntegrationTests` | 59 | 0 | 0 |
 | `Licitaciones.FunctionalTests` | 3 | 0 | 0 |
-| **Total ejecutado** | **111** | **0** | **0** |
+| **Total ejecutado** | **121** | **0** | **0** |
 
 Los recorridos end-to-end crean clientes sobre hosts ASP.NET Core reales. Así
 verifican activación por DI, routing, model binding, serialización, vistas,

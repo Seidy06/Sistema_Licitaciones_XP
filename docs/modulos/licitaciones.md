@@ -5,7 +5,9 @@
 HU-10 implementa la creación de licitaciones con código único, título, presupuesto
 positivo y fecha de cierre. HU-11 implementa la publicación de una licitación
 desde estado `Borrador` hacia `Publicada`, con registro de la transición de
-estado.
+estado. HU-12 implementa la edición de licitaciones (con validación de presupuesto
+frente a ofertas existentes y protección de campos tras el cierre) y el cierre
+funcional basado en vencimiento de la fecha de cierre.
 
 ## Reglas de negocio
 
@@ -28,12 +30,32 @@ estado.
 - Cada transición se registra en la tabla `licitacion_transiciones` con el
   estado anterior, el estado nuevo y la fecha de la transición.
 
+### Editar licitación (HU-12)
+
+- No se puede editar una licitación cerrada formalmente (`Estado == Cerrada`).
+- No se puede editar una licitación cerrada funcionalmente
+  (`Estado == Publicada` y `FechaCierre <= clock.UtcNow()`).
+- Si se reduce el presupuesto por debajo del monto mínimo de oferta ya
+  registrada, se rechaza la edición.
+- Los campos código, título, presupuesto y fecha de cierre son editables
+  mientras la licitación no esté cerrada (formal ni funcionalmente).
+- Los campos nulos en la solicitud de edición conservan el valor actual
+  (edición parcial).
+
+### Cierre funcional (HU-12)
+
+- `EstadoEfectivo(IClock)` retorna `Cerrada` cuando la licitación está en
+  estado `Publicada` y `FechaCierre <= clock.UtcNow()`.
+- El campo `Estado` en persistencia no cambia; el cierre es computado en
+  tiempo de lectura.
+- `EstaCerradaFormalmente()` retorna `true` cuando `Estado == Cerrada`.
+
 ## Componentes
 
 | Capa | Componentes principales |
 | --- | --- |
-| Domain | `Licitacion` (entidad con `Crear`, `Publicar`, `EstaVencida`), `LicitacionTransicion`, `EstadoLicitacion`, `EstadoLicitacionCatalogo`. |
-| Application | `CrearLicitacionService`, `ILicitacionRepository`, `LicitacionDto`. |
+| Domain | `Licitacion` (entidad con `Crear`, `Publicar`, `Editar`, `EstaVencida`, `EstaCerradaFormalmente`, `EstadoEfectivo`), `LicitacionTransicion`, `EstadoLicitacion`, `EstadoLicitacionCatalogo`. |
+| Application | `CrearLicitacionService`, `EditarLicitacionService`, `ILicitacionRepository`, `LicitacionDto` (con `FromEntity`), `LicitacionNoEncontradaException`. |
 | Infrastructure | `LicitacionRepository`, configuraciones EF Core, migraciones `ImplementCreateTenderHu10` e `ImplementPublishTenderHu11`. |
 | API | Crear licitación bajo `POST /api/v1/licitaciones`. |
 | Web | Formulario de creación en MVC. |
@@ -41,11 +63,13 @@ estado.
 ## Máquina de estados
 
 ```
-Borrador ──Publicar()──► Publicada
+Borrador ──Publicar()──► Publicada ──vencimiento──► Cerrada (funcional)
+                       │
+                       └──cierre formal──► Cerrada
 ```
 
-Las transiciones futuras (Cerrada, Adjudicada, Cancelada) se implementarán en
-historias posteriores (HU-12 y siguientes).
+Las transiciones hacia `Adjudicada` y `Cancelada` se implementarán en
+historias posteriores.
 
 ## Persistencia
 

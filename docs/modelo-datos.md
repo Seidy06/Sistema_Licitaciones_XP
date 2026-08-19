@@ -91,7 +91,7 @@ las transiciones al eliminar la licitación. Se persiste mediante
 ## Modelo base aún sin interfaz funcional
 
 - `EstadosLicitacion`: catálogo único con Borrador, Publicada, Cerrada, Adjudicada y Cancelada.
-- `Licitaciones`: código único, título de hasta 250 caracteres, presupuesto `numeric(18,2)` positivo, cierre, estado y auditoría. Crear y publicar implementados (HU-10, HU-11).
+- `Licitaciones`: código único, título de hasta 250 caracteres, presupuesto `numeric(18,2)` positivo, cierre, estado y auditoría. Crear, publicar, editar y cierre funcional implementados (HU-10, HU-11, HU-12).
 - `LicitacionTransiciones`: historial de cambios de estado de licitaciones (HU-11).
 - `Ofertas`: relaciones restrictivas con licitación y proveedor, monto `numeric(18,2)` positivo y unicidad por `(LicitacionId, ProveedorId)`.
 - `NivelesAprobacion`: límites `numeric(18,2)` y semillas Operativo, Gerencial y Directivo. Contiene checks de mínimo y rango, además de la restricción de exclusión `EX_NivelesAprobacion_SinTraslape` creada por la migración `CompleteInitialDomain`.

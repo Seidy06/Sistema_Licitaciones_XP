@@ -20,7 +20,7 @@ y estimaciones se conservan sin reestimarlas en este inicio formal.
 | 1 | HU-10 — Crear licitación | Alta | 5 | Base de dominio, persistencia y reloj de HU-02 a HU-05. | Seleccionada; no terminada |
 | 2 | HU-11 — Publicar licitación | Alta | 3 | HU-10, porque solo puede publicarse una licitación creada en `Borrador`. | Seleccionada; no terminada |
 | 3 | HU-14 — Registrar oferta | Alta | 5 | HU-11, HU-06 y HU-05: requiere licitación publicada, proveedor y reloj inyectable. | Seleccionada; no terminada |
-| 4 | HU-12 — Editar y cerrar licitación | Alta | 5 | HU-10 y HU-14 para comprobar las restricciones de edición frente a ofertas existentes. | Seleccionada; no terminada |
+| 4 | HU-12 — Editar y cerrar licitación | Alta | 5 | HU-10 y HU-14 para comprobar las restricciones de edición frente a ofertas existentes. | Refactor completado; sin endpoints HTTP ni DI. |
 | 5 | HU-15 — Rechazar y auditar ofertas inválidas | Alta | 3 | HU-14 y HU-12 para verificar duplicidad, exceso de presupuesto, vencimiento e inmutabilidad tras el cierre. | Seleccionada; no terminada |
 | 6 | HU-16 — Calcular mejor oferta y clasificación de ahorro | Alta | 5 | HU-14 para disponer de ofertas válidas. El nivel de aprobación correspondiente depende de HU-18, planificada para la Iteración 3. | Seleccionada; no terminada |
 | 7 | HU-13 — Listar y consultar licitaciones | Media | 3 | HU-12 y HU-16 para mostrar estado efectivo y mejor oferta. El nivel de aprobación depende de HU-18. | Seleccionada; no terminada |
@@ -91,6 +91,62 @@ Ejecución local del 19 de agosto de 2026 con `dotnet test Licitaciones.sln`:
 - 59 de integración superadas contra PostgreSQL real.
 - 3 funcionales superadas.
 - 0 fallidas y 0 omitidas; 111 ejecutadas.
+
+### HU-12 — Editar y cerrar licitación (refactor)
+
+#### Estado
+
+| Historia | SP | Estado |
+| --- | ---: | --- |
+| HU-12 — Editar y cerrar licitación | 5 | Refactor completado. Dominio, servicio y pruebas unitarias existentes; sin endpoints HTTP ni registro DI todavía. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| Refactor HU-12 | Seidy | — | Sin commits (solo refactor local). |
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Historia | Rojo | Verde | Refactorización |
+| --- | --- | --- | --- |
+| HU-12 | Las pruebas unitarias (6 en `EditarLicitacionServiceTests`, 4 en `EstadoEfectivoLicitacionTests`) existían desde la fase verde previa. | Todas las pruebas pasaban antes del refactor (59 unitarias, 3 funcionales). | `docs/bitacora-xp.md` registra este refactor. |
+
+#### Refactorizaciones aplicadas
+
+1. **Namespace `Editar/` alineado con convención `Crear/`** — Los tres archivos en
+   `src/Licitaciones.Application/Licitaciones/Editar/` (`EditarLicitacionService`,
+   `EditarLicitacionRequest`, `LicitacionNoEncontradaException`) cambiaron de
+   `namespace Licitaciones.Application.Licitaciones` a
+   `Licitaciones.Application.Licitaciones.Editar`, consistente con la convención
+   establecida por la carpeta `Crear/`.
+
+2. **Mapeo `LicitacionDto` centralizado** — Ambos servicios (`CrearLicitacionService`
+   y `EditarLicitacionService`) construían `LicitacionDto` con las mismas 9
+   propiedades. Se extrajo `LicitacionDto.FromEntity(Licitacion)` para eliminar la
+   duplicación.
+
+3. **`RepositorioEnMemoria` compartido en tests** — Dos implementaciones privadas
+   separadas (`CrearLicitacionServiceTests` y `EditarLicitacionServiceTests`) se
+   unificaron en `tests/Common/RepositorioEnMemoria.cs` con constructor
+   configurable y propiedades `CodigoNormalizadoExiste`, `CodigoConsultado`,
+   `LicitacionAgregada` y `MontoMinimoOferta`.
+
+4. **`EstablecerEstado` extraído a helper compartido** — La función de reflexión
+   para establecer el estado de una licitación en pruebas (duplicada en
+   `EditarLicitacionServiceTests`, `EstadoEfectivoLicitacionTests` y
+   `PublicarLicitacionTests`) se centralizó en
+   `tests/Common/LicitacionTestHelper.cs` con `using static` en cada archivo de
+   prueba.
+
+#### Resultado de pruebas (refactor HU-12)
+
+Ejecución local del 19 de agosto de 2026 con `dotnet test Licitaciones.sln`:
+
+- 59 unitarias superadas (10 de HU-12: 6 editar + 4 estado efectivo).
+- 3 funcionales superadas.
+- Pruebas de integración no ejecutadas localmente (requieren Docker).
+- 0 fallidas y 0 omitidas en las pruebas ejecutadas.
 
 ---
 
