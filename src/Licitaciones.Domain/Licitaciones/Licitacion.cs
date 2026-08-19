@@ -10,12 +10,14 @@ public sealed class Licitacion : IAuditableEntity
 
     public Guid Id { get; private set; }
     public string Codigo { get; private set; } = string.Empty;
+    public string CodigoNormalizado { get; private set; } = string.Empty;
     public string Titulo { get; private set; } = string.Empty;
     public decimal Presupuesto { get; private set; }
     public DateTimeOffset FechaCierre { get; private set; }
     public EstadoLicitacion Estado { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }
+    public DateTimeOffset? DeletedAt { get; private set; }
 
     public static Licitacion Crear(
         string codigo,
@@ -42,6 +44,7 @@ public sealed class Licitacion : IAuditableEntity
         {
             Id = Guid.NewGuid(),
             Codigo = codigo.Trim(),
+            CodigoNormalizado = codigo.Trim().ToUpperInvariant(),
             Titulo = titulo.Trim(),
             Presupuesto = presupuesto,
             FechaCierre = fechaCierre.ToUniversalTime(),

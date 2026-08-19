@@ -137,7 +137,15 @@ namespace Licitaciones.Infrastructure.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<string>("CodigoNormalizado")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Estado")
@@ -159,8 +167,10 @@ namespace Licitaciones.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Codigo")
-                        .IsUnique();
+                    b.HasIndex("CodigoNormalizado")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Licitaciones_CodigoNormalizado")
+                        .HasFilter("\"DeletedAt\" IS NULL");
 
                     b.HasIndex("Estado");
 
