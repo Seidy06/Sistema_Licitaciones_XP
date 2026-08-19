@@ -2,7 +2,9 @@ using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
+using Licitaciones.Domain.Proveedores;
 using Licitaciones.IntegrationTests.Proveedores;
+using Ofertas = Licitaciones.Domain.Ofertas;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -35,7 +37,8 @@ public sealed class ConsultarLicitacionPersistenceTests : IClassFixture<PostgreS
         await using var queryContext = _database.CrearContexto();
         var results = await queryContext.Licitaciones
             .AsNoTracking()
-            .Where(l => l.Estado == EstadoLicitacion.Publicada
+            .Where(l => l.Id == publicada.Id
+                && l.Estado == EstadoLicitacion.Publicada
                 && l.DeletedAt == null)
             .ToListAsync();
 
@@ -60,7 +63,8 @@ public sealed class ConsultarLicitacionPersistenceTests : IClassFixture<PostgreS
         await using var queryContext = _database.CrearContexto();
         var results = await queryContext.Licitaciones
             .AsNoTracking()
-            .Where(l => l.Estado == EstadoLicitacion.Publicada
+            .Where(l => l.Id == publicadaVencida.Id
+                && l.Estado == EstadoLicitacion.Publicada
                 && l.FechaCierre <= Ahora
                 && l.DeletedAt == null)
             .ToListAsync();
@@ -75,15 +79,16 @@ public sealed class ConsultarLicitacionPersistenceTests : IClassFixture<PostgreS
     {
         var licitacion = PublicarLicitacion(
             $"DET-{Guid.NewGuid():N}", Ahora.AddDays(5));
-        var proveedorId = Guid.NewGuid();
+        var proveedor = Proveedor.Crear($"Proveedor {Guid.NewGuid():N}");
 
         await using (var context = _database.CrearContexto())
         {
+            context.Proveedores.Add(proveedor);
             context.Licitaciones.Add(licitacion);
             await context.SaveChangesAsync();
 
             context.Ofertas.Add(Ofertas.Oferta.Crear(
-                licitacion.Id, proveedorId, 8_000m, new FixedClock(Ahora)));
+                licitacion.Id, proveedor.Id, 8_000m, new FixedClock(Ahora)));
             await context.SaveChangesAsync();
         }
 
@@ -102,18 +107,19 @@ public sealed class ConsultarLicitacionPersistenceTests : IClassFixture<PostgreS
     {
         var licitacion = PublicarLicitacion(
             $"MULT-{Guid.NewGuid():N}", Ahora.AddDays(5));
-        var proveedor1 = Guid.NewGuid();
-        var proveedor2 = Guid.NewGuid();
+        var proveedor1 = Proveedor.Crear($"Proveedor 1 {Guid.NewGuid():N}");
+        var proveedor2 = Proveedor.Crear($"Proveedor 2 {Guid.NewGuid():N}");
 
         await using (var context = _database.CrearContexto())
         {
+            context.Proveedores.AddRange(proveedor1, proveedor2);
             context.Licitaciones.Add(licitacion);
             await context.SaveChangesAsync();
 
             context.Ofertas.Add(Ofertas.Oferta.Crear(
-                licitacion.Id, proveedor1, 15_000m, new FixedClock(Ahora)));
+                licitacion.Id, proveedor1.Id, 15_000m, new FixedClock(Ahora)));
             context.Ofertas.Add(Ofertas.Oferta.Crear(
-                licitacion.Id, proveedor2, 12_000m, new FixedClock(Ahora)));
+                licitacion.Id, proveedor2.Id, 12_000m, new FixedClock(Ahora)));
             await context.SaveChangesAsync();
         }
 

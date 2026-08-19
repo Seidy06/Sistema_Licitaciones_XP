@@ -1,4 +1,5 @@
 using Licitaciones.Application.Licitaciones;
+using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Application.Licitaciones.Crear;
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Consultar;
@@ -23,7 +24,9 @@ builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
 builder.Services.AddScoped<IProveedorConsultaRepository, ProveedorRepository>();
 builder.Services.AddScoped<IProveedorBajaRepository, ProveedorRepository>();
 builder.Services.AddScoped<CrearLicitacionService>();
+builder.Services.AddScoped<ConsultarLicitacionService>();
 builder.Services.AddScoped<ILicitacionRepository, LicitacionRepository>();
+builder.Services.AddScoped<ILicitacionConsultaRepository, LicitacionConsultaRepository>();
 builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddDbContext<LicitacionesDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Licitaciones")));
