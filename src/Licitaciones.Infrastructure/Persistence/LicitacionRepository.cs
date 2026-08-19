@@ -43,4 +43,23 @@ public sealed class LicitacionRepository : ILicitacionRepository
             throw new LicitacionDuplicadoException(licitacion.Codigo);
         }
     }
+
+    public Task<Licitacion?> ObtenerPorIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default) =>
+        _context.Licitaciones
+            .FirstOrDefaultAsync(
+                l => l.Id == id && l.DeletedAt == null,
+                cancellationToken);
+
+    public async Task<decimal?> ObtenerMontoMinimoOfertaAsync(
+        Guid licitacionId,
+        CancellationToken cancellationToken = default) =>
+        await _context.Ofertas
+            .Where(o => o.LicitacionId == licitacionId)
+            .MinAsync(o => (decimal?)o.Monto, cancellationToken);
+
+    public Task GuardarCambiosAsync(
+        CancellationToken cancellationToken = default) =>
+        _context.SaveChangesAsync(cancellationToken);
 }

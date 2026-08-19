@@ -57,6 +57,13 @@ public sealed class Licitacion : IAuditableEntity
 
     public bool EstaVencida(IClock clock) => clock.UtcNow() >= FechaCierre;
 
+    public bool EstaCerradaFormalmente() => Estado == EstadoLicitacion.Cerrada;
+
+    public EstadoLicitacion EstadoEfectivo(IClock clock) =>
+        Estado == EstadoLicitacion.Publicada && EstaVencida(clock)
+            ? EstadoLicitacion.Cerrada
+            : Estado;
+
     public void Publicar(IClock clock)
     {
         if (Estado != EstadoLicitacion.Borrador)
@@ -78,5 +85,40 @@ public sealed class Licitacion : IAuditableEntity
             estadoAnterior,
             Estado,
             clock.UtcNow()));
+    }
+
+    public void Editar(
+        string codigo,
+        string titulo,
+        decimal presupuesto,
+        DateTimeOffset fechaCierre,
+        IClock clock)
+    {
+        if (EstaCerradaFormalmente() || EstaVencida(clock))
+        {
+            throw new DomainException(
+                "No se puede editar una licitación cerrada (formal o funcionalmente).");
+        }
+
+        if (string.IsNullOrWhiteSpace(codigo))
+        {
+            throw new DomainException("El código de la licitación es obligatorio.");
+        }
+
+        if (string.IsNullOrWhiteSpace(titulo))
+        {
+            throw new DomainException("El título de la licitación es obligatorio.");
+        }
+
+        if (presupuesto <= 0)
+        {
+            throw new DomainException("El presupuesto debe ser mayor que cero.");
+        }
+
+        Codigo = codigo.Trim();
+        CodigoNormalizado = codigo.Trim().ToUpperInvariant();
+        Titulo = titulo.Trim();
+        Presupuesto = presupuesto;
+        FechaCierre = fechaCierre.ToUniversalTime();
     }
 }
