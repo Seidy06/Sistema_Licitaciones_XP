@@ -1,4 +1,4 @@
-namespace Licitaciones.Application.Licitaciones;
+namespace Licitaciones.Application.Licitaciones.Editar;
 
 public sealed record EditarLicitacionRequest(
     Guid Id,

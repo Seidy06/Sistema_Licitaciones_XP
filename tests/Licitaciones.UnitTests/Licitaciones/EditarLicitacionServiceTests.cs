@@ -1,8 +1,10 @@
 using Licitaciones.Application.Licitaciones;
+using Licitaciones.Application.Licitaciones.Editar;
 using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Domain.Ofertas;
 using Licitaciones.UnitTests.Common;
+using static Licitaciones.UnitTests.Common.LicitacionTestHelper;
 
 namespace Licitaciones.UnitTests.Licitaciones;
 
@@ -159,64 +161,5 @@ public sealed class EditarLicitacionServiceTests
             FechaCierre: null));
 
         Assert.Equal("Titulo actualizado", resultado.Titulo);
-    }
-
-    private static void EstablecerEstado(
-        Licitacion licitacion,
-        EstadoLicitacion estado)
-    {
-        typeof(Licitacion)
-            .GetProperty(
-                nameof(Licitacion.Estado),
-                System.Reflection.BindingFlags.Instance
-                    | System.Reflection.BindingFlags.Public)!
-            .SetValue(licitacion, estado);
-    }
-
-    private sealed class RepositorioEnMemoria : ILicitacionRepository
-    {
-        private readonly Licitacion _licitacion;
-
-        public RepositorioEnMemoria(Licitacion licitacion)
-        {
-            _licitacion = licitacion;
-        }
-
-        public decimal? MontoMinimoOferta { get; init; }
-
-        public Task<Licitacion?> ObtenerPorIdAsync(
-            Guid id,
-            CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult<Licitacion?>(
-                _licitacion.Id == id ? _licitacion : null);
-        }
-
-        public Task<decimal?> ObtenerMontoMinimoOfertaAsync(
-            Guid licitacionId,
-            CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(MontoMinimoOferta);
-        }
-
-        public Task<bool> ExisteCodigoNormalizadoAsync(
-            string codigoNormalizado,
-            CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(false);
-        }
-
-        public Task AgregarAsync(
-            Licitacion licitacion,
-            CancellationToken cancellationToken = default)
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task GuardarCambiosAsync(
-            CancellationToken cancellationToken = default)
-        {
-            return Task.CompletedTask;
-        }
     }
 }

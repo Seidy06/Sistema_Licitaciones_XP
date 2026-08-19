@@ -2,6 +2,7 @@ using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Crear;
 using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
+using Licitaciones.UnitTests.Common;
 
 namespace Licitaciones.UnitTests.Licitaciones;
 
@@ -30,7 +31,7 @@ public class CrearLicitacionServiceTests
     [Fact]
     public async Task CrearAsync_DebeRechazarCodigoDuplicado()
     {
-        var repository = new RepositorioEnMemoria { Existe = true };
+        var repository = new RepositorioEnMemoria { CodigoNormalizadoExiste = true };
         var service = new CrearLicitacionService(repository);
         var cierre = new DateTimeOffset(2026, 12, 31, 23, 59, 0, TimeSpan.Zero);
 
@@ -72,50 +73,5 @@ public class CrearLicitacionServiceTests
 
         Assert.Equal("lic-002", resultado.Codigo);
         Assert.Equal("LIC-002", resultado.CodigoNormalizado);
-    }
-
-    private sealed class RepositorioEnMemoria : ILicitacionRepository
-    {
-        public bool Existe { get; init; }
-
-        public string? CodigoConsultado { get; private set; }
-
-        public Licitacion? LicitacionAgregada { get; private set; }
-
-        public Task<bool> ExisteCodigoNormalizadoAsync(
-            string codigoNormalizado,
-            CancellationToken cancellationToken = default)
-        {
-            CodigoConsultado = codigoNormalizado;
-            return Task.FromResult(Existe);
-        }
-
-        public Task AgregarAsync(
-            Licitacion licitacion,
-            CancellationToken cancellationToken = default)
-        {
-            LicitacionAgregada = licitacion;
-            return Task.CompletedTask;
-        }
-
-        public Task<Licitacion?> ObtenerPorIdAsync(
-            Guid id,
-            CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult<Licitacion?>(null);
-        }
-
-        public Task<decimal?> ObtenerMontoMinimoOfertaAsync(
-            Guid licitacionId,
-            CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult<decimal?>(null);
-        }
-
-        public Task GuardarCambiosAsync(
-            CancellationToken cancellationToken = default)
-        {
-            return Task.CompletedTask;
-        }
     }
 }

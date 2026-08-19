@@ -1,8 +1,7 @@
-using System.Reflection;
-
 using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.UnitTests.Common;
+using static Licitaciones.UnitTests.Common.LicitacionTestHelper;
 
 namespace Licitaciones.UnitTests.Licitaciones;
 
@@ -70,13 +69,4 @@ public sealed class PublicarLicitacionTests
             "Compra para pruebas HU-11",
             1000m,
             fechaCierre);
-
-    private static void EstablecerEstado(
-        Licitacion licitacion,
-        EstadoLicitacion estado)
-    {
-        typeof(Licitacion)
-            .GetProperty(nameof(Licitacion.Estado), BindingFlags.Instance | BindingFlags.Public)!
-            .SetValue(licitacion, estado);
-    }
 }

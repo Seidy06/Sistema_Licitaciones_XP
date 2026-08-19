@@ -32,15 +32,6 @@ public sealed class CrearLicitacionService
 
         await _repository.AgregarAsync(licitacion, cancellationToken);
 
-        return new LicitacionDto(
-            licitacion.Id,
-            licitacion.Codigo,
-            licitacion.CodigoNormalizado,
-            licitacion.Titulo,
-            licitacion.Presupuesto,
-            licitacion.FechaCierre,
-            licitacion.Estado,
-            licitacion.CreatedAt,
-            licitacion.UpdatedAt);
+        return LicitacionDto.FromEntity(licitacion);
     }
 }

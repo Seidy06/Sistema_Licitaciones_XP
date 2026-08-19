@@ -1,7 +1,7 @@
 using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
 
-namespace Licitaciones.Application.Licitaciones;
+namespace Licitaciones.Application.Licitaciones.Editar;
 
 public sealed class EditarLicitacionService
 {
@@ -49,15 +49,6 @@ public sealed class EditarLicitacionService
 
         await _repository.GuardarCambiosAsync(cancellationToken);
 
-        return new LicitacionDto(
-            licitacion.Id,
-            licitacion.Codigo,
-            licitacion.CodigoNormalizado,
-            licitacion.Titulo,
-            licitacion.Presupuesto,
-            licitacion.FechaCierre,
-            licitacion.Estado,
-            licitacion.CreatedAt,
-            licitacion.UpdatedAt);
+        return LicitacionDto.FromEntity(licitacion);
     }
 }

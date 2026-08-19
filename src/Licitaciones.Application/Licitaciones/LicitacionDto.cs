@@ -11,4 +11,16 @@ public sealed record LicitacionDto(
     DateTimeOffset FechaCierre,
     EstadoLicitacion Estado,
     DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt)
+{
+    public static LicitacionDto FromEntity(Licitacion licitacion) => new(
+        licitacion.Id,
+        licitacion.Codigo,
+        licitacion.CodigoNormalizado,
+        licitacion.Titulo,
+        licitacion.Presupuesto,
+        licitacion.FechaCierre,
+        licitacion.Estado,
+        licitacion.CreatedAt,
+        licitacion.UpdatedAt);
+}
