@@ -24,6 +24,7 @@ public sealed class LicitacionesDbContext : DbContext
 
     public DbSet<Proveedor> Proveedores => Set<Proveedor>();
     public DbSet<Licitacion> Licitaciones => Set<Licitacion>();
+    public DbSet<LicitacionTransicion> LicitacionTransiciones => Set<LicitacionTransicion>();
     public DbSet<Oferta> Ofertas => Set<Oferta>();
     public DbSet<NivelAprobacion> NivelesAprobacion => Set<NivelAprobacion>();
     public DbSet<TipoCambio> TiposCambio => Set<TipoCambio>();

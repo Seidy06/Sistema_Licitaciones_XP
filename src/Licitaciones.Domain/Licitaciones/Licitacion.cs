@@ -4,6 +4,8 @@ namespace Licitaciones.Domain.Licitaciones;
 
 public sealed class Licitacion : IAuditableEntity
 {
+    private readonly List<LicitacionTransicion> _transiciones = [];
+
     private Licitacion()
     {
     }
@@ -18,6 +20,7 @@ public sealed class Licitacion : IAuditableEntity
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }
     public DateTimeOffset? DeletedAt { get; private set; }
+    public IReadOnlyCollection<LicitacionTransicion> Transiciones => _transiciones.AsReadOnly();
 
     public static Licitacion Crear(
         string codigo,
@@ -53,4 +56,27 @@ public sealed class Licitacion : IAuditableEntity
     }
 
     public bool EstaVencida(IClock clock) => clock.UtcNow() >= FechaCierre;
+
+    public void Publicar(IClock clock)
+    {
+        if (Estado != EstadoLicitacion.Borrador)
+        {
+            throw new DomainException(
+                $"No se puede publicar una licitación en estado {Estado}.");
+        }
+
+        if (EstaVencida(clock))
+        {
+            throw new DomainException(
+                "No se puede publicar una licitación cuya fecha de cierre ya pasó.");
+        }
+
+        var estadoAnterior = Estado;
+        Estado = EstadoLicitacion.Publicada;
+        _transiciones.Add(LicitacionTransicion.Crear(
+            Id,
+            estadoAnterior,
+            Estado,
+            clock.UtcNow()));
+    }
 }
