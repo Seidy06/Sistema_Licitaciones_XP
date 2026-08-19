@@ -2,9 +2,9 @@
 
 ## Cobertura existente
 
-- `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; además de pruebas iniciales de licitación y oferta.
-- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales del CRUD mediante `WebApplicationFactory`.
-- `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial y la plantilla MVC.
+- `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear y publicar licitación; reloj determinista y servicio de crear licitación.
+- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales del CRUD mediante `WebApplicationFactory`; persistencia de crear y publicar licitación.
+- `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC y el formulario de crear licitación.
 
 Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, Testcontainers inicia `postgres:16-alpine`; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
 
@@ -35,14 +35,14 @@ Remove-Item Env:LICITACIONES_INTEGRATION_CONNECTION_STRING
 
 ## Resultado verificado para el cierre
 
-Ejecución local del 15 de agosto de 2026:
+Ejecución local del 19 de agosto de 2026:
 
 | Proyecto | Superadas | Fallidas | Omitidas |
 | --- | ---: | ---: | ---: |
-| `Licitaciones.UnitTests` | 36 | 0 | 0 |
-| `Licitaciones.IntegrationTests` | 51 | 0 | 0 |
-| `Licitaciones.FunctionalTests` | 1 | 0 | 0 |
-| **Total ejecutado** | **88** | **0** | **0** |
+| `Licitaciones.UnitTests` | 49 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 59 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 3 | 0 | 0 |
+| **Total ejecutado** | **111** | **0** | **0** |
 
 Los recorridos end-to-end crean clientes sobre hosts ASP.NET Core reales. Así
 verifican activación por DI, routing, model binding, serialización, vistas,

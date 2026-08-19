@@ -11,4 +11,4 @@ La configuración de proveedores usa `DeletedAt` como baja lógica, filtro globa
 
 Las migraciones están en `src/Licitaciones.Infrastructure/Persistence/Migrations`. Web ejecuta `Database.MigrateAsync()` al arrancar; API no lo hace. En ejecución se usa `ConnectionStrings__Licitaciones`; la fábrica de diseño admite `LICITACIONES_DESIGN_CONNECTION_STRING`.
 
-El contexto también contiene el esquema base de licitaciones, ofertas, estados, niveles de aprobación y tipos de cambio. Su persistencia existe, pero no equivale a casos de uso terminados para esos módulos.
+El contexto también contiene el esquema base de licitaciones, ofertas, estados, niveles de aprobación y tipos de cambio. HU-10 y HU-11 implementan la persistencia de licitaciones: `LicitacionRepository` con `ExisteCodigoNormalizadoAsync` y `AgregarAsync` (incluyendo traducción de violación única a duplicado), más la tabla `licitacion_transiciones` para el historial de cambios de estado. El esquema de ofertas, niveles de aprobación y tipos de cambio existe pero no equivale a casos de uso terminados.
