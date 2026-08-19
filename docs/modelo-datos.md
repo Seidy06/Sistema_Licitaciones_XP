@@ -1,10 +1,11 @@
 # Modelo de datos
 
-El modelo ejecutable está definido por `LicitacionesDbContext`, las configuraciones Fluent API y tres migraciones: `CreateProviders`, `CompleteInitialDomain` y `AddProveedorSoftDelete`.
+El modelo ejecutable está definido por `LicitacionesDbContext`, las configuraciones Fluent API y cuatro migraciones: `CreateProviders`, `CompleteInitialDomain`, `AddProveedorSoftDelete` e `ImplementCreateTenderHu10`/`ImplementPublishTenderHu11`.
 
 ```mermaid
 erDiagram
     ESTADOS_LICITACION ||--o{ LICITACIONES : clasifica
+    LICITACIONES ||--o{ LICITACION_TRANSICIONES : registra
     LICITACIONES ||--o{ OFERTAS : recibe
     PROVEEDORES ||--o{ OFERTAS : presenta
     PROVEEDORES { uuid Id PK
@@ -22,6 +23,11 @@ erDiagram
         decimal Presupuesto
         timestamptz FechaCierre
         int Estado FK }
+    LICITACION_TRANSICIONES { uuid Id PK
+        uuid LicitacionId FK
+        int EstadoAnterior
+        int EstadoNuevo
+        timestamptz Fecha }
     OFERTAS { uuid Id PK
         uuid LicitacionId FK
         uuid ProveedorId FK
@@ -53,10 +59,40 @@ erDiagram
 
 El índice parcial único `UX_Proveedores_NombreNormalizado`, filtrado por `"DeletedAt" IS NULL`, impide dos proveedores activos equivalentes y permite reutilizar el nombre de uno dado de baja. El filtro global de EF Core excluye por defecto las filas con `DeletedAt`.
 
+## Licitaciones
+
+| Columna | Tipo PostgreSQL | Regla |
+| --- | --- | --- |
+| `Id` | `uuid` | Clave primaria; Guid generado por Domain. |
+| `Codigo` | `varchar(50)` | Obligatorio; forma legible. |
+| `CodigoNormalizado` | `varchar(50)` | Obligatorio; `Trim().ToUpperInvariant()`, índice único parcial filtrado por `DeletedAt IS NULL`. |
+| `Titulo` | `varchar(250)` | Obligatorio. |
+| `Presupuesto` | `numeric(18,2)` | Obligatorio; restricción CHECK `> 0`. |
+| `FechaCierre` | `timestamp with time zone` | Obligatorio. |
+| `Estado` | `integer` | FK hacia `EstadosLicitacion`. |
+| `CreatedAt` | `timestamp with time zone` | Obligatorio; asignado al insertar. |
+| `UpdatedAt` | `timestamp with time zone` | Obligatorio; actualizado al modificar. |
+| `DeletedAt` | `timestamp with time zone` | Nullable; indica baja lógica. |
+
+## LicitacionTransiciones
+
+| Columna | Tipo PostgreSQL | Regla |
+| --- | --- | --- |
+| `id` | `uuid` | Clave primaria; Guid generado por Domain. |
+| `licitacion_id` | `uuid` | FK hacia `Licitaciones` con cascade. |
+| `estado_anterior` | `integer` | Estado previo a la transición. |
+| `estado_nuevo` | `integer` | Estado resultante de la transición. |
+| `fecha` | `timestamp with time zone` | Momento de la transición. |
+
+Registra cada cambio de estado de una licitación. La FK con cascade elimina
+las transiciones al eliminar la licitación. Se persiste mediante
+`LicitacionTransicion.Crear(...)` invocado desde `Licitacion.Publicar(...)`.
+
 ## Modelo base aún sin interfaz funcional
 
 - `EstadosLicitacion`: catálogo único con Borrador, Publicada, Cerrada, Adjudicada y Cancelada.
-- `Licitaciones`: código único, título de hasta 250 caracteres, presupuesto `numeric(18,2)` positivo, cierre, estado y auditoría.
+- `Licitaciones`: código único, título de hasta 250 caracteres, presupuesto `numeric(18,2)` positivo, cierre, estado y auditoría. Crear y publicar implementados (HU-10, HU-11).
+- `LicitacionTransiciones`: historial de cambios de estado de licitaciones (HU-11).
 - `Ofertas`: relaciones restrictivas con licitación y proveedor, monto `numeric(18,2)` positivo y unicidad por `(LicitacionId, ProveedorId)`.
 - `NivelesAprobacion`: límites `numeric(18,2)` y semillas Operativo, Gerencial y Directivo. Contiene checks de mínimo y rango, además de la restricción de exclusión `EX_NivelesAprobacion_SinTraslape` creada por la migración `CompleteInitialDomain`.
 - `TiposCambio`: valor `numeric(18,6)` positivo, fecha, indicador activo, índice único parcial sobre el registro activo y semilla USD/CRC con valor 500.

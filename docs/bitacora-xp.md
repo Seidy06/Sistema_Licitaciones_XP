@@ -55,6 +55,43 @@ planificada de inicio y no atribuye evidencia de implementación todavía.
   código.
 - Ninguna historia de esta iteración se declara terminada en este inicio.
 
+### HU-10 y HU-11 — Crear y publicar licitación
+
+#### Estado
+
+| Historia | SP | Estado |
+| --- | ---: | --- |
+| HU-10 — Crear licitación | 5 | Terminada. |
+| HU-11 — Publicar licitación | 3 | Terminada. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| Pruebas rojo HU-10 | Seidy | Tiffany | `8bb724b` |
+| Implementación HU-10 | Tiffany | Seidy | `49ff9e7` |
+| Pruebas cobertura HU-10 | Seidy | Tiffany | `8863d29` |
+| Corrección y estilo HU-10 | Seidy | Tiffany | `6087703`, `dbab284` |
+| Pruebas rojo HU-11 | Tiffany | Seidy | `dcd7ba0` |
+| Implementación HU-11 | Seidy | Tiffany | `b6ed6a6` |
+| Corrección formato HU-11 | Seidy | Tiffany | `60b84c5` |
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Historia | Rojo | Verde | Refactorización |
+| --- | --- | --- | --- |
+| HU-10 | `8bb724b` agregó pruebas unitarias (presupuesto no positivo, estado Borrador) y de integración (CHECK, unicidad, persistencia). | `49ff9e7` implementó `Licitacion.Crear`, `CrearLicitacionService`, `ILicitacionRepository`, `LicitacionRepository`, API y MVC. | `6087703` corrigió la excepción duplicada en la prueba; `dbab284` ordenó imports para CI. No se justificó un refactor de código adicional. |
+| HU-11 | `dcd7ba0` agregó pruebas unitarias (publicar desde Borrador, rechazo desde otros estados, rechazo con fecha vencida) y de integración (persistencia de estado y transición). | `b6ed6a6` implementó `Licitacion.Publicar(IClock)`, `LicitacionTransicion`, la migración `ImplementPublishTenderHu11` y la configuración EF Core. | `60b84c5` corrigió formato. No se identificó refactor justificado: la lógica de dominio es limpia, sin duplicación ni responsabilidades fusionadas. |
+
+#### Resultado de pruebas (cierre de HU-10 + HU-11)
+
+Ejecución local del 19 de agosto de 2026 con `dotnet test Licitaciones.sln`:
+
+- 49 unitarias superadas.
+- 59 de integración superadas contra PostgreSQL real.
+- 3 funcionales superadas.
+- 0 fallidas y 0 omitidas; 111 ejecutadas.
+
 ---
 
 ## Iteración 1 — Base técnica y proveedores

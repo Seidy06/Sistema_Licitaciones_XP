@@ -11,6 +11,7 @@ Se utilizó IA como apoyo de programación en pareja y documentación para revis
 - Entradas HTTP: API REST y MVC de proveedores.
 - Pruebas: revisión de escenarios unitarios e integrados con PostgreSQL real.
 - Documentación: arquitectura, datos, API, pruebas, Docker y bitácora XP.
+- Licitaciones (Iteración 2): análisis de código de dominio (`Licitacion.Publicar`, `LicitacionTransicion`) para la fase refactor de HU-11, y actualización de documentación del módulo, modelo de datos, pruebas y bitácora.
 
 ## Ejemplos de apoyo y validación humana
 
