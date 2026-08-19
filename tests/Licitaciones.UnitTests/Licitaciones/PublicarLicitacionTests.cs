@@ -1,6 +1,7 @@
 using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.UnitTests.Common;
+
 using static Licitaciones.UnitTests.Common.LicitacionTestHelper;
 
 namespace Licitaciones.UnitTests.Licitaciones;
