@@ -4,9 +4,10 @@ using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Domain.Proveedores;
 using Licitaciones.IntegrationTests.Proveedores;
-using Ofertas = Licitaciones.Domain.Ofertas;
 
 using Microsoft.EntityFrameworkCore;
+
+using Ofertas = Licitaciones.Domain.Ofertas;
 
 namespace Licitaciones.IntegrationTests.Hu13;
 
