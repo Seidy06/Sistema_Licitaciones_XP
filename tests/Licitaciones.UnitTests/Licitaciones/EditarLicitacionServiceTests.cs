@@ -15,7 +15,6 @@ public sealed class EditarLicitacionServiceTests
     [Trait("HU", "HU-12")]
     public async Task Editar_PresupuestoPorDebajoDeOfertaExistente_DebeRechazar()
     {
-        var licitacionId = Guid.NewGuid();
         var licitacion = Licitacion.Crear(
             $"HU12-{Guid.NewGuid():N}",
             "Compra con oferta",
@@ -32,7 +31,7 @@ public sealed class EditarLicitacionServiceTests
 
         var exception = await Assert.ThrowsAsync<DomainException>(() =>
             service.EditarAsync(new EditarLicitacionRequest(
-                licitacionId,
+                licitacion.Id,
                 Codigo: null,
                 Titulo: null,
                 Presupuesto: 4_000m,
@@ -220,11 +219,4 @@ public sealed class EditarLicitacionServiceTests
             return Task.CompletedTask;
         }
     }
-
-    public sealed record EditarLicitacionRequest(
-        Guid Id,
-        string? Codigo,
-        string? Titulo,
-        decimal? Presupuesto,
-        DateTimeOffset? FechaCierre);
 }

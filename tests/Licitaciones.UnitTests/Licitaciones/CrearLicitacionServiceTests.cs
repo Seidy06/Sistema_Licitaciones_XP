@@ -97,5 +97,25 @@ public class CrearLicitacionServiceTests
             LicitacionAgregada = licitacion;
             return Task.CompletedTask;
         }
+
+        public Task<Licitacion?> ObtenerPorIdAsync(
+            Guid id,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<Licitacion?>(null);
+        }
+
+        public Task<decimal?> ObtenerMontoMinimoOfertaAsync(
+            Guid licitacionId,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<decimal?>(null);
+        }
+
+        public Task GuardarCambiosAsync(
+            CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
     }
 }
