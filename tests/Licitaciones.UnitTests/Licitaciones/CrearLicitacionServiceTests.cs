@@ -34,7 +34,7 @@ public class CrearLicitacionServiceTests
         var service = new CrearLicitacionService(repository);
         var cierre = new DateTimeOffset(2026, 12, 31, 23, 59, 0, TimeSpan.Zero);
 
-        await Assert.ThrowsAsync<LicitacionDuplicadaException>(() =>
+        await Assert.ThrowsAsync<LicitacionDuplicadoException>(() =>
             service.CrearAsync(
                 new CrearLicitacionRequest("lic-001", "Compra de equipos", 5_000_000m, cierre)));
 
