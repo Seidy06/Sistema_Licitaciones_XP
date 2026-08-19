@@ -1,5 +1,5 @@
-using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Domain.Common;
+using Licitaciones.Domain.Licitaciones;
 using Licitaciones.IntegrationTests.Proveedores;
 
 using Microsoft.EntityFrameworkCore;
