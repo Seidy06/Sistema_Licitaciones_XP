@@ -1,4 +1,5 @@
 using Licitaciones.Application.Ofertas.Crear;
+using Licitaciones.Application.Ofertas.Proteger;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Domain.Ofertas;
 using Licitaciones.Domain.Proveedores;
@@ -10,7 +11,7 @@ using Npgsql;
 
 namespace Licitaciones.Infrastructure.Persistence;
 
-public sealed class OfertaRepository : IOfertaRepository
+public sealed class OfertaRepository : IOfertaRepository, IProteccionOfertaRepository
 {
     private readonly LicitacionesDbContext _context;
 
@@ -32,6 +33,18 @@ public sealed class OfertaRepository : IOfertaRepository
         _context.Ofertas.AnyAsync(
             x => x.LicitacionId == licitacionId && x.ProveedorId == proveedorId,
             cancellationToken);
+
+    public Task<Licitacion?> ObtenerLicitacionPorOfertaIdAsync(
+        Guid ofertaId,
+        CancellationToken cancellationToken = default) =>
+        _context.Ofertas
+            .Where(oferta => oferta.Id == ofertaId)
+            .Join(
+                _context.Licitaciones,
+                oferta => oferta.LicitacionId,
+                licitacion => licitacion.Id,
+                (_, licitacion) => licitacion)
+            .FirstOrDefaultAsync(cancellationToken);
 
     public async Task AgregarAsync(
         Oferta oferta, CancellationToken cancellationToken = default) =>

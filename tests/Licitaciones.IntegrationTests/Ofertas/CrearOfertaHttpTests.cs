@@ -49,7 +49,7 @@ public sealed class CrearOfertaHttpTests : IClassFixture<PostgreSqlFixture>
 
     [Fact]
     [Trait("HU", "HU-14")]
-    public async Task Api_PostConMontoMayorAlPresupuesto_DebeResponderBadRequest()
+    public async Task Api_PostConMontoMayorAlPresupuesto_DebeResponderUnprocessableEntity()
     {
         var (licitacionId, proveedorId) = await PrepararLicitacionPublicada(
             $"API-PRESUP-{Guid.NewGuid():N}");
@@ -61,7 +61,7 @@ public sealed class CrearOfertaHttpTests : IClassFixture<PostgreSqlFixture>
             "/api/v1/ofertas",
             Solicitud(licitacionId, proveedorId, 15_000m));
 
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public sealed class CrearOfertaHttpTests : IClassFixture<PostgreSqlFixture>
 
     [Fact]
     [Trait("HU", "HU-14")]
-    public async Task Api_PostConLicitacionPublicadaVencida_DebeResponderBadRequest()
+    public async Task Api_PostConLicitacionPublicadaVencida_DebeResponderUnprocessableEntity()
     {
         var licitacionId = Guid.Empty;
         var proveedorId = Guid.Empty;
@@ -133,7 +133,7 @@ public sealed class CrearOfertaHttpTests : IClassFixture<PostgreSqlFixture>
             "/api/v1/ofertas",
             Solicitud(licitacionId, proveedorId, 500m));
 
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
     }
 
     [Fact]

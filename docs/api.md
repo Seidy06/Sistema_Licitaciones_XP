@@ -16,7 +16,9 @@ La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedore
 | `GET /api/v1/licitaciones` | `200 OK` | No hay un contrato de error personalizado para esta acción. |
 | `GET /api/v1/licitaciones/{id}` | `200 OK` | `404 Not Found`. |
 | `POST /api/v1/licitaciones` | `201 Created` | `400 Bad Request`, `409 Conflict`. |
-| `POST /api/v1/ofertas` | `201 Created` | `400 Bad Request`, `409 Conflict`. |
+| `POST /api/v1/ofertas` | `201 Created` | `400 Bad Request`, `409 Conflict`, `422 Unprocessable Entity`. |
+| `PUT /api/v1/ofertas/{id}` | No modifica la oferta. | `422 Unprocessable Entity`. |
+| `DELETE /api/v1/ofertas/{id}` | No elimina la oferta. | `422 Unprocessable Entity`. |
 
 ## Listar y consultar
 
@@ -162,8 +164,18 @@ Una solicitud válida devuelve `201 Created`, una cabecera `Location` con
 ```
 
 Devuelve `409 Conflict` con título `Oferta duplicada` cuando el proveedor ya
-tiene una oferta para la licitación. Devuelve `400 Bad Request` con título
-`Oferta rechazada` si la licitación no existe, no está publicada o está
-vencida; si el monto supera el presupuesto; o si el proveedor no existe. La
+tiene una oferta para la licitación. Devuelve `422 Unprocessable Entity` con
+título `Oferta rechazada` cuando la licitación está vencida o el monto supera
+el presupuesto. Devuelve `400 Bad Request` para los demás rechazos controlados,
+como licitación inexistente o no publicada y proveedor inexistente. La
 validación automática del contrato también responde 400 cuando los
 identificadores o el monto no satisfacen sus restricciones.
+
+## Proteger ofertas registradas (HU-15)
+
+`PUT /api/v1/ofertas/{id}` y `DELETE /api/v1/ofertas/{id}` rechazan cambios
+sobre ofertas registradas con `422 Unprocessable Entity`. Para una oferta
+asociada a una licitación cerrada, el `ProblemDetails` usa el título `Oferta
+inalterable` y explica que no puede editarse ni eliminarse. Estas rutas no
+persisten cambios: la oferta se conserva como evidencia con su licitación,
+proveedor y monto originales.
