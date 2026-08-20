@@ -23,7 +23,7 @@ y estimaciones se conservan sin reestimarlas en este inicio formal.
 | 4 | HU-12 — Editar y cerrar licitación | Alta | 5 | HU-10 y HU-14 para comprobar las restricciones de edición frente a ofertas existentes. | Refactor completado; sin endpoints HTTP ni DI. |
 | 5 | HU-15 — Rechazar y auditar ofertas inválidas | Alta | 3 | HU-14 y HU-12 para verificar duplicidad, exceso de presupuesto, vencimiento e inmutabilidad tras el cierre. | Seleccionada; no terminada |
 | 6 | HU-16 — Calcular mejor oferta y clasificación de ahorro | Alta | 5 | HU-14 para disponer de ofertas válidas. El nivel de aprobación correspondiente depende de HU-18, planificada para la Iteración 3. | Seleccionada; no terminada |
-| 7 | HU-13 — Listar y consultar licitaciones | Media | 3 | HU-12 y HU-16 para mostrar estado efectivo y mejor oferta. El nivel de aprobación depende de HU-18. | Seleccionada; no terminada |
+| 7 | HU-13 — Listar y consultar licitaciones | Media | 3 | HU-12 y HU-16 para mostrar estado efectivo y mejor oferta. El nivel de aprobación depende de HU-18. | Terminada. |
 | 8 | HU-17 — Listar y consultar ofertas | Media | 2 | HU-14 y HU-16. La presentación alternable en USD depende del servicio de conversión de HU-19, planificado para la Iteración 3. | Seleccionada; no terminada |
 |  | **Total seleccionado** |  | **31** | **26 SP de prioridad alta y 5 SP de prioridad media.** | **Velocidad observada no registrada** |
 
@@ -145,6 +145,47 @@ Ejecución local del 19 de agosto de 2026 con `dotnet test Licitaciones.sln`:
 
 - 59 unitarias superadas (10 de HU-12: 6 editar + 4 estado efectivo).
 - 3 funcionales superadas.
+- Pruebas de integración no ejecutadas localmente (requieren Docker).
+- 0 fallidas y 0 omitidas en las pruebas ejecutadas.
+
+### HU-13 — Listar y consultar licitaciones
+
+#### Estado
+
+| Historia | SP | Estado |
+| --- | ---: | --- |
+| HU-13 — Listar y consultar licitaciones | 3 | Terminada. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| Pruebas rojo HU-13 | Tiffany | Seidy | `b869316` |
+| Implementación HU-13 | Seidy | Tiffany | `e62dca2` |
+| Pruebas completas HU-13 | Seidy | Tiffany | `ce3445c` |
+| Refactor HU-13 | Tiffany | Seidy | `d5761ec` |
+| Refactor HU-13 (tests) | — | — | Sin commit (solo refactor local). |
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Historia | Rojo | Verde | Refactorización |
+| --- | --- | --- | --- |
+| HU-13 | `b869316` agregó pruebas unitarias (listar con filtro de estado, cierre funcional, detalle con y sin ofertas, clasificación de nivel de aprobación) y de integración (persistencia de listado, filtro por estado, monto de ofertas). | `e62dca2` implementó `ConsultarLicitacionService`, `ILicitacionConsultaRepository`, `LicitacionConsultaRepository`, endpoints `GET` en `LicitacionesController` y registro DI. `ce3445c` completó pruebas de persistencia HTTP (listar, detalle, inexistente). | `d5761ec` simplificó la implementación. Refactor de tests extrajo `FixedClock` y `PublicarLicitacion` duplicados a `IntegrationTests/Common/LicitacionTestHelper.cs` compartido. |
+
+#### Refactorizaciones aplicadas
+
+1. **`FixedClock` y `PublicarLicitacion` extraídos a helper compartido** — Ambos
+   archivos de prueba de integración de HU-13 (`ConsultarLicitacionHttpTests` y
+   `ConsultarLicitacionPersistenceTests`) definían clases privadas idénticas
+   `FixedClock : IClock` y métodos `PublicarLicitacion`. Se centralizaron en
+   `tests/IntegrationTests/Common/LicitacionTestHelper.cs` con `using static`,
+   eliminando la duplicación.
+
+#### Resultado de pruebas (HU-13)
+
+Ejecución local del 19 de agosto de 2026 con `dotnet test`:
+
+- 68 unitarias superadas (9 de HU-13: 4 listar + 5 detalle).
 - Pruebas de integración no ejecutadas localmente (requieren Docker).
 - 0 fallidas y 0 omitidas en las pruebas ejecutadas.
 

@@ -7,7 +7,9 @@ positivo y fecha de cierre. HU-11 implementa la publicación de una licitación
 desde estado `Borrador` hacia `Publicada`, con registro de la transición de
 estado. HU-12 implementa la edición de licitaciones (con validación de presupuesto
 frente a ofertas existentes y protección de campos tras el cierre) y el cierre
-funcional basado en vencimiento de la fecha de cierre.
+funcional basado en vencimiento de la fecha de cierre. HU-13 implementa el
+listado y consulta de licitaciones con filtro por estado efectivo (incluyendo
+cierre funcional) y detalle con mejor oferta y nivel de aprobación.
 
 ## Reglas de negocio
 
@@ -50,14 +52,28 @@ funcional basado en vencimiento de la fecha de cierre.
   tiempo de lectura.
 - `EstaCerradaFormalmente()` retorna `true` cuando `Estado == Cerrada`.
 
+### Listar y consultar licitaciones (HU-13)
+
+- `GET /api/v1/licitaciones` retorna todas las licitaciones activas
+  (`DeletedAt IS NULL`).
+- El filtro por estado efectivo computa el estado real en el servicio:
+  `Publicada` con `FechaCierre <= ahora` se muestra como `Cerrada`.
+- `Borrador` con `FechaCierre` vencida se mantiene como `Borrador`
+  (el cierre funcional solo aplica a `Publicada`).
+- `GET /api/v1/licitaciones/{id}` retorna el detalle completo incluyendo
+  código, título, presupuesto, fecha de cierre, mejor oferta (monto mínimo)
+  y nivel de aprobación correspondiente.
+- Si no existen ofertas para una licitación, `MejorOferta` y
+  `NivelAprobacion` son `null`.
+
 ## Componentes
 
 | Capa | Componentes principales |
 | --- | --- |
 | Domain | `Licitacion` (entidad con `Crear`, `Publicar`, `Editar`, `EstaVencida`, `EstaCerradaFormalmente`, `EstadoEfectivo`), `LicitacionTransicion`, `EstadoLicitacion`, `EstadoLicitacionCatalogo`. |
-| Application | `CrearLicitacionService`, `EditarLicitacionService`, `ILicitacionRepository`, `LicitacionDto` (con `FromEntity`), `LicitacionNoEncontradaException`. |
-| Infrastructure | `LicitacionRepository`, configuraciones EF Core, migraciones `ImplementCreateTenderHu10` e `ImplementPublishTenderHu11`. |
-| API | Crear licitación bajo `POST /api/v1/licitaciones`. |
+| Application | `CrearLicitacionService`, `EditarLicitacionService`, `ConsultarLicitacionService`, `ILicitacionRepository`, `ILicitacionConsultaRepository`, `LicitacionDto` (con `FromEntity`), `ConsultarLicitacionesRequest`, `LicitacionConsultaDto`, `LicitacionDetalleDto`, `LicitacionMejorOfertaDto`, `LicitacionNivelAprobacionDto`, `PaginaLicitaciones`, `LicitacionNoEncontradaException`. |
+| Infrastructure | `LicitacionRepository`, `LicitacionConsultaRepository`, configuraciones EF Core, migraciones `ImplementCreateTenderHu10` e `ImplementPublishTenderHu11`. |
+| API | Crear licitación bajo `POST /api/v1/licitaciones`. Listar y consultar bajo `GET /api/v1/licitaciones` y `GET /api/v1/licitaciones/{id}`. |
 | Web | Formulario de creación en MVC. |
 
 ## Máquina de estados
