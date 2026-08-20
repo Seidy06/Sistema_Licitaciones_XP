@@ -3,8 +3,9 @@
 HU-14 implementa el registro económico de un proveedor en una licitación por
 medio de la API REST. HU-15 agrega respuestas específicas para ofertas
 duplicadas, vencidas o superiores al presupuesto y protege las ofertas
-registradas contra edición y eliminación. El alcance actual no incluye vistas
-MVC, listado, clasificación de ahorro ni un registro persistente separado de
+registradas contra edición y eliminación. HU-16 calcula la mejor oferta y su
+clasificación de ahorro para el detalle de una licitación. El alcance actual no
+incluye vistas MVC, listado de ofertas ni un registro persistente separado de
 intentos rechazados.
 
 ## Caso de uso implementado
@@ -24,13 +25,29 @@ Las reglas se ejecutan en Application y Domain, no en el controlador. La
 entidad `Oferta` valida identificadores, monto positivo y registra
 `FechaRegistro` con el reloj inyectado.
 
+## Mejor oferta y ahorro (HU-16)
+
+`CalculadoraMejorOferta.Calcular(...)` es un servicio estático y puro de
+Domain. Recibe el presupuesto y las ofertas válidas de una licitación, sin
+acceder a controladores ni persistencia:
+
+1. Ordena por `Monto` ascendente.
+2. Si hay empate, ordena por `FechaRegistro` ascendente.
+3. Calcula `AhorroPorcentaje = (Presupuesto - Monto) / Presupuesto * 100`.
+4. Clasifica un ahorro mayor o igual a 10 % como `Oferta conveniente`, uno
+   mayor que 0 % y menor que 10 % como `Oferta aceptable`, y un monto igual al
+   presupuesto como `Oferta válida sin ahorro`.
+
+Si no recibe ofertas, retorna `null`; Application lo presenta mediante
+`MensajeMejorOferta` con el texto `Sin ofertas válidas`.
+
 ## Componentes
 
 | Capa | Componentes y responsabilidad |
 | --- | --- |
-| Domain | `Oferta.Crear(...)` protege los invariantes propios de la entidad. |
-| Application | `CrearOfertaService`, `CrearOfertaRequest`, `IOfertaRepository`, `OfertaDuplicadaException` y `OfertaDto` ejecutan el registro. `ProtegerOfertaService`, `IProteccionOfertaRepository` y `OfertaErrorCodes` expresan la inmutabilidad y los rechazos no procesables. |
-| Infrastructure | `OfertaRepository` consulta licitación/proveedor, detecta duplicidad, persiste, obtiene la licitación asociada a una oferta y traduce la violación del índice compuesto esperado. |
+| Domain | `Oferta.Crear(...)` protege los invariantes propios de la entidad. `CalculadoraMejorOferta` selecciona, desempata y clasifica; `ResultadoMejorOferta` devuelve identificador, monto, porcentaje y clasificación. |
+| Application | `CrearOfertaService`, `CrearOfertaRequest`, `IOfertaRepository`, `OfertaDuplicadaException` y `OfertaDto` ejecutan el registro. `ProtegerOfertaService`, `IProteccionOfertaRepository` y `OfertaErrorCodes` expresan la inmutabilidad y los rechazos no procesables. `ConsultarLicitacionService` aplica el cálculo al detalle. |
+| Infrastructure | `OfertaRepository` consulta licitación/proveedor, detecta duplicidad, persiste, obtiene la licitación asociada a una oferta y traduce la violación del índice compuesto esperado. `LicitacionConsultaRepository` obtiene las ofertas válidas para el cálculo. |
 | API | `OfertasController` adapta el contrato HTTP y convierte rechazos de negocio en `400`, `409` o `422`; sus rutas `PUT` y `DELETE` protegen la evidencia en vez de modificarla. |
 
 ## Persistencia y concurrencia
@@ -62,3 +79,6 @@ HU-14 cuenta con pruebas unitarias del servicio, pruebas HTTP mediante
 agrega cinco pruebas HTTP integradas para códigos y mensajes de duplicidad,
 vencimiento y presupuesto, además de edición/eliminación de ofertas de una
 licitación cerrada con verificación posterior de la evidencia persistida.
+HU-16 agrega cinco pruebas de Application y cinco pruebas HTTP integradas para
+el monto mínimo, el desempate por fecha, el caso sin ofertas y los tres rangos
+de clasificación.
