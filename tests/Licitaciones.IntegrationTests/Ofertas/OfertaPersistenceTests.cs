@@ -31,7 +31,7 @@ public sealed class OfertaPersistenceTests : IClassFixture<PostgreSqlFixture>
             Ahora.AddDays(10));
         EstablecerEstado(licitacion, EstadoLicitacion.Publicada);
 
-        var proveedor = Proveedor.Crear($"DUP-{Guid.NewGuid():N}");
+        var proveedor = Proveedor.Crear($"DUP {Guid.NewGuid():N}");
 
         await using (var context = _database.CrearContexto(new FixedClock(Ahora)))
         {
@@ -67,7 +67,7 @@ public sealed class OfertaPersistenceTests : IClassFixture<PostgreSqlFixture>
             10_000m,
             Ahora.AddDays(10));
 
-        var proveedor = Proveedor.Crear($"CHECK-{Guid.NewGuid():N}");
+        var proveedor = Proveedor.Crear($"CHECK {Guid.NewGuid():N}");
 
         await using (var context = _database.CrearContexto(new FixedClock(Ahora)))
         {
@@ -97,7 +97,7 @@ public sealed class OfertaPersistenceTests : IClassFixture<PostgreSqlFixture>
             presupuesto,
             Ahora.AddDays(10));
 
-        var proveedor = Proveedor.Crear($"PRESUP-{Guid.NewGuid():N}");
+        var proveedor = Proveedor.Crear($"PRESUP {Guid.NewGuid():N}");
 
         await using (var context = _database.CrearContexto(new FixedClock(Ahora)))
         {
@@ -124,7 +124,7 @@ public sealed class OfertaPersistenceTests : IClassFixture<PostgreSqlFixture>
             presupuesto,
             Ahora.AddDays(10));
 
-        var proveedor = Proveedor.Crear($"PRESUP2-{Guid.NewGuid():N}");
+        var proveedor = Proveedor.Crear($"PRESUP2 {Guid.NewGuid():N}");
 
         await using (var context = _database.CrearContexto(new FixedClock(Ahora)))
         {
@@ -168,7 +168,7 @@ public sealed class OfertaPersistenceTests : IClassFixture<PostgreSqlFixture>
     [Trait("HU", "HU-14")]
     public async Task PostgreSql_OfertaConLicitacionNoExistente_DebeRechazarFK()
     {
-        var proveedor = Proveedor.Crear($"FK-LIC-{Guid.NewGuid():N}");
+        var proveedor = Proveedor.Crear($"FK LIC {Guid.NewGuid():N}");
 
         await using (var context = _database.CrearContexto(new FixedClock(Ahora)))
         {

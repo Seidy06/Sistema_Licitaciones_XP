@@ -1,3 +1,5 @@
+using Licitaciones.Application.Ofertas;
+using Licitaciones.Application.Ofertas.Crear;
 using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Domain.Ofertas;
@@ -244,54 +246,4 @@ public sealed class CrearOfertaServiceTests
             CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
     }
-}
-
-public sealed record CrearOfertaRequest(
-    Guid LicitacionId, Guid ProveedorId, decimal Monto);
-
-public sealed class CrearOfertaService
-{
-    private readonly IOfertaRepository _repository;
-    private readonly IClock _clock;
-
-    public CrearOfertaService(IOfertaRepository repository, IClock clock)
-    {
-        _repository = repository;
-        _clock = clock;
-    }
-
-    public Task<OfertaDto> CrearAsync(
-        CrearOfertaRequest request,
-        CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public sealed class OfertaDto
-{
-    public Guid Id { get; init; }
-    public Guid LicitacionId { get; init; }
-    public Guid ProveedorId { get; init; }
-    public decimal Monto { get; init; }
-    public DateTimeOffset FechaRegistro { get; init; }
-}
-
-public interface IOfertaRepository
-{
-    Task<Licitacion?> ObtenerLicitacionPorIdAsync(
-        Guid id, CancellationToken cancellationToken = default);
-
-    Task<Proveedor?> ObtenerProveedorPorIdAsync(
-        Guid id, CancellationToken cancellationToken = default);
-
-    Task<bool> ExisteOfertaAsync(
-        Guid licitacionId, Guid proveedorId,
-        CancellationToken cancellationToken = default);
-
-    Task AgregarAsync(
-        Oferta oferta, CancellationToken cancellationToken = default);
-
-    Task GuardarCambiosAsync(
-        CancellationToken cancellationToken = default);
 }

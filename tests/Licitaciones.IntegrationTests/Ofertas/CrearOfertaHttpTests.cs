@@ -79,7 +79,7 @@ public sealed class CrearOfertaHttpTests : IClassFixture<PostgreSqlFixture>
                 10_000m,
                 Ahora.AddDays(10));
 
-            var proveedor = Proveedor.Crear($"API-BORR-{Guid.NewGuid():N}");
+            var proveedor = Proveedor.Crear($"API BORR {Guid.NewGuid():N}");
 
             context.Licitaciones.Add(licitacion);
             context.Proveedores.Add(proveedor);
@@ -116,7 +116,7 @@ public sealed class CrearOfertaHttpTests : IClassFixture<PostgreSqlFixture>
 
             licitacion.Publicar(new FixedClock(Ahora.AddTicks(-2)));
 
-            var proveedor = Proveedor.Crear($"API-VENC-{Guid.NewGuid():N}");
+            var proveedor = Proveedor.Crear($"API VENC {Guid.NewGuid():N}");
 
             context.Licitaciones.Add(licitacion);
             context.Proveedores.Add(proveedor);
@@ -169,7 +169,7 @@ public sealed class CrearOfertaHttpTests : IClassFixture<PostgreSqlFixture>
 
         licitacion.Publicar(new FixedClock(Ahora));
 
-        var proveedor = Proveedor.Crear($"API-PUB-{Guid.NewGuid():N}");
+        var proveedor = Proveedor.Crear($"API PUB {Guid.NewGuid():N}");
 
         context.Licitaciones.Add(licitacion);
         context.Proveedores.Add(proveedor);
@@ -198,11 +198,11 @@ public sealed class CrearOfertaHttpTests : IClassFixture<PostgreSqlFixture>
 
     private static object Solicitud(
         Guid licitacionId, Guid proveedorId, decimal monto) => new
-    {
-        licitacionId,
-        proveedorId,
-        monto
-    };
+        {
+            licitacionId,
+            proveedorId,
+            monto
+        };
 
     private sealed class FixedClock : IClock
     {
