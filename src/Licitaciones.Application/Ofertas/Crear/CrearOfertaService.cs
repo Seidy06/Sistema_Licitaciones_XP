@@ -32,7 +32,8 @@ public sealed class CrearOfertaService
         if (licitacion.EstaVencida(_clock))
         {
             throw new DomainException(
-                "La licitacion esta vencida y no admite nuevas ofertas.");
+                "La licitacion esta vencida y no admite nuevas ofertas.",
+                OfertaErrorCodes.NoProcesable);
         }
 
         if (await _repository.ExisteOfertaAsync(
@@ -44,7 +45,8 @@ public sealed class CrearOfertaService
         if (request.Monto > licitacion.Presupuesto)
         {
             throw new DomainException(
-                "El monto de la oferta no puede superar el presupuesto de la licitacion.");
+                "El monto de la oferta no puede superar el presupuesto de la licitacion.",
+                OfertaErrorCodes.NoProcesable);
         }
 
         if (request.Monto <= 0)

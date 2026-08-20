@@ -6,4 +6,12 @@ public class DomainException : Exception
         : base(message)
     {
     }
+
+    public DomainException(string message, string code)
+        : base(message)
+    {
+        Code = code;
+    }
+
+    public string? Code { get; }
 }
