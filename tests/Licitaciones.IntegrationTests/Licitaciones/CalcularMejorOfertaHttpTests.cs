@@ -108,7 +108,7 @@ public sealed class CalcularMejorOfertaHttpTests : IClassFixture<PostgreSqlFixtu
         decimal montoOferta)
     {
         var licitacion = CrearLicitacionPublicada(presupuesto);
-        var proveedor = Proveedor.Crear($"Proveedor HU-16 {Guid.NewGuid():N}");
+        var proveedor = Proveedor.Crear($"Proveedor HU16 {Guid.NewGuid():N}");
         var oferta = Oferta.Crear(
             licitacion.Id,
             proveedor.Id,

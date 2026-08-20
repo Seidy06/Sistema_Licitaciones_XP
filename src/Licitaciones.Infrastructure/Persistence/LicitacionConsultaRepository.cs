@@ -1,6 +1,7 @@
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
+using Licitaciones.Domain.Ofertas;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -55,12 +56,12 @@ public sealed class LicitacionConsultaRepository : ILicitacionConsultaRepository
                 l => l.Id == id && l.DeletedAt == null,
                 cancellationToken);
 
-    public async Task<decimal?> ObtenerMontoMinimoOfertaAsync(
+    public async Task<IReadOnlyList<Oferta>> ObtenerOfertasAsync(
         Guid licitacionId,
         CancellationToken cancellationToken = default) =>
         await _context.Ofertas
             .Where(o => o.LicitacionId == licitacionId)
-            .MinAsync(o => (decimal?)o.Monto, cancellationToken);
+            .ToListAsync(cancellationToken);
 
     public async Task<LicitacionNivelAprobacionDto?> ObtenerNivelAprobacionAsync(
         decimal montoOferta,

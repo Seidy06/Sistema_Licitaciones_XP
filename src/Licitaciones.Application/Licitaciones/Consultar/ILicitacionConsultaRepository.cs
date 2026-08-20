@@ -1,4 +1,5 @@
 using Licitaciones.Domain.Licitaciones;
+using Licitaciones.Domain.Ofertas;
 
 namespace Licitaciones.Application.Licitaciones.Consultar;
 
@@ -12,7 +13,7 @@ public interface ILicitacionConsultaRepository
         Guid id,
         CancellationToken cancellationToken = default);
 
-    Task<decimal?> ObtenerMontoMinimoOfertaAsync(
+    Task<IReadOnlyList<Oferta>> ObtenerOfertasAsync(
         Guid licitacionId,
         CancellationToken cancellationToken = default);
 

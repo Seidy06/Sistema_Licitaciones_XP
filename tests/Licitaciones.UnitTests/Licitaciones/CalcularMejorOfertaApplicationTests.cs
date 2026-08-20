@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 
 using Licitaciones.Application.Licitaciones;
@@ -11,6 +12,11 @@ namespace Licitaciones.UnitTests.Licitaciones;
 
 public sealed class CalcularMejorOfertaApplicationTests
 {
+    private static readonly JsonSerializerOptions OpcionesJson = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
     private static readonly DateTimeOffset Ahora =
         new(2026, 8, 20, 12, 0, 0, TimeSpan.Zero);
 
@@ -42,7 +48,7 @@ public sealed class CalcularMejorOfertaApplicationTests
     {
         var detalle = await ConsultarAsync(CrearLicitacion(10_000m), []);
 
-        var json = JsonSerializer.Serialize(detalle);
+        var json = JsonSerializer.Serialize(detalle, OpcionesJson);
 
         Assert.Contains("Sin ofertas válidas", json, StringComparison.Ordinal);
     }
@@ -83,7 +89,7 @@ public sealed class CalcularMejorOfertaApplicationTests
             licitacion,
             [CrearOferta(licitacion.Id, montoOferta, Ahora)]);
 
-        return JsonSerializer.Serialize(detalle);
+        return JsonSerializer.Serialize(detalle, OpcionesJson);
     }
 
     private static async Task<LicitacionDetalleDto> ConsultarAsync(
@@ -145,13 +151,13 @@ public sealed class CalcularMejorOfertaApplicationTests
             CancellationToken cancellationToken = default) =>
             Task.FromResult<Licitacion?>(id == _licitacion.Id ? _licitacion : null);
 
-        public Task<decimal?> ObtenerMontoMinimoOfertaAsync(
+        public Task<IReadOnlyList<Oferta>> ObtenerOfertasAsync(
             Guid licitacionId,
             CancellationToken cancellationToken = default) =>
-            Task.FromResult(
+            Task.FromResult<IReadOnlyList<Oferta>>(
                 _ofertas
                     .Where(oferta => oferta.LicitacionId == licitacionId)
-                    .Min(oferta => (decimal?)oferta.Monto));
+                    .ToArray());
 
         public Task<LicitacionNivelAprobacionDto?> ObtenerNivelAprobacionAsync(
             decimal montoOferta,
