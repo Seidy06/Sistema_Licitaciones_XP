@@ -252,7 +252,7 @@ public sealed class ConsultarLicitacionServiceTests
                 _ => new LicitacionNivelAprobacionDto(1, "Operativo")
             };
 
-            return Task.FromResult(resultado);
+            return Task.FromResult<LicitacionNivelAprobacionDto?>(resultado);
         }
     }
 }
