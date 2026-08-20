@@ -11,7 +11,7 @@ Se utilizó IA como apoyo de programación en pareja y documentación para revis
 - Entradas HTTP: API REST y MVC de proveedores.
 - Pruebas: revisión de escenarios unitarios e integrados con PostgreSQL real.
 - Documentación: arquitectura, datos, API, pruebas, Docker y bitácora XP.
-- Licitaciones y ofertas (Iteración 2): análisis de código de dominio (`Licitacion.Publicar`, `LicitacionTransicion`) para la fase refactor de HU-11; refactors de HU-12 y HU-13; y refactor de HU-14 para sustituir la comparación textual de errores por `OfertaDuplicadaException`, acotar la traducción de PostgreSQL al índice esperado y centralizar el mapeo `OfertaDto`. Codex también ayudó a ejecutar la línea base y la suite final con PostgreSQL mediante Testcontainers, y a contrastar la documentación con código, pruebas y commits reales.
+- Licitaciones y ofertas (Iteración 2): análisis de código de dominio (`Licitacion.Publicar`, `LicitacionTransicion`) para la fase refactor de HU-11; refactors de HU-12 y HU-13; y refactor de HU-14 para sustituir la comparación textual de errores por `OfertaDuplicadaException`, acotar la traducción de PostgreSQL al índice esperado y centralizar el mapeo `OfertaDto`. En HU-15, Codex apoyó la creación y ejecución de las pruebas ROJO, el diagnóstico del comportamiento esperado, la revisión del VERDE aportado por la pareja y el refactor de nombres y construcción duplicada de excepciones. También ayudó a verificar 163 pruebas contra un esquema PostgreSQL limpio y a contrastar esta documentación con código y commits reales.
 
 ## Ejemplos de apoyo y validación humana
 

@@ -4,6 +4,15 @@
 
 El controlador recibe modelos HTTP para crear y editar, invoca servicios de Application y devuelve `ProveedorDto`; no expone entidades de EF Core. Los errores controlados de creación, edición y baja usan `ProblemDetails`. El 404 del detalle se devuelve sin cuerpo personalizado.
 
-La API registra `AddProblemDetails()` y el manejador de excepciones. En Development publica el documento OpenAPI generado por `MapOpenApi()`. No hay Swagger UI, autenticación ni autorización por roles. No existen endpoints de publicación de licitaciones, ofertas, aprobaciones ni tipos de cambio.
+La API registra `AddProblemDetails()` y el manejador de excepciones. En
+Development publica el documento OpenAPI generado por `MapOpenApi()`. No hay
+Swagger UI, autenticación ni autorización por roles. Existen endpoints para
+crear y consultar licitaciones y para registrar y proteger ofertas. No existen
+endpoints de publicación de licitaciones, aprobaciones ni tipos de cambio.
+
+HU-15 amplía `OfertasController`: `POST /api/v1/ofertas` distingue duplicidad
+(`409`) de vencimiento o exceso de presupuesto (`422`), mientras
+`PUT /api/v1/ofertas/{id}` y `DELETE /api/v1/ofertas/{id}` rechazan la mutación
+con `422` y conservan la oferta persistida.
 
 El proceso de API no ejecuta migraciones. Requiere una cadena `ConnectionStrings:Licitaciones` válida y una base ya migrada.

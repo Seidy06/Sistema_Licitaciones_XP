@@ -1,8 +1,11 @@
 # Módulo de ofertas
 
 HU-14 implementa el registro económico de un proveedor en una licitación por
-medio de la API REST. El alcance actual no incluye vistas MVC, listado de
-ofertas, auditoría de intentos rechazados ni clasificación de ahorro.
+medio de la API REST. HU-15 agrega respuestas específicas para ofertas
+duplicadas, vencidas o superiores al presupuesto y protege las ofertas
+registradas contra edición y eliminación. El alcance actual no incluye vistas
+MVC, listado, clasificación de ahorro ni un registro persistente separado de
+intentos rechazados.
 
 ## Caso de uso implementado
 
@@ -26,9 +29,9 @@ entidad `Oferta` valida identificadores, monto positivo y registra
 | Capa | Componentes y responsabilidad |
 | --- | --- |
 | Domain | `Oferta.Crear(...)` protege los invariantes propios de la entidad. |
-| Application | `CrearOfertaService`, `CrearOfertaRequest`, `IOfertaRepository`, `OfertaDuplicadaException` y `OfertaDto` ejecutan y expresan el caso de uso. |
-| Infrastructure | `OfertaRepository` consulta licitación/proveedor, detecta duplicidad, persiste y traduce la violación del índice compuesto esperado. |
-| API | `OfertasController` adapta el contrato HTTP y convierte rechazos de negocio en `400` o `409`. |
+| Application | `CrearOfertaService`, `CrearOfertaRequest`, `IOfertaRepository`, `OfertaDuplicadaException` y `OfertaDto` ejecutan el registro. `ProtegerOfertaService`, `IProteccionOfertaRepository` y `OfertaErrorCodes` expresan la inmutabilidad y los rechazos no procesables. |
+| Infrastructure | `OfertaRepository` consulta licitación/proveedor, detecta duplicidad, persiste, obtiene la licitación asociada a una oferta y traduce la violación del índice compuesto esperado. |
+| API | `OfertasController` adapta el contrato HTTP y convierte rechazos de negocio en `400`, `409` o `422`; sus rutas `PUT` y `DELETE` protegen la evidencia en vez de modificarla. |
 
 ## Persistencia y concurrencia
 
@@ -43,11 +46,19 @@ registros concurrentes. Solo la violación de ese índice se traduce a
 
 `POST /api/v1/ofertas` recibe `licitacionId`, `proveedorId` y `monto`. Devuelve
 `201 Created` con el DTO y una cabecera `Location`; devuelve `409 Conflict` para
-la oferta duplicada y `400 Bad Request` para los demás rechazos controlados.
+la oferta duplicada, `422 Unprocessable Entity` para vencimiento o exceso de
+presupuesto, y `400 Bad Request` para los demás rechazos controlados.
+
+`PUT /api/v1/ofertas/{id}` y `DELETE /api/v1/ofertas/{id}` no alteran ni eliminan
+la oferta. Devuelven `422 Unprocessable Entity`; cuando pertenece a una
+licitación cerrada, el detalle indica explícitamente que no puede editarse ni
+eliminarse. La oferta permanece en PostgreSQL con licitación, proveedor y monto
+inalterados como evidencia histórica.
 
 ## Pruebas
 
 HU-14 cuenta con pruebas unitarias del servicio, pruebas HTTP mediante
-`WebApplicationFactory` y pruebas de persistencia sobre PostgreSQL real. Se
-cubren estado, cierre funcional, duplicidad, presupuesto, monto positivo, FKs,
-CHECK e índice único compuesto.
+`WebApplicationFactory` y pruebas de persistencia sobre PostgreSQL real. HU-15
+agrega cinco pruebas HTTP integradas para códigos y mensajes de duplicidad,
+vencimiento y presupuesto, además de edición/eliminación de ofertas de una
+licitación cerrada con verificación posterior de la evidencia persistida.
