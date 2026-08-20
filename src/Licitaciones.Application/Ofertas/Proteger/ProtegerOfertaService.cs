@@ -23,15 +23,12 @@ public sealed class ProtegerOfertaService
         var licitacion = await _repository.ObtenerLicitacionPorOfertaIdAsync(
             ofertaId, cancellationToken);
 
-        if (licitacion?.EstadoEfectivo(_clock) == EstadoLicitacion.Cerrada)
-        {
-            throw new DomainException(
-                "No se puede editar ni eliminar una oferta de una licitacion cerrada.",
-                OfertaErrorCodes.NoProcesable);
-        }
+        var mensaje = licitacion?.EstadoEfectivo(_clock) == EstadoLicitacion.Cerrada
+            ? "No se puede editar ni eliminar una oferta de una licitacion cerrada."
+            : "Las ofertas registradas no se pueden editar ni eliminar.";
 
         throw new DomainException(
-            "Las ofertas registradas no se pueden editar ni eliminar.",
+            mensaje,
             OfertaErrorCodes.NoProcesable);
     }
 }

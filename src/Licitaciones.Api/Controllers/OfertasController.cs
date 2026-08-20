@@ -14,15 +14,15 @@ namespace Licitaciones.Api.Controllers;
 [Route("api/v1/ofertas")]
 public sealed class OfertasController : ControllerBase
 {
-    private readonly CrearOfertaService _service;
-    private readonly ProtegerOfertaService _proteccionService;
+    private readonly CrearOfertaService _crearOfertaService;
+    private readonly ProtegerOfertaService _protegerOfertaService;
 
     public OfertasController(
-        CrearOfertaService service,
-        ProtegerOfertaService proteccionService)
+        CrearOfertaService crearOfertaService,
+        ProtegerOfertaService protegerOfertaService)
     {
-        _service = service;
-        _proteccionService = proteccionService;
+        _crearOfertaService = crearOfertaService;
+        _protegerOfertaService = protegerOfertaService;
     }
 
     [HttpPost]
@@ -36,7 +36,7 @@ public sealed class OfertasController : ControllerBase
     {
         try
         {
-            var oferta = await _service.CrearAsync(
+            var oferta = await _crearOfertaService.CrearAsync(
                 new ApplicationRequest(
                     request.LicitacionId, request.ProveedorId, request.Monto),
                 cancellationToken);
@@ -93,7 +93,7 @@ public sealed class OfertasController : ControllerBase
     {
         try
         {
-            await _proteccionService.RechazarCambioAsync(id, cancellationToken);
+            await _protegerOfertaService.RechazarCambioAsync(id, cancellationToken);
             return NoContent();
         }
         catch (DomainException exception)
