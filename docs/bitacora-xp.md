@@ -19,7 +19,7 @@ y estimaciones se conservan sin reestimarlas en este inicio formal.
 | ---: | --- | --- | ---: | --- | --- |
 | 1 | HU-10 — Crear licitación | Alta | 5 | Base de dominio, persistencia y reloj de HU-02 a HU-05. | Seleccionada; no terminada |
 | 2 | HU-11 — Publicar licitación | Alta | 3 | HU-10, porque solo puede publicarse una licitación creada en `Borrador`. | Seleccionada; no terminada |
-| 3 | HU-14 — Registrar oferta | Alta | 5 | HU-11, HU-06 y HU-05: requiere licitación publicada, proveedor y reloj inyectable. | Seleccionada; no terminada |
+| 3 | HU-14 — Registrar oferta | Alta | 5 | HU-11, HU-06 y HU-05: requiere licitación publicada, proveedor y reloj inyectable. | Terminada. |
 | 4 | HU-12 — Editar y cerrar licitación | Alta | 5 | HU-10 y HU-14 para comprobar las restricciones de edición frente a ofertas existentes. | Refactor completado; sin endpoints HTTP ni DI. |
 | 5 | HU-15 — Rechazar y auditar ofertas inválidas | Alta | 3 | HU-14 y HU-12 para verificar duplicidad, exceso de presupuesto, vencimiento e inmutabilidad tras el cierre. | Seleccionada; no terminada |
 | 6 | HU-16 — Calcular mejor oferta y clasificación de ahorro | Alta | 5 | HU-14 para disponer de ofertas válidas. El nivel de aprobación correspondiente depende de HU-18, planificada para la Iteración 3. | Seleccionada; no terminada |
@@ -188,6 +188,55 @@ Ejecución local del 19 de agosto de 2026 con `dotnet test`:
 - 68 unitarias superadas (9 de HU-13: 4 listar + 5 detalle).
 - Pruebas de integración no ejecutadas localmente (requieren Docker).
 - 0 fallidas y 0 omitidas en las pruebas ejecutadas.
+
+### HU-14 — Registrar oferta
+
+#### Estado
+
+| Historia | SP | Estado |
+| --- | ---: | --- |
+| HU-14 — Registrar oferta | 5 | Terminada: servicio de aplicación, persistencia PostgreSQL y endpoint REST implementados. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-14 | Seidy | Tiffany | `7b1fcdd` |
+| VERDE HU-14 | Tiffany | Seidy | `3f24614` |
+| Refactor HU-14 | Seidy | Tiffany | `1b59ae4` |
+
+Los roles se registran a partir de la autoría alternada de los commits; Git no
+conserva evidencia independiente del rol Navigator.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `7b1fcdd` — `test(ofertas): cubrir criterios de registrar oferta (HU-14)` | Agregó pruebas unitarias del servicio, pruebas HTTP y pruebas PostgreSQL para estado, vencimiento, duplicidad, presupuesto, monto positivo, FKs, CHECK e índice único. |
+| VERDE | `3f24614` — `feat(ofertas): implementar registrar oferta (HU-14)` | Incorporó contrato y controlador API, servicio, repositorio, DTO y registro DI con el comportamiento mínimo para satisfacer las pruebas. |
+| Refactor | `1b59ae4` — `refactor(ofertas): simplificar implementacion de HU-14` | Introdujo `OfertaDuplicadaException`, eliminó la clasificación de errores por texto, limitó la traducción de PostgreSQL al índice único esperado y centralizó `OfertaDto.FromEntity`. No agregó reglas ni endpoints. |
+
+#### Commits
+
+- `7b1fcdd` — pruebas de criterios de aceptación.
+- `3f24614` — implementación del registro de ofertas.
+- `1b59ae4` — refactorización sin cambio funcional.
+
+#### Resultado
+
+La línea base previa al refactor y la verificación final del 19 de agosto de
+2026 se ejecutaron con `dotnet test Licitaciones.sln --no-restore` y PostgreSQL
+real mediante Testcontainers. En ambas ejecuciones se obtuvieron:
+
+- 76 pruebas unitarias superadas.
+- 79 pruebas de integración superadas.
+- 3 pruebas funcionales superadas.
+- 0 fallidas y 0 omitidas; 158 ejecutadas.
+
+El incremento permite registrar por API una oferta válida para una licitación
+publicada y vigente. Rechaza con 409 la duplicidad y con 400 los demás errores
+controlados cubiertos por HU-14. No incorpora listado, vistas MVC, auditoría de
+rechazos ni clasificación de ofertas, que pertenecen a historias posteriores.
 
 ---
 

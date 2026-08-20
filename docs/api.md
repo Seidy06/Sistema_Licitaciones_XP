@@ -16,6 +16,7 @@ La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedore
 | `GET /api/v1/licitaciones` | `200 OK` | No hay un contrato de error personalizado para esta acción. |
 | `GET /api/v1/licitaciones/{id}` | `200 OK` | `404 Not Found`. |
 | `POST /api/v1/licitaciones` | `201 Created` | `400 Bad Request`, `409 Conflict`. |
+| `POST /api/v1/ofertas` | `201 Created` | `400 Bad Request`, `409 Conflict`. |
 
 ## Listar y consultar
 
@@ -130,3 +131,39 @@ GET /api/v1/licitaciones/d5d2f6a1-...
 `POST /api/v1/licitaciones` crea una licitación en estado `Borrador`.
 Devuelve `201 Created` con el DTO y cabecera `Location`. Un código duplicado
 devuelve 409; datos inválidos devuelven 400.
+
+## Registrar oferta (HU-14)
+
+`POST /api/v1/ofertas` registra una oferta para una licitación publicada y no
+vencida.
+
+```http
+POST /api/v1/ofertas
+Content-Type: application/json
+
+{
+  "licitacionId": "d5d2f6a1-0000-0000-0000-000000000001",
+  "proveedorId": "7d9413f2-0000-0000-0000-000000000002",
+  "monto": 8000.00
+}
+```
+
+Una solicitud válida devuelve `201 Created`, una cabecera `Location` con
+`/api/v1/ofertas/{id}` y el DTO siguiente:
+
+```json
+{
+  "id": "9a3d94d0-0000-0000-0000-000000000003",
+  "licitacionId": "d5d2f6a1-0000-0000-0000-000000000001",
+  "proveedorId": "7d9413f2-0000-0000-0000-000000000002",
+  "monto": 8000.00,
+  "fechaRegistro": "2026-08-19T15:00:00+00:00"
+}
+```
+
+Devuelve `409 Conflict` con título `Oferta duplicada` cuando el proveedor ya
+tiene una oferta para la licitación. Devuelve `400 Bad Request` con título
+`Oferta rechazada` si la licitación no existe, no está publicada o está
+vencida; si el monto supera el presupuesto; o si el proveedor no existe. La
+validación automática del contrato también responde 400 cuando los
+identificadores o el monto no satisfacen sus restricciones.
