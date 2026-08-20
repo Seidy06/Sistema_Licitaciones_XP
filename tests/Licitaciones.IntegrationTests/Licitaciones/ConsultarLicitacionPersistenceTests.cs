@@ -7,9 +7,9 @@ using Licitaciones.IntegrationTests.Proveedores;
 
 using Microsoft.EntityFrameworkCore;
 
-using Ofertas = Licitaciones.Domain.Ofertas;
-
 using static Licitaciones.IntegrationTests.Common.LicitacionTestHelper;
+
+using Ofertas = Licitaciones.Domain.Ofertas;
 
 namespace Licitaciones.IntegrationTests.Hu13;
 

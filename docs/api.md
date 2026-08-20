@@ -1,6 +1,6 @@
 # API REST implementada
 
-La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedores`. Los ejemplos de identificadores, fechas y versiones son ilustrativos. El proyecto conserva además `GET /WeatherForecast`, generado por la plantilla; es un endpoint de muestra y no forma parte del dominio de licitaciones.
+La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedores`. La Iteración 2 agrega licitaciones bajo `/api/v1/licitaciones`. Los ejemplos de identificadores, fechas y versiones son ilustrativos. El proyecto conserva además `GET /WeatherForecast`, generado por la plantilla; es un endpoint de muestra y no forma parte del dominio de licitaciones.
 
 ## Resumen
 
@@ -13,6 +13,9 @@ La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedore
 | `DELETE /api/v1/proveedores/{id}` | `204 No Content` | `404 Not Found`. |
 | `GET /api/v1/proveedores/historico` | `200 OK` | No hay un contrato de error personalizado para esta acción. |
 | `GET /api/v1/proveedores/historico/{id}` | `200 OK` | `404 Not Found`. |
+| `GET /api/v1/licitaciones` | `200 OK` | No hay un contrato de error personalizado para esta acción. |
+| `GET /api/v1/licitaciones/{id}` | `200 OK` | `404 Not Found`. |
+| `POST /api/v1/licitaciones` | `201 Created` | `400 Bad Request`, `409 Conflict`. |
 
 ## Listar y consultar
 
@@ -74,3 +77,56 @@ consultar su detalle e incluye `deletedAt`. Estas rutas son explícitas para no
 debilitar el filtro global aplicado al resto de las consultas.
 
 La aplicación registra OpenAPI y publica el documento solo en Development con `MapOpenApi()`. No existe Swagger UI en esta iteración.
+
+## Licitaciones (HU-13)
+
+### Listar
+
+`GET /api/v1/licitaciones` retorna todas las licitaciones activas con su
+estado efectivo computado (cierre funcional incluido).
+
+```http
+GET /api/v1/licitaciones
+```
+
+```json
+{
+  "items": [
+    {
+      "id": "d5d2f6a1-...",
+      "titulo": "Compra de material informático",
+      "presupuesto": 10000.00,
+      "fechaCierre": "2026-08-25T12:00:00+00:00",
+      "estadoEfectivo": "Publicada"
+    }
+  ]
+}
+```
+
+### Consultar detalle
+
+`GET /api/v1/licitaciones/{id}` devuelve el DTO de detalle o 404. El detalle
+incluye mejor oferta (monto mínimo de ofertas recibidas) y nivel de aprobación
+correspondiente. Si no existen ofertas, ambos campos son `null`.
+
+```http
+GET /api/v1/licitaciones/d5d2f6a1-...
+```
+
+```json
+{
+  "id": "d5d2f6a1-...",
+  "codigo": "COMP-2026-001",
+  "titulo": "Compra de material informático",
+  "presupuesto": 10000.00,
+  "fechaCierre": "2026-08-25T12:00:00+00:00",
+  "mejorOferta": { "monto": 8000.00 },
+  "nivelAprobacion": { "id": 2, "nombre": "Gerencial" }
+}
+```
+
+### Crear licitación (HU-10)
+
+`POST /api/v1/licitaciones` crea una licitación en estado `Borrador`.
+Devuelve `201 Created` con el DTO y cabecera `Location`. Un código duplicado
+devuelve 409; datos inválidos devuelven 400.
