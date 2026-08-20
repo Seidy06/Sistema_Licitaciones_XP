@@ -65,45 +65,53 @@ public sealed class CalcularMejorOfertaHttpTests : IClassFixture<PostgreSqlFixtu
         var licitacion = CrearLicitacionPublicada(10_000m);
         await GuardarAsync(licitacion, [], []);
 
-        var contenido = await ObtenerContenidoDetalleAsync(licitacion.Id);
+        var detalle = await ObtenerDetalleAsync(licitacion.Id);
 
-        Assert.Contains("Sin ofertas válidas", contenido, StringComparison.Ordinal);
+        Assert.Equal(
+            "Sin ofertas válidas",
+            detalle.GetProperty("mensajeMejorOferta").GetString());
     }
 
     [Fact]
     [Trait("HU", "HU-16")]
     public async Task Api_AhorroExactamenteDiezPorCiento_DebeClasificarOfertaConveniente()
     {
-        var contenido = await PrepararYConsultarOfertaAsync(
+        var mejorOferta = await PrepararYConsultarOfertaAsync(
             presupuesto: 10_000m,
             montoOferta: 9_000m);
 
-        Assert.Contains("Oferta conveniente", contenido, StringComparison.Ordinal);
+        Assert.Equal(
+            "Oferta conveniente",
+            mejorOferta.GetProperty("clasificacion").GetString());
     }
 
     [Fact]
     [Trait("HU", "HU-16")]
     public async Task Api_AhorroMayorACeroYMenorADiezPorCiento_DebeClasificarOfertaAceptable()
     {
-        var contenido = await PrepararYConsultarOfertaAsync(
+        var mejorOferta = await PrepararYConsultarOfertaAsync(
             presupuesto: 10_000m,
             montoOferta: 9_500m);
 
-        Assert.Contains("Oferta aceptable", contenido, StringComparison.Ordinal);
+        Assert.Equal(
+            "Oferta aceptable",
+            mejorOferta.GetProperty("clasificacion").GetString());
     }
 
     [Fact]
     [Trait("HU", "HU-16")]
     public async Task Api_OfertaIgualAlPresupuesto_DebeClasificarValidaSinAhorro()
     {
-        var contenido = await PrepararYConsultarOfertaAsync(
+        var mejorOferta = await PrepararYConsultarOfertaAsync(
             presupuesto: 10_000m,
             montoOferta: 10_000m);
 
-        Assert.Contains("Oferta válida sin ahorro", contenido, StringComparison.Ordinal);
+        Assert.Equal(
+            "Oferta válida sin ahorro",
+            mejorOferta.GetProperty("clasificacion").GetString());
     }
 
-    private async Task<string> PrepararYConsultarOfertaAsync(
+    private async Task<JsonElement> PrepararYConsultarOfertaAsync(
         decimal presupuesto,
         decimal montoOferta)
     {
@@ -116,7 +124,8 @@ public sealed class CalcularMejorOfertaHttpTests : IClassFixture<PostgreSqlFixtu
             new FixedClock(Ahora));
 
         await GuardarAsync(licitacion, [proveedor], [oferta]);
-        return await ObtenerContenidoDetalleAsync(licitacion.Id);
+        var detalle = await ObtenerDetalleAsync(licitacion.Id);
+        return detalle.GetProperty("mejorOferta");
     }
 
     private Licitacion CrearLicitacionPublicada(decimal presupuesto)

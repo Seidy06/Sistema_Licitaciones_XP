@@ -6,7 +6,6 @@ namespace Licitaciones.Application.Licitaciones.Consultar;
 public sealed class ConsultarLicitacionService
 {
     private readonly ILicitacionConsultaRepository _repository;
-    private readonly CalculadoraMejorOferta _calculadora = new();
 
     public ConsultarLicitacionService(ILicitacionConsultaRepository repository)
     {
@@ -46,7 +45,9 @@ public sealed class ConsultarLicitacionService
 
         var ofertas = await _repository.ObtenerOfertasAsync(
             licitacion.Id, cancellationToken);
-        var resultado = _calculadora.Calcular(licitacion.Presupuesto, ofertas);
+        var resultado = CalculadoraMejorOferta.Calcular(
+            licitacion.Presupuesto,
+            ofertas);
 
         LicitacionMejorOfertaDto? mejorOferta = resultado is not null
             ? new LicitacionMejorOfertaDto(

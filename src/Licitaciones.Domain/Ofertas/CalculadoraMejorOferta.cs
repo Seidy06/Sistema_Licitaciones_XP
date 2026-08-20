@@ -1,8 +1,8 @@
 namespace Licitaciones.Domain.Ofertas;
 
-public sealed class CalculadoraMejorOferta
+public static class CalculadoraMejorOferta
 {
-    public ResultadoMejorOferta? Calcular(
+    public static ResultadoMejorOferta? Calcular(
         decimal presupuesto,
         IEnumerable<Oferta> ofertas)
     {

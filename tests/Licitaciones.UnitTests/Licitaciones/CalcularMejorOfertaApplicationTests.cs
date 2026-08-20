@@ -1,6 +1,3 @@
-using System.Text.Encodings.Web;
-using System.Text.Json;
-
 using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Domain.Common;
@@ -12,11 +9,6 @@ namespace Licitaciones.UnitTests.Licitaciones;
 
 public sealed class CalcularMejorOfertaApplicationTests
 {
-    private static readonly JsonSerializerOptions OpcionesJson = new()
-    {
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    };
-
     private static readonly DateTimeOffset Ahora =
         new(2026, 8, 20, 12, 0, 0, TimeSpan.Zero);
 
@@ -32,14 +24,11 @@ public sealed class CalcularMejorOfertaApplicationTests
         var detalle = await ConsultarAsync(
             licitacion,
             [ofertaMayor, ofertaPrimero, ofertaDespues]);
-        var json = Serializar(detalle);
-        var mejorOferta = json.GetProperty("mejorOferta");
+        var mejorOferta = Assert.IsType<LicitacionMejorOfertaDto>(
+            detalle.MejorOferta);
 
-        Assert.Equal(9_000m, mejorOferta.GetProperty("monto").GetDecimal());
-        Assert.True(
-            mejorOferta.TryGetProperty("id", out var ofertaId),
-            "La mejor oferta debe identificar cuál oferta ganó el desempate.");
-        Assert.Equal(ofertaPrimero.Id, ofertaId.GetGuid());
+        Assert.Equal(9_000m, mejorOferta.Monto);
+        Assert.Equal(ofertaPrimero.Id, mejorOferta.Id);
     }
 
     [Fact]
@@ -48,39 +37,37 @@ public sealed class CalcularMejorOfertaApplicationTests
     {
         var detalle = await ConsultarAsync(CrearLicitacion(10_000m), []);
 
-        var json = JsonSerializer.Serialize(detalle, OpcionesJson);
-
-        Assert.Contains("Sin ofertas válidas", json, StringComparison.Ordinal);
+        Assert.Equal("Sin ofertas válidas", detalle.MensajeMejorOferta);
     }
 
     [Fact]
     [Trait("HU", "HU-16")]
     public async Task AhorroExactamenteDiezPorCiento_DebeClasificarOfertaConveniente()
     {
-        var json = await ConsultarComoJsonAsync(10_000m, 9_000m);
+        var mejorOferta = await ConsultarMejorOfertaAsync(10_000m, 9_000m);
 
-        Assert.Contains("Oferta conveniente", json, StringComparison.Ordinal);
+        Assert.Equal("Oferta conveniente", mejorOferta.Clasificacion);
     }
 
     [Fact]
     [Trait("HU", "HU-16")]
     public async Task AhorroMayorACeroYMenorADiezPorCiento_DebeClasificarOfertaAceptable()
     {
-        var json = await ConsultarComoJsonAsync(10_000m, 9_500m);
+        var mejorOferta = await ConsultarMejorOfertaAsync(10_000m, 9_500m);
 
-        Assert.Contains("Oferta aceptable", json, StringComparison.Ordinal);
+        Assert.Equal("Oferta aceptable", mejorOferta.Clasificacion);
     }
 
     [Fact]
     [Trait("HU", "HU-16")]
     public async Task OfertaIgualAlPresupuesto_DebeClasificarValidaSinAhorro()
     {
-        var json = await ConsultarComoJsonAsync(10_000m, 10_000m);
+        var mejorOferta = await ConsultarMejorOfertaAsync(10_000m, 10_000m);
 
-        Assert.Contains("Oferta válida sin ahorro", json, StringComparison.Ordinal);
+        Assert.Equal("Oferta válida sin ahorro", mejorOferta.Clasificacion);
     }
 
-    private static async Task<string> ConsultarComoJsonAsync(
+    private static async Task<LicitacionMejorOfertaDto> ConsultarMejorOfertaAsync(
         decimal presupuesto,
         decimal montoOferta)
     {
@@ -89,7 +76,7 @@ public sealed class CalcularMejorOfertaApplicationTests
             licitacion,
             [CrearOferta(licitacion.Id, montoOferta, Ahora)]);
 
-        return JsonSerializer.Serialize(detalle, OpcionesJson);
+        return Assert.IsType<LicitacionMejorOfertaDto>(detalle.MejorOferta);
     }
 
     private static async Task<LicitacionDetalleDto> ConsultarAsync(
@@ -105,11 +92,6 @@ public sealed class CalcularMejorOfertaApplicationTests
 
         return Assert.IsType<LicitacionDetalleDto>(detalle);
     }
-
-    private static JsonElement Serializar(LicitacionDetalleDto detalle) =>
-        JsonSerializer.SerializeToElement(
-            detalle,
-            new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
     private static Licitacion CrearLicitacion(decimal presupuesto) =>
         Licitacion.Crear(
