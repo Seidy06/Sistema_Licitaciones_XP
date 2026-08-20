@@ -1,9 +1,9 @@
-# Pruebas de la Iteración 1
+# Pruebas automatizadas
 
 ## Cobertura existente
 
-- `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de nivel de aprobación); reloj determinista y servicio de crear licitación.
-- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales del CRUD mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación.
+- `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo.
+- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; y HU-14 sobre API, FKs, CHECK e índice único de ofertas.
 - `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC y el formulario de crear licitación.
 
 Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, Testcontainers inicia `postgres:16-alpine`; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
@@ -39,10 +39,14 @@ Ejecución local del 19 de agosto de 2026:
 
 | Proyecto | Superadas | Fallidas | Omitidas |
 | --- | ---: | ---: | ---: |
-| `Licitaciones.UnitTests` | 68 | 0 | 0 |
-| `Licitaciones.IntegrationTests` | 59 | 0 | 0 |
+| `Licitaciones.UnitTests` | 76 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 79 | 0 | 0 |
 | `Licitaciones.FunctionalTests` | 3 | 0 | 0 |
-| **Total ejecutado** | **130** | **0** | **0** |
+| **Total ejecutado** | **158** | **0** | **0** |
+
+Para HU-14, la cobertura específica incluye 8 casos unitarios del servicio, 6
+casos HTTP y 7 casos de persistencia (contando por separado los datos de las
+teorías). La suite completa se ejecutó antes y después del refactor.
 
 Los recorridos end-to-end crean clientes sobre hosts ASP.NET Core reales. Así
 verifican activación por DI, routing, model binding, serialización, vistas,

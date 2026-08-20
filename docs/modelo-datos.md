@@ -88,12 +88,29 @@ Registra cada cambio de estado de una licitación. La FK con cascade elimina
 las transiciones al eliminar la licitación. Se persiste mediante
 `LicitacionTransicion.Crear(...)` invocado desde `Licitacion.Publicar(...)`.
 
-## Modelo base aún sin interfaz funcional
+## Ofertas
+
+| Columna | Tipo PostgreSQL | Regla |
+| --- | --- | --- |
+| `Id` | `uuid` | Clave primaria; Guid generado por Domain. |
+| `LicitacionId` | `uuid` | FK restrictiva hacia `Licitaciones`. |
+| `ProveedorId` | `uuid` | FK restrictiva hacia `Proveedores`. |
+| `Monto` | `numeric(18,2)` | Obligatorio; restricción CHECK `CK_Ofertas_Monto_Positivo` (`> 0`). |
+| `FechaRegistro` | `timestamp with time zone` | Momento obtenido mediante `IClock`. |
+| `CreatedAt` | `timestamp with time zone` | Obligatorio; asignado al insertar. |
+| `UpdatedAt` | `timestamp with time zone` | Obligatorio; actualizado al modificar. |
+
+El índice único compuesto `IX_Ofertas_LicitacionId_ProveedorId` garantiza una
+sola oferta por proveedor y licitación, incluso ante registros concurrentes.
+El límite de la oferta respecto al presupuesto y la admisión por estado o
+fecha son reglas del caso de uso; no son restricciones de base de datos.
+
+## Estado funcional del modelo
 
 - `EstadosLicitacion`: catálogo único con Borrador, Publicada, Cerrada, Adjudicada y Cancelada.
 - `Licitaciones`: código único, título de hasta 250 caracteres, presupuesto `numeric(18,2)` positivo, cierre, estado y auditoría. Crear, publicar, editar y cierre funcional implementados (HU-10, HU-11, HU-12).
 - `LicitacionTransiciones`: historial de cambios de estado de licitaciones (HU-11).
-- `Ofertas`: relaciones restrictivas con licitación y proveedor, monto `numeric(18,2)` positivo y unicidad por `(LicitacionId, ProveedorId)`.
+- `Ofertas`: registro mediante API implementado en HU-14; relaciones restrictivas, monto positivo y unicidad por `(LicitacionId, ProveedorId)`.
 - `NivelesAprobacion`: límites `numeric(18,2)` y semillas Operativo, Gerencial y Directivo. Contiene checks de mínimo y rango, además de la restricción de exclusión `EX_NivelesAprobacion_SinTraslape` creada por la migración `CompleteInitialDomain`.
 - `TiposCambio`: valor `numeric(18,6)` positivo, fecha, indicador activo, índice único parcial sobre el registro activo y semilla USD/CRC con valor 500.
 
