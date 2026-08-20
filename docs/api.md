@@ -81,7 +81,7 @@ debilitar el filtro global aplicado al resto de las consultas.
 
 La aplicación registra OpenAPI y publica el documento solo en Development con `MapOpenApi()`. No existe Swagger UI en esta iteración.
 
-## Licitaciones (HU-13)
+## Licitaciones (HU-13 y HU-16)
 
 ### Listar
 
@@ -109,8 +109,9 @@ GET /api/v1/licitaciones
 ### Consultar detalle
 
 `GET /api/v1/licitaciones/{id}` devuelve el DTO de detalle o 404. El detalle
-incluye mejor oferta (monto mínimo de ofertas recibidas) y nivel de aprobación
-correspondiente. Si no existen ofertas, ambos campos son `null`.
+incluye la mejor oferta, su porcentaje y clasificación de ahorro, y el nivel de
+aprobación correspondiente. La mejor oferta es la de menor monto; un empate se
+resuelve por la `FechaRegistro` más temprana.
 
 ```http
 GET /api/v1/licitaciones/d5d2f6a1-...
@@ -123,10 +124,22 @@ GET /api/v1/licitaciones/d5d2f6a1-...
   "titulo": "Compra de material informático",
   "presupuesto": 10000.00,
   "fechaCierre": "2026-08-25T12:00:00+00:00",
-  "mejorOferta": { "monto": 8000.00 },
-  "nivelAprobacion": { "id": 2, "nombre": "Gerencial" }
+  "mejorOferta": {
+    "id": "9a3d94d0-0000-0000-0000-000000000003",
+    "monto": 8000.00,
+    "ahorroPorcentaje": 20.0,
+    "clasificacion": "Oferta conveniente"
+  },
+  "mensajeMejorOferta": null,
+  "nivelAprobacion": { "id": 1, "nombre": "Operativo" }
 }
 ```
+
+La clasificación es `Oferta conveniente` para ahorro mayor o igual a 10 %,
+`Oferta aceptable` para ahorro mayor que 0 % y menor que 10 %, y `Oferta válida
+sin ahorro` cuando el monto coincide con el presupuesto. Si no existen ofertas,
+`mejorOferta` y `nivelAprobacion` son `null`, mientras
+`mensajeMejorOferta` contiene `Sin ofertas válidas`.
 
 ### Crear licitación (HU-10)
 

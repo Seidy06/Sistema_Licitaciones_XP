@@ -22,7 +22,7 @@ y estimaciones se conservan sin reestimarlas en este inicio formal.
 | 3 | HU-14 — Registrar oferta | Alta | 5 | HU-11, HU-06 y HU-05: requiere licitación publicada, proveedor y reloj inyectable. | Terminada. |
 | 4 | HU-12 — Editar y cerrar licitación | Alta | 5 | HU-10 y HU-14 para comprobar las restricciones de edición frente a ofertas existentes. | Refactor completado; sin endpoints HTTP ni DI. |
 | 5 | HU-15 — Rechazar y auditar ofertas inválidas | Alta | 3 | HU-14 y HU-12 para verificar duplicidad, exceso de presupuesto, vencimiento e inmutabilidad tras el cierre. | Terminada. |
-| 6 | HU-16 — Calcular mejor oferta y clasificación de ahorro | Alta | 5 | HU-14 para disponer de ofertas válidas. El nivel de aprobación correspondiente depende de HU-18, planificada para la Iteración 3. | Seleccionada; no terminada |
+| 6 | HU-16 — Calcular mejor oferta y clasificación de ahorro | Alta | 5 | HU-14 para disponer de ofertas válidas. El nivel de aprobación correspondiente depende de HU-18, planificada para la Iteración 3. | Terminada. |
 | 7 | HU-13 — Listar y consultar licitaciones | Media | 3 | HU-12 y HU-16 para mostrar estado efectivo y mejor oferta. El nivel de aprobación depende de HU-18. | Terminada. |
 | 8 | HU-17 — Listar y consultar ofertas | Media | 2 | HU-14 y HU-16. La presentación alternable en USD depende del servicio de conversión de HU-19, planificado para la Iteración 3. | Seleccionada; no terminada |
 |  | **Total seleccionado** |  | **31** | **26 SP de prioridad alta y 5 SP de prioridad media.** | **Velocidad observada no registrada** |
@@ -281,6 +281,59 @@ presupuesto. Los intentos de editar o eliminar ofertas registradas se rechazan
 con `422`; en licitaciones cerradas se comunica la inmutabilidad y se conserva
 la fila original como evidencia. No se incorporó una tabla o bitácora separada
 para intentos rechazados, ni listado, clasificación o vistas futuras.
+
+### HU-16 — Calcular mejor oferta y clasificación de ahorro
+
+#### Estado
+
+| Historia | SP | Estado |
+| --- | ---: | --- |
+| HU-16 — Calcular mejor oferta y clasificación de ahorro | 5 | Terminada: selección, desempate, porcentaje, clasificación y respuesta sin ofertas implementados y verificados. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-16 | Seidy | Tiffany | `0220ec8` |
+| VERDE HU-16 | Tiffany | Seidy | `eb50f93` |
+| Refactor HU-16 | Seidy | Tiffany | `c54514f` |
+
+Los roles se registran a partir de la autoría alternada de los commits; Git
+conserva la autoría del Driver, no evidencia independiente del rol Navigator.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `0220ec8` — `test(ofertas): cubrir criterios de calcular mejor oferta y clasificación de ahorro (HU-16)` | Agregó cinco pruebas de Application y cinco HTTP para menor monto, desempate por `FechaRegistro`, ausencia de ofertas y los tres rangos de clasificación. Las pruebas Application confirmaron 5 fallos funcionales; la primera ejecución HTTP quedó bloqueada hasta iniciar Docker/Testcontainers. |
+| VERDE | `eb50f93` — `feat(ofertas): implementar calcular mejor oferta y clasificación de ahorro (HU-16)` | Incorporó `CalculadoraMejorOferta`, `ResultadoMejorOferta`, consulta de ofertas desde infraestructura y amplió el DTO de detalle con identificador, monto, porcentaje, clasificación y mensaje sin ofertas. Las reglas permanecen fuera del controlador. |
+| Refactor | `c54514f` — `refactor(ofertas): simplificar implementacion de HU-16` | Convirtió la calculadora pura y sin estado en estática, eliminó su instancia innecesaria en Application y reemplazó aserciones basadas en búsquedas dentro de JSON por validaciones directas de DTO y propiedades JSON. No agregó comportamiento. |
+
+#### Commits
+
+- `0220ec8` — pruebas de criterios de aceptación (ROJO).
+- `eb50f93` — implementación mínima (VERDE).
+- `c54514f` — refactorización sin cambio funcional.
+
+No se crearon commits adicionales durante la actualización documental.
+
+#### Resultado
+
+La línea base y la verificación final del 20 de agosto de 2026 se ejecutaron
+con `dotnet test Licitaciones.sln --no-restore` y PostgreSQL real mediante
+Testcontainers. El resultado final fue:
+
+- 81 pruebas unitarias superadas.
+- 89 pruebas de integración superadas.
+- 3 pruebas funcionales superadas.
+- 0 fallidas y 0 omitidas; 173 ejecutadas.
+
+El detalle de una licitación selecciona la oferta de menor monto y desempata
+por la fecha de registro más temprana. Expone el porcentaje de ahorro y las
+clasificaciones `Oferta conveniente`, `Oferta aceptable` u `Oferta válida sin
+ahorro`; cuando no existen ofertas muestra `Sin ofertas válidas`. No se agregó
+listado de ofertas, conversión monetaria, vistas MVC ni comportamiento de
+historias futuras.
 
 ---
 

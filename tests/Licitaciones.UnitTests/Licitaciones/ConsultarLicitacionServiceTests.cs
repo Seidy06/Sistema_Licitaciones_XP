@@ -2,6 +2,7 @@ using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
+using Licitaciones.Domain.Ofertas;
 using Licitaciones.UnitTests.Common;
 
 namespace Licitaciones.UnitTests.Licitaciones;
@@ -234,11 +235,19 @@ public sealed class ConsultarLicitacionServiceTests
                 query.ToArray());
         }
 
-        public Task<decimal?> ObtenerMontoMinimoOfertaAsync(
+        public Task<IReadOnlyList<Oferta>> ObtenerOfertasAsync(
             Guid licitacionId,
             CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(MontoMinimoOferta);
+            IReadOnlyList<Oferta> ofertas = MontoMinimoOferta.HasValue
+                ? [Oferta.Crear(
+                    licitacionId,
+                    Guid.NewGuid(),
+                    MontoMinimoOferta.Value,
+                    _clock)]
+                : [];
+
+            return Task.FromResult(ofertas);
         }
 
         public Task<LicitacionNivelAprobacionDto?> ObtenerNivelAprobacionAsync(

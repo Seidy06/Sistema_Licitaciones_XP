@@ -7,6 +7,11 @@ public sealed record LicitacionDetalleDto(
     decimal Presupuesto,
     DateTimeOffset FechaCierre,
     LicitacionMejorOfertaDto? MejorOferta,
+    string? MensajeMejorOferta,
     LicitacionNivelAprobacionDto? NivelAprobacion);
 
-public sealed record LicitacionMejorOfertaDto(decimal Monto);
+public sealed record LicitacionMejorOfertaDto(
+    Guid Id,
+    decimal Monto,
+    decimal AhorroPorcentaje,
+    string Clasificacion);

@@ -1,4 +1,5 @@
 using Licitaciones.Domain.Common;
+using Licitaciones.Domain.Ofertas;
 
 namespace Licitaciones.Application.Licitaciones.Consultar;
 
@@ -42,16 +43,23 @@ public sealed class ConsultarLicitacionService
             return null;
         }
 
-        var montoMinimo = await _repository.ObtenerMontoMinimoOfertaAsync(
+        var ofertas = await _repository.ObtenerOfertasAsync(
             licitacion.Id, cancellationToken);
+        var resultado = CalculadoraMejorOferta.Calcular(
+            licitacion.Presupuesto,
+            ofertas);
 
-        LicitacionMejorOfertaDto? mejorOferta = montoMinimo.HasValue
-            ? new LicitacionMejorOfertaDto(montoMinimo.Value)
+        LicitacionMejorOfertaDto? mejorOferta = resultado is not null
+            ? new LicitacionMejorOfertaDto(
+                resultado.Id,
+                resultado.Monto,
+                resultado.AhorroPorcentaje,
+                resultado.Clasificacion)
             : null;
 
-        LicitacionNivelAprobacionDto? nivelAprobacion = montoMinimo.HasValue
+        LicitacionNivelAprobacionDto? nivelAprobacion = resultado is not null
             ? await _repository.ObtenerNivelAprobacionAsync(
-                montoMinimo.Value, cancellationToken)
+                resultado.Monto, cancellationToken)
             : null;
 
         return new LicitacionDetalleDto(
@@ -61,6 +69,7 @@ public sealed class ConsultarLicitacionService
             licitacion.Presupuesto,
             licitacion.FechaCierre,
             mejorOferta,
+            resultado is null ? "Sin ofertas válidas" : null,
             nivelAprobacion);
     }
 }
