@@ -193,7 +193,7 @@ public sealed class CrearOfertaServiceTests
             repository.ProveedorId,
             500m));
 
-        await Assert.ThrowsAsync<DomainException>(() =>
+        await Assert.ThrowsAsync<OfertaDuplicadaException>(() =>
             service.CrearAsync(new CrearOfertaRequest(
                 licitacion.Id,
                 repository.ProveedorId,

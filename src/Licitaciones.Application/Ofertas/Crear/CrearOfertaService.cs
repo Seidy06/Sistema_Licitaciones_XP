@@ -6,9 +6,6 @@ namespace Licitaciones.Application.Ofertas.Crear;
 
 public sealed class CrearOfertaService
 {
-    public const string ErrorDuplicada =
-        "El proveedor ya tiene una oferta activa para esta licitacion.";
-
     private readonly IOfertaRepository _repository;
     private readonly IClock _clock;
 
@@ -41,7 +38,7 @@ public sealed class CrearOfertaService
         if (await _repository.ExisteOfertaAsync(
             request.LicitacionId, request.ProveedorId, cancellationToken))
         {
-            throw new DomainException(ErrorDuplicada);
+            throw new OfertaDuplicadaException();
         }
 
         if (request.Monto > licitacion.Presupuesto)
@@ -65,11 +62,6 @@ public sealed class CrearOfertaService
         await _repository.AgregarAsync(oferta, cancellationToken);
         await _repository.GuardarCambiosAsync(cancellationToken);
 
-        return new OfertaDto(
-            oferta.Id,
-            oferta.LicitacionId,
-            oferta.ProveedorId,
-            oferta.Monto,
-            oferta.FechaRegistro);
+        return OfertaDto.FromEntity(oferta);
     }
 }

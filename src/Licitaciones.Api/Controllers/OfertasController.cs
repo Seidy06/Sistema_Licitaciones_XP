@@ -34,17 +34,22 @@ public sealed class OfertasController : ControllerBase
 
             return Created($"/api/v1/ofertas/{oferta.Id}", oferta);
         }
+        catch (OfertaDuplicadaException exception)
+        {
+            return Conflict(new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Oferta duplicada",
+                Detail = exception.Message,
+                Instance = HttpContext.Request.Path
+            });
+        }
         catch (DomainException exception)
         {
-            var duplicada = exception.Message == CrearOfertaService.ErrorDuplicada;
-            var status = duplicada
-                ? StatusCodes.Status409Conflict
-                : StatusCodes.Status400BadRequest;
-
-            return StatusCode(status, new ProblemDetails
+            return BadRequest(new ProblemDetails
             {
-                Status = status,
-                Title = duplicada ? "Oferta duplicada" : "Oferta rechazada",
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Oferta rechazada",
                 Detail = exception.Message,
                 Instance = HttpContext.Request.Path
             });

@@ -1,8 +1,8 @@
 using Licitaciones.Application.Ofertas.Crear;
-using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Domain.Ofertas;
 using Licitaciones.Domain.Proveedores;
+using Licitaciones.Infrastructure.Persistence.Configurations;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -47,10 +47,11 @@ public sealed class OfertaRepository : IOfertaRepository
         catch (DbUpdateException exception)
             when (exception.InnerException is PostgresException
             {
-                SqlState: PostgresErrorCodes.UniqueViolation
+                SqlState: PostgresErrorCodes.UniqueViolation,
+                ConstraintName: OfertaConfiguration.IndiceUnicoLicitacionProveedor
             })
         {
-            throw new DomainException(CrearOfertaService.ErrorDuplicada);
+            throw new OfertaDuplicadaException();
         }
     }
 }

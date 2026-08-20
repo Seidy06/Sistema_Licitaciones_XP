@@ -1,3 +1,5 @@
+using Licitaciones.Domain.Ofertas;
+
 namespace Licitaciones.Application.Ofertas;
 
 public sealed record OfertaDto(
@@ -5,4 +7,12 @@ public sealed record OfertaDto(
     Guid LicitacionId,
     Guid ProveedorId,
     decimal Monto,
-    DateTimeOffset FechaRegistro);
+    DateTimeOffset FechaRegistro)
+{
+    public static OfertaDto FromEntity(Oferta oferta) => new(
+        oferta.Id,
+        oferta.LicitacionId,
+        oferta.ProveedorId,
+        oferta.Monto,
+        oferta.FechaRegistro);
+}
