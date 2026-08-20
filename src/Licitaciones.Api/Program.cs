@@ -2,6 +2,7 @@ using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Application.Licitaciones.Crear;
 using Licitaciones.Application.Ofertas.Crear;
+using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Ofertas.Proteger;
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Consultar;
@@ -31,8 +32,10 @@ builder.Services.AddScoped<ConsultarLicitacionService>();
 builder.Services.AddScoped<ILicitacionRepository, LicitacionRepository>();
 builder.Services.AddScoped<ILicitacionConsultaRepository, LicitacionConsultaRepository>();
 builder.Services.AddScoped<CrearOfertaService>();
+builder.Services.AddScoped<ConsultarOfertaService>();
 builder.Services.AddScoped<ProtegerOfertaService>();
 builder.Services.AddScoped<IOfertaRepository, OfertaRepository>();
+builder.Services.AddScoped<IOfertaConsultaRepository, OfertaRepository>();
 builder.Services.AddScoped<IProteccionOfertaRepository, OfertaRepository>();
 builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddDbContext<LicitacionesDbContext>(options =>
