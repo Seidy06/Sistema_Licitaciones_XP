@@ -1,9 +1,7 @@
 using System.Net;
-using System.Net.Http.Json;
 
-using Licitaciones.Domain.Common;
-using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Infrastructure.Persistence;
+using Licitaciones.IntegrationTests.Common;
 using Licitaciones.IntegrationTests.Proveedores;
 
 using Microsoft.AspNetCore.DataProtection;
@@ -13,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+
+using static Licitaciones.IntegrationTests.Common.LicitacionTestHelper;
 
 namespace Licitaciones.IntegrationTests.Hu13;
 
@@ -68,19 +68,6 @@ public sealed class ConsultarLicitacionHttpTests : IClassFixture<PostgreSqlFixtu
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
-    private static Licitacion PublicarLicitacion(
-        string codigo, DateTimeOffset fechaCierre)
-    {
-        var licitacion = Licitacion.Crear(
-            codigo,
-            "Compra para pruebas HU-13",
-            10_000m,
-            fechaCierre);
-
-        licitacion.Publicar(new FixedClock(fechaCierre.AddDays(-5)));
-        return licitacion;
-    }
-
     private WebApplicationFactory<Licitaciones.Api.Controllers.ProveedoresController>
         CrearApiFactory()
     {
@@ -97,12 +84,5 @@ public sealed class ConsultarLicitacionHttpTests : IClassFixture<PostgreSqlFixtu
                     services.AddDataProtection().UseEphemeralDataProtectionProvider();
                 });
             });
-    }
-
-    private sealed class FixedClock : IClock
-    {
-        private readonly DateTimeOffset _value;
-        public FixedClock(DateTimeOffset value) => _value = value;
-        public DateTimeOffset UtcNow() => _value;
     }
 }

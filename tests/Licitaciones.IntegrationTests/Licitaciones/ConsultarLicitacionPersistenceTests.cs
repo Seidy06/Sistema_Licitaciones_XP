@@ -1,13 +1,15 @@
 using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Consultar;
-using Licitaciones.Domain.Common;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Domain.Proveedores;
+using Licitaciones.IntegrationTests.Common;
 using Licitaciones.IntegrationTests.Proveedores;
 
 using Microsoft.EntityFrameworkCore;
 
 using Ofertas = Licitaciones.Domain.Ofertas;
+
+using static Licitaciones.IntegrationTests.Common.LicitacionTestHelper;
 
 namespace Licitaciones.IntegrationTests.Hu13;
 
@@ -130,25 +132,5 @@ public sealed class ConsultarLicitacionPersistenceTests : IClassFixture<PostgreS
             .MinAsync(o => (decimal?)o.Monto);
 
         Assert.Equal(12_000m, montoMinimo);
-    }
-
-    private static Licitacion PublicarLicitacion(
-        string codigo, DateTimeOffset fechaCierre)
-    {
-        var licitacion = Licitacion.Crear(
-            codigo,
-            "Compra para pruebas HU-13",
-            10_000m,
-            fechaCierre);
-
-        licitacion.Publicar(new FixedClock(fechaCierre.AddDays(-5)));
-        return licitacion;
-    }
-
-    private sealed class FixedClock : IClock
-    {
-        private readonly DateTimeOffset _value;
-        public FixedClock(DateTimeOffset value) => _value = value;
-        public DateTimeOffset UtcNow() => _value;
     }
 }
