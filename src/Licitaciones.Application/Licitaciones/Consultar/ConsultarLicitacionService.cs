@@ -17,9 +17,12 @@ public sealed class ConsultarLicitacionService
         IClock clock,
         CancellationToken cancellationToken = default)
     {
+        ValidarConsulta(consulta);
         var licitaciones = await _repository.ListarAsync(consulta, cancellationToken);
 
         var items = licitaciones
+            .Skip((consulta.Pagina - 1) * consulta.TamanoPagina)
+            .Take(consulta.TamanoPagina)
             .Select(l => new LicitacionConsultaDto(
                 l.Id,
                 l.Titulo,
@@ -28,7 +31,8 @@ public sealed class ConsultarLicitacionService
                 l.EstadoEfectivo(clock)))
             .ToArray();
 
-        return new PaginaLicitaciones(items);
+        return new PaginaLicitaciones(
+            items, licitaciones.Count, consulta.Pagina, consulta.TamanoPagina);
     }
 
     public async Task<LicitacionDetalleDto?> ObtenerDetalleAsync(
@@ -71,5 +75,23 @@ public sealed class ConsultarLicitacionService
             mejorOferta,
             resultado is null ? "Sin ofertas válidas" : null,
             nivelAprobacion);
+    }
+
+    private static void ValidarConsulta(ConsultarLicitacionesRequest consulta)
+    {
+        if (consulta.Pagina <= 0 || consulta.TamanoPagina is <= 0 or > 100)
+        {
+            throw new DomainException("La paginaciÃ³n solicitada no es vÃ¡lida.");
+        }
+
+        if (consulta.FechaDesde > consulta.FechaHasta)
+        {
+            throw new DomainException("El rango de fechas no es vÃ¡lido.");
+        }
+
+        if (consulta.OrdenarPor.ToLowerInvariant() is not ("fechacierre" or "codigo" or "presupuesto"))
+        {
+            throw new DomainException("El campo de ordenamiento no es vÃ¡lido.");
+        }
     }
 }

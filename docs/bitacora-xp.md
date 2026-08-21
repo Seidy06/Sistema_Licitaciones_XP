@@ -1,5 +1,15 @@
 # Bitácora XP
 
+## Corrección posterior a la auditoría final de Iteración 2
+
+Driver: Codex. Navigator/responsable: Tiffany. La auditoría detectó que HU-11 y
+HU-12 no tenían superficie HTTP y que HU-13/HU-17 no completaban paginación,
+filtro y ordenamiento. Se agregaron pruebas unitarias y HTTP sobre PostgreSQL
+real, luego las operaciones Domain/Application/API y los contratos paginados.
+No se agregaron contenedores: las pruebas siguen usando una sola colección y
+fixture PostgreSQL compartida. Los cambios permanecen sin commit mientras se
+realiza la verificación final; no se atribuye CI remoto antes de publicarlos.
+
 ## Iteración 2 — Ciclo de licitaciones y ofertas
 
 **Estado: CERRADA — iniciada el 18 y cerrada documentalmente el 20 de agosto

@@ -87,6 +87,23 @@ public sealed class Licitacion : IAuditableEntity
             clock.UtcNow()));
     }
 
+    public void Cerrar(IClock clock)
+    {
+        if (Estado != EstadoLicitacion.Publicada)
+        {
+            throw new DomainException(
+                $"No se puede cerrar una licitaciÃ³n en estado {Estado}.");
+        }
+
+        var estadoAnterior = Estado;
+        Estado = EstadoLicitacion.Cerrada;
+        _transiciones.Add(LicitacionTransicion.Crear(
+            Id,
+            estadoAnterior,
+            Estado,
+            clock.UtcNow()));
+    }
+
     public void Editar(
         string codigo,
         string titulo,

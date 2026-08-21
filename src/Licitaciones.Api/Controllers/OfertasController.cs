@@ -30,17 +30,25 @@ public sealed class OfertasController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType<IReadOnlyList<OfertaConsultaDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<PaginaOfertas>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<IReadOnlyList<OfertaConsultaDto>>> Listar(
+    public async Task<ActionResult<PaginaOfertas>> Listar(
         [FromQuery] Guid licitacionId,
         [FromQuery] string moneda = "CRC",
+        [FromQuery] string? proveedor = null,
+        [FromQuery] string ordenarPor = "monto",
+        [FromQuery] bool descendente = false,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 20,
         CancellationToken cancellationToken = default)
     {
         try
         {
             return Ok(await _consultarOfertaService.ListarAsync(
-                licitacionId, moneda, cancellationToken));
+                new ConsultarOfertasRequest(
+                    licitacionId, moneda, proveedor, ordenarPor,
+                    descendente, pagina, tamanoPagina),
+                cancellationToken));
         }
         catch (DomainException exception)
         {

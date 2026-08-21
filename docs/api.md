@@ -1,5 +1,16 @@
 # API REST implementada
 
+## Correcciones de cierre HU-11, HU-12, HU-13 y HU-17
+
+- `POST /api/v1/licitaciones/{id}/publicar` publica un borrador.
+- `PUT /api/v1/licitaciones/{id}` edita parcialmente una licitacion y
+  `POST /api/v1/licitaciones/{id}/cerrar` realiza su cierre manual.
+- El listado de licitaciones acepta `estadoFiltro`, `codigo`, `fechaDesde`,
+  `fechaHasta`, `ordenarPor`, `descendente`, `pagina` y `tamanoPagina`.
+- El listado de ofertas acepta `proveedor`, `ordenarPor`, `descendente`,
+  `pagina` y `tamanoPagina`. Ambos listados responden con `items`, `total`,
+  `pagina` y `tamanoPagina`.
+
 La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedores`. La Iteración 2 agrega licitaciones bajo `/api/v1/licitaciones`. Los ejemplos de identificadores, fechas y versiones son ilustrativos. El proyecto conserva además `GET /WeatherForecast`, generado por la plantilla; es un endpoint de muestra y no forma parte del dominio de licitaciones.
 
 ## Resumen

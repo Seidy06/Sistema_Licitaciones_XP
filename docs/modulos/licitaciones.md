@@ -97,3 +97,14 @@ historias posteriores.
 La tabla `Licitaciones` almacena la entidad con código único parcial filtrado
 por `DeletedAt IS NULL`. La tabla `licitacion_transiciones` almacena el
 historial de cambios de estado con FK cascada hacia `Licitaciones`.
+
+## Correcciones de cierre de la Iteracion 2
+
+- HU-11 expone `POST /api/v1/licitaciones/{id}/publicar`; Application coordina
+  la operacion y Domain conserva la regla y la transicion.
+- HU-12 expone `PUT /api/v1/licitaciones/{id}` y
+  `POST /api/v1/licitaciones/{id}/cerrar`. El cierre manual solo parte de
+  `Publicada` y registra la transicion a `Cerrada`.
+- HU-13 acepta `estadoFiltro`, `codigo`, `fechaDesde`, `fechaHasta`,
+  `ordenarPor`, `descendente`, `pagina` y `tamanoPagina`. La respuesta incluye
+  `items`, `total`, `pagina` y `tamanoPagina`; el tamano maximo es 100.
