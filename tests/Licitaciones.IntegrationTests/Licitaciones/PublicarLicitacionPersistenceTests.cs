@@ -8,7 +8,8 @@ using Npgsql;
 
 namespace Licitaciones.IntegrationTests.Hu11;
 
-public sealed class PublicarLicitacionPersistenceTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class PublicarLicitacionPersistenceTests
 {
     private static readonly DateTimeOffset Ahora =
         new(2026, 8, 18, 15, 0, 0, TimeSpan.Zero);

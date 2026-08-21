@@ -53,37 +53,18 @@ public sealed class OfertaRepository :
     public async Task<IReadOnlyList<OfertaConsultaRegistro>> ListarAsync(
         Guid licitacionId,
         CancellationToken cancellationToken = default) =>
-        await _context.Ofertas
-            .Where(oferta => oferta.LicitacionId == licitacionId)
-            .OrderBy(oferta => oferta.Monto)
-            .ThenBy(oferta => oferta.FechaRegistro)
-            .Join(
-                _context.Proveedores,
-                oferta => oferta.ProveedorId,
-                proveedor => proveedor.Id,
-                (oferta, proveedor) => new OfertaConsultaRegistro(
-                    oferta.Id,
-                    oferta.LicitacionId,
-                    proveedor.Nombre,
-                    oferta.Monto,
-                    oferta.FechaRegistro))
+        await ProyectarConsulta(
+                _context.Ofertas
+                    .Where(oferta => oferta.LicitacionId == licitacionId)
+                    .OrderBy(oferta => oferta.Monto)
+                    .ThenBy(oferta => oferta.FechaRegistro))
             .ToListAsync(cancellationToken);
 
     public Task<OfertaConsultaRegistro?> ObtenerPorIdAsync(
         Guid id,
         CancellationToken cancellationToken = default) =>
-        _context.Ofertas
-            .Where(oferta => oferta.Id == id)
-            .Join(
-                _context.Proveedores,
-                oferta => oferta.ProveedorId,
-                proveedor => proveedor.Id,
-                (oferta, proveedor) => new OfertaConsultaRegistro(
-                    oferta.Id,
-                    oferta.LicitacionId,
-                    proveedor.Nombre,
-                    oferta.Monto,
-                    oferta.FechaRegistro))
+        ProyectarConsulta(
+                _context.Ofertas.Where(oferta => oferta.Id == id))
             .FirstOrDefaultAsync(cancellationToken);
 
     public Task<decimal?> ObtenerTipoCambioUsdCrcAsync(
@@ -99,6 +80,19 @@ public sealed class OfertaRepository :
     public async Task AgregarAsync(
         Oferta oferta, CancellationToken cancellationToken = default) =>
         await _context.Ofertas.AddAsync(oferta, cancellationToken);
+
+    private IQueryable<OfertaConsultaRegistro> ProyectarConsulta(
+        IQueryable<Oferta> ofertas) =>
+        ofertas.Join(
+            _context.Proveedores,
+            oferta => oferta.ProveedorId,
+            proveedor => proveedor.Id,
+            (oferta, proveedor) => new OfertaConsultaRegistro(
+                oferta.Id,
+                oferta.LicitacionId,
+                proveedor.Nombre,
+                oferta.Monto,
+                oferta.FechaRegistro));
 
     public async Task GuardarCambiosAsync(
         CancellationToken cancellationToken = default)

@@ -6,7 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Licitaciones.IntegrationTests.Proveedores;
 
-public sealed class ProveedorEdicionPersistenceTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class ProveedorEdicionPersistenceTests
 {
     private readonly PostgreSqlFixture _database;
 

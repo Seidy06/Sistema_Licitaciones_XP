@@ -11,7 +11,8 @@ using CrearProveedorService = Licitaciones.Application.Proveedores.Crear.CrearPr
 
 namespace Licitaciones.IntegrationTests.Proveedores;
 
-public sealed class ProveedorConsultaHttpTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class ProveedorConsultaHttpTests
 {
     private readonly PostgreSqlFixture _database;
 

@@ -16,7 +16,8 @@ using static Licitaciones.IntegrationTests.Common.LicitacionTestHelper;
 
 namespace Licitaciones.IntegrationTests.Hu13;
 
-public sealed class ConsultarLicitacionHttpTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class ConsultarLicitacionHttpTests
 {
     private static readonly DateTimeOffset Ahora =
         new(2026, 8, 19, 12, 0, 0, TimeSpan.Zero);

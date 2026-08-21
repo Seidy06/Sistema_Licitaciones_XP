@@ -18,7 +18,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Licitaciones.IntegrationTests.Hu17;
 
-public sealed class ConsultarOfertaHttpTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class ConsultarOfertaHttpTests
 {
     private static readonly DateTimeOffset FechaPrimeraOferta =
         new(2026, 8, 20, 14, 30, 0, TimeSpan.Zero);

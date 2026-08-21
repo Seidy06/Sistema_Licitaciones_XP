@@ -10,7 +10,8 @@ using Npgsql;
 
 namespace Licitaciones.IntegrationTests.Persistence;
 
-public sealed class InitialModelPersistenceTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class InitialModelPersistenceTests
 {
     private readonly PostgreSqlFixture _database;
 

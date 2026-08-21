@@ -19,7 +19,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Licitaciones.IntegrationTests.Proveedores;
 
-public sealed class ProveedorEndToEndHttpTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class ProveedorEndToEndHttpTests
 {
     private readonly PostgreSqlFixture _database;
 
