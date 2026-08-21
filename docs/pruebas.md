@@ -33,7 +33,7 @@ dotnet test Licitaciones.sln --configuration Release
 Remove-Item Env:LICITACIONES_INTEGRATION_CONNECTION_STRING
 ```
 
-## Resultado verificado para el cierre
+## Resultado verificado para el cierre de la Iteración 2
 
 Ejecución local del 21 de agosto de 2026, después del refactor de HU-17 y con
 PostgreSQL real iniciado por Testcontainers:
@@ -74,3 +74,16 @@ controlador ya existentes.
 ## Integración continua
 
 `.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release y ejecuta toda la solución. En esta iteración no mide cobertura ni construye imágenes Docker.
+
+Estado verificado en la API pública de GitHub al cierre de la Iteración 2 (20
+de agosto de 2026): los ocho commits de fusión del incremento terminaron en
+`success` en `main` — `cccfa2d` (PR #19, ejecución `32217608694`), `0fc34be`
+(PR #20, `32258741686`), `cbd8fed` (PR #21, `32285499762`), `1f5c453`
+(PR #22, `32318996472`), `d154284` (PR #23, `32337758472`), `370e1ac`
+(PR #24, `32383569802`), `0be6570` (PR #25, `32397368491`) y `9966565`
+(PR #26, `32450135648`). Cada ejecución incluye el paso
+`dotnet format --verify-no-changes`, por lo que el criterio de formato del DoD
+queda cubierto por CI. Los commits rojo de las ramas fallaron como era
+esperable dentro del ciclo TDD y quedaron en verde tras la implementación; el
+único fallo no funcional fue el orden de imports de `fc87fe0`, corregido en
+`7b49708`.
