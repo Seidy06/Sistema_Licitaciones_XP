@@ -76,6 +76,27 @@ actual sin atribuir los Issues a la ejecución histórica de la iteración:
 - API REST versionada y documentación OpenAPI/Swagger.
 - Pequeñas liberaciones frecuentes e integración continua.
 
+La Iteración 3 inicia con **38 SP seleccionados** y mantiene **36 SP como
+velocidad planificada de referencia**. La diferencia de 2 SP se registra como
+riesgo de planificación; no se declara velocidad observada hasta el cierre.
+El orden conserva HU-18 a HU-27: primero capacidades de negocio, después
+experiencia web y finalmente consolidación de API y Swagger. Las dependencias
+pueden hacer que una pareja adelante preparación técnica sin marcar historias
+como terminadas.
+
+| Orden | Historia | Prioridad | SP | Dependencias principales | Driver | Navigator | Issue | Rama prevista |
+| ---: | --- | --- | ---: | --- | --- | --- | --- | --- |
+| 1 | HU-18 — Niveles de aprobación | Alta | 5 | Modelo persistente de HU-04; consumo posterior por HU-23/HU-26. | Tiffany | Seidy | [#47](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/47) | `iteracion-3/hu-18-niveles-aprobacion` |
+| 2 | HU-19 — Tipo de cambio y conversión | Alta | 5 | Tipo de cambio sembrado en HU-04 y montos de HU-17; habilita presentación web. | Seidy | Tiffany | [#48](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/48) | `iteracion-3/hu-19-tipo-cambio` |
+| 3 | HU-20 — Landing page | Media | 3 | Contenido del flujo HU-10 a HU-19. | Tiffany | Seidy | [#49](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/49) | `iteracion-3/hu-20-landing-page` |
+| 4 | HU-21 — Navegación global | Media | 2 | Rutas MVC y enlace a Swagger de HU-27. | Seidy | Tiffany | [#50](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/50) | `iteracion-3/hu-21-navegacion-global` |
+| 5 | HU-22 — Tema claro/oscuro | Baja | 2 | Layout compartido de HU-21. | Tiffany | Seidy | [#51](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/51) | `iteracion-3/hu-22-tema-claro-oscuro` |
+| 6 | HU-23 — CRUD web completo | Alta | 8 | Casos de uso HU-06 a HU-19; niveles y tipo de cambio de HU-18/HU-19. | Seidy | Tiffany | [#52](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/52) | `iteracion-3/hu-23-crud-web-completo` |
+| 7 | HU-24 — Mensajería | Media | 2 | Operaciones MVC de HU-23. | Tiffany | Seidy | [#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53) | `iteracion-3/hu-24-mensajeria` |
+| 8 | HU-25 — Formato es-CR | Baja | 1 | Montos y conversión de HU-19; vistas de HU-23. | Seidy | Tiffany | [#54](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/54) | `iteracion-3/hu-25-formato-es-cr` |
+| 9 | HU-26 — API REST versionada | Alta | 8 | Casos de uso de todos los módulos, incluidos HU-18/HU-19. | Tiffany | Seidy | [#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55) | `iteracion-3/hu-26-api-rest-versionada` |
+| 10 | HU-27 — OpenAPI/Swagger | Media | 2 | Contratos y endpoints consolidados en HU-26. | Seidy | Tiffany | [#56](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/56) | `iteracion-3/hu-27-swagger` |
+
 ### Iteración 4: HU-28 a HU-37
 
 - Pruebas unitarias, de integración y funcionales aplicando TDD.

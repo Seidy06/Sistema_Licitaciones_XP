@@ -274,6 +274,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** crear, editar, listar y desactivar niveles de aprobación (rango de monto mínimo/máximo y aprobador)
 - **Para:** que el sistema determine el aprobador según el monto sin lógica if/else fija
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#47](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/47) — Iteración 3, estado inicial OPEN, rama prevista `iteracion-3/hu-18-niveles-aprobacion`.
 - **Criterios de aceptación:**
   - Given dos niveles con rangos que se traslapan, When se intenta guardar el segundo, Then se rechaza en servidor y en base de datos (exclusion constraint).
   - Given un nivel sin monto máximo (rango abierto), When ya existe otro nivel abierto activo, Then se rechaza la creación de un segundo rango abierto.
@@ -285,6 +286,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** administrar el tipo de cambio CRC→USD y que la interfaz permita alternar la visualización de montos
 - **Para:** ofrecer una referencia en dólares sin alterar los valores oficiales almacenados en colones
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#48](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/48) — Iteración 3, estado inicial OPEN, rama prevista `iteracion-3/hu-19-tipo-cambio`.
 - **Criterios de aceptación:**
   - Given un nuevo tipo de cambio activado, When se guarda, Then se desactiva automáticamente cualquier otro tipo de cambio previamente activo (solo uno activo a la vez).
   - Given un monto almacenado en CRC, When el usuario alterna a USD, Then se calcula `monto / tipoCambio.valor` solo para presentación, sin modificar el valor persistido.
@@ -301,6 +303,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** ver una landing page que explique el propósito de la aplicación, el flujo de licitación, ofertas, mejor oferta, nivel de aprobación y conversión monetaria
 - **Para:** entender el sistema antes de operarlo
 - **Prioridad:** Media | **Estimación:** 3 SP
+- **Issue GitHub:** [#49](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/49) — Iteración 3, estado inicial OPEN, rama prevista `iteracion-3/hu-20-landing-page`.
 - **Criterios de aceptación:**
   - Given la ruta raíz `/`, When se accede sin autenticación, Then se muestra la landing con las secciones explicativas indicadas.
   - Given un dispositivo móvil, When se visualiza la landing, Then el diseño es responsivo (Bootstrap o equivalente).
@@ -311,6 +314,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** un menú visible con acceso a Inicio, Licitaciones, Proveedores, Ofertas, Niveles de aprobación, Tipo de cambio y documentación interactiva de la API
 - **Para:** navegar fácilmente entre los módulos del sistema
 - **Prioridad:** Media | **Estimación:** 2 SP
+- **Issue GitHub:** [#50](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/50) — Iteración 3, estado inicial OPEN, rama prevista `iteracion-3/hu-21-navegacion-global`.
 - **Criterios de aceptación:**
   - Given cualquier página del sitio, When se renderiza el layout, Then el menú está presente y resalta la sección activa.
   - Given el enlace a documentación de API, When se hace clic, Then abre Swagger UI.
@@ -321,6 +325,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** alternar entre modo claro y oscuro con un control visible
 - **Para:** adaptar la interfaz a mi preferencia visual
 - **Prioridad:** Baja | **Estimación:** 2 SP
+- **Issue GitHub:** [#51](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/51) — Iteración 3, estado inicial OPEN, rama prevista `iteracion-3/hu-22-tema-claro-oscuro`.
 - **Criterios de aceptación:**
   - Given el control de tema, When se cambia, Then la preferencia persiste entre sesiones (almacenamiento local del navegador).
   - Given una nueva visita, When se carga la página, Then se respeta el último tema seleccionado.
@@ -331,6 +336,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** crear, leer, actualizar y eliminar proveedores, licitaciones, ofertas, niveles de aprobación y tipos de cambio desde vistas MVC
 - **Para:** operar el sistema completamente desde el navegador sin depender de la API directamente
 - **Prioridad:** Alta | **Estimación:** 8 SP
+- **Issue GitHub:** [#52](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/52) — Iteración 3, estado inicial OPEN, rama prevista `iteracion-3/hu-23-crud-web-completo`.
 - **Criterios de aceptación:**
   - Given cada módulo, When se accede a su vista de listado, Then soporta paginación, filtrado y ordenamiento (tablas).
   - Given cada formulario, When se envía con datos inválidos, Then se muestran mensajes de validación junto al campo correspondiente, sin recargar toda la información ya ingresada.
@@ -342,6 +348,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** recibir mensajes claros de éxito, advertencia y error tras cada operación
 - **Para:** entender el resultado de mis acciones
 - **Prioridad:** Media | **Estimación:** 2 SP
+- **Issue GitHub:** [#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53) — Iteración 3, estado inicial OPEN, rama prevista `iteracion-3/hu-24-mensajeria`.
 - **Criterios de aceptación:**
   - Given una operación exitosa, When se completa, Then se muestra un mensaje de confirmación (toast/alert).
   - Given un error de negocio (regla violada), When ocurre, Then el mensaje es específico y comprensible (no un stack trace).
@@ -352,6 +359,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** ver los montos en colones con el formato cultural costarricense
 - **Para:** interpretar correctamente las cifras monetarias
 - **Prioridad:** Baja | **Estimación:** 1 SP
+- **Issue GitHub:** [#54](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/54) — Iteración 3, estado inicial OPEN, rama prevista `iteracion-3/hu-25-formato-es-cr`.
 - **Criterios de aceptación:**
   - Given un monto en CRC, When se presenta en cualquier vista, Then usa separador de miles y formato `es-CR` (ej. `₡1.500.000,00`).
 - **Notas técnicas:** Configurar `CultureInfo("es-CR")` en el pipeline de localización de ASP.NET Core o formatear en el helper de vista.
@@ -365,6 +373,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** consumir una API REST versionada para proveedores, licitaciones, ofertas, niveles de aprobación y tipo de cambio
 - **Para:** integrar el sistema con otras plataformas sin depender de la interfaz web
 - **Prioridad:** Alta | **Estimación:** 8 SP
+- **Issue GitHub:** [#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55) — Iteración 3, estado inicial OPEN, rama prevista `iteracion-3/hu-26-api-rest-versionada`.
 - **Criterios de aceptación:**
   - Given cualquier endpoint, When retorna datos, Then usa DTOs específicos (nunca entidades EF Core expuestas directamente).
   - Given la ruta base, When se define, Then incluye versión (`/api/v1/...`).
@@ -378,6 +387,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** acceder a documentación interactiva de la API (Swagger UI) con ejemplos
 - **Para:** conocer los contratos, probar endpoints y entender los errores posibles
 - **Prioridad:** Media | **Estimación:** 2 SP
+- **Issue GitHub:** [#56](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/56) — Iteración 3, estado inicial OPEN, rama prevista `iteracion-3/hu-27-swagger`.
 - **Criterios de aceptación:**
   - Given la ruta `/swagger`, When se accede, Then se muestra la documentación generada con todos los endpoints, esquemas de request/response y ejemplos.
   - Given `/docs/api.md`, When se abre, Then documenta endpoints, contratos, ejemplos y errores, y referencia una colección reproducible de solicitudes (Postman/Insomnia/`.http`).
