@@ -1,3 +1,4 @@
+using Licitaciones.Application.Aprobaciones;
 using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Cerrar;
 using Licitaciones.Application.Licitaciones.Consultar;
@@ -23,6 +24,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
+builder.Services.AddScoped<AdministrarNivelesAprobacionService>();
+builder.Services.AddScoped<ResolverNivelAprobacionService>();
+builder.Services.AddScoped<INivelAprobacionRepository, NivelAprobacionRepository>();
 builder.Services.AddScoped<CrearProveedorService>();
 builder.Services.AddScoped<ConsultarProveedorService>();
 builder.Services.AddScoped<EditarProveedorService>();

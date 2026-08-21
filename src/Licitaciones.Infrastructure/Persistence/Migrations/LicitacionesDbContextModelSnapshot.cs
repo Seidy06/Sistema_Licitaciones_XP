@@ -25,7 +25,14 @@ namespace Licitaciones.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Licitaciones.Domain.Aprobaciones.NivelAprobacion", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValueSql("nextval('\"NivelesAprobacion_Id_seq\"'::regclass)");
+
+                    b.Property<bool>("Activo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -57,6 +64,7 @@ namespace Licitaciones.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 1,
+                            Activo = true,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             MontoMaximo = 1000000m,
                             MontoMinimo = 0m,
@@ -66,6 +74,7 @@ namespace Licitaciones.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 2,
+                            Activo = true,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             MontoMaximo = 10000000m,
                             MontoMinimo = 1000000m,
@@ -75,6 +84,7 @@ namespace Licitaciones.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 3,
+                            Activo = true,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             MontoMinimo = 10000000m,
                             Nombre = "Directivo",

@@ -95,10 +95,12 @@ public sealed class LicitacionConsultaRepository : ILicitacionConsultaRepository
         CancellationToken cancellationToken = default)
     {
         var nivel = await _context.NivelesAprobacion
-            .FirstOrDefaultAsync(n =>
-                montoOferta >= n.MontoMinimo
-                && (n.MontoMaximo == null || montoOferta < n.MontoMaximo),
-                cancellationToken);
+            .Where(n =>
+                n.Activo
+                && montoOferta >= n.MontoMinimo
+                && (n.MontoMaximo == null || montoOferta <= n.MontoMaximo))
+            .OrderByDescending(n => n.MontoMinimo)
+            .FirstOrDefaultAsync(cancellationToken);
 
         return nivel is null
             ? null
