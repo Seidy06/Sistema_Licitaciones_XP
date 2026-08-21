@@ -42,10 +42,11 @@ public sealed class ConsultarOfertaHttpTests
             $"/api/v1/ofertas?licitacionId={escenario.LicitacionId}&moneda=CRC");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var ofertas = await response.Content.ReadFromJsonAsync<List<OfertaConsultaResponse>>();
-        Assert.NotNull(ofertas);
+        var pagina = await response.Content.ReadFromJsonAsync<PaginaOfertaResponse>();
+        Assert.NotNull(pagina);
+        Assert.Equal(2, pagina.Total);
         Assert.Collection(
-            ofertas,
+            pagina.Items,
             oferta => AssertOferta(
                 oferta,
                 escenario.OfertaMejorId,
@@ -62,6 +63,26 @@ public sealed class ConsultarOfertaHttpTests
                 "CRC",
                 FechaPrimeraOferta.AddMinutes(5),
                 false));
+    }
+
+    [Fact]
+    [Trait("HU", "HU-17")]
+    public async Task GetPorLicitacion_ConFiltroOrdenYPaginacion_DebeAplicarConsulta()
+    {
+        var escenario = await PrepararLicitacionConOfertasAsync();
+        await using var factory = CrearApiFactory();
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync(
+            $"/api/v1/ofertas?licitacionId={escenario.LicitacionId}" +
+            $"&proveedor={Uri.EscapeDataString(escenario.ProveedorMayor)}" +
+            "&ordenarPor=fechaRegistro&descendente=true&pagina=1&tamanoPagina=1");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var pagina = await response.Content.ReadFromJsonAsync<PaginaOfertaResponse>();
+        Assert.NotNull(pagina);
+        Assert.Equal(1, pagina.Total);
+        Assert.Equal(escenario.OfertaMayorId, Assert.Single(pagina.Items).Id);
     }
 
     [Fact]
@@ -167,6 +188,12 @@ public sealed class ConsultarOfertaHttpTests
         string Moneda,
         DateTimeOffset FechaRegistro,
         bool EsMejorOferta);
+
+    private sealed record PaginaOfertaResponse(
+        IReadOnlyList<OfertaConsultaResponse> Items,
+        int Total,
+        int Pagina,
+        int TamanoPagina);
 
     private sealed class FixedClock : IClock
     {

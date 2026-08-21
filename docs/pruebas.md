@@ -1,5 +1,13 @@
 # Pruebas automatizadas
 
+## Cobertura agregada tras la auditoria final
+
+Se agregaron dos pruebas unitarias de cierre manual y cinco recorridos HTTP
+integrados: publicar, editar, cerrar, consultar licitaciones con
+filtro/orden/paginacion y consultar ofertas con filtro/orden/paginacion. La
+coleccion xUnit continua reutilizando una sola fixture PostgreSQL Testcontainers;
+no se agregaron fixtures ni contenedores por historia.
+
 ## Cobertura existente
 
 - `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de ahorro y nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo.

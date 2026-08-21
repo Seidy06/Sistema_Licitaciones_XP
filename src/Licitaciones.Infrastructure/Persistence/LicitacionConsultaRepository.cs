@@ -45,6 +45,33 @@ public sealed class LicitacionConsultaRepository : ILicitacionConsultaRepository
             };
         }
 
+
+        if (!string.IsNullOrWhiteSpace(consulta.Codigo))
+        {
+            var codigo = consulta.Codigo.Trim().ToUpperInvariant();
+            query = query.Where(l => l.CodigoNormalizado.Contains(codigo));
+        }
+
+        if (consulta.FechaDesde.HasValue)
+        {
+            query = query.Where(l => l.FechaCierre >= consulta.FechaDesde.Value.ToUniversalTime());
+        }
+
+        if (consulta.FechaHasta.HasValue)
+        {
+            query = query.Where(l => l.FechaCierre <= consulta.FechaHasta.Value.ToUniversalTime());
+        }
+
+        query = (consulta.OrdenarPor.ToLowerInvariant(), consulta.Descendente) switch
+        {
+            ("codigo", false) => query.OrderBy(l => l.CodigoNormalizado),
+            ("codigo", true) => query.OrderByDescending(l => l.CodigoNormalizado),
+            ("presupuesto", false) => query.OrderBy(l => l.Presupuesto),
+            ("presupuesto", true) => query.OrderByDescending(l => l.Presupuesto),
+            ("fechacierre", true) => query.OrderByDescending(l => l.FechaCierre),
+            _ => query.OrderBy(l => l.FechaCierre)
+        };
+
         return await query.ToListAsync(cancellationToken);
     }
 

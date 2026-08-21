@@ -113,3 +113,14 @@ de clasificación. HU-17 agrega dos pruebas HTTP integradas: el listado
 comprueba proveedor, monto CRC, fecha de registro e indicador de mejor oferta,
 y el detalle solicita USD y comprueba la conversión con el tipo de cambio
 activo sin alterar el monto persistido.
+
+## Correcciones de cierre de la Iteracion 2
+
+El listado HU-17 responde ahora con `items`, `total`, `pagina` y
+`tamanoPagina`. Ademas de `licitacionId` y `moneda`, acepta filtro `proveedor`,
+orden por `monto`, `proveedor` o `fechaRegistro`, direccion `descendente`,
+`pagina` y `tamanoPagina` (maximo 100). La seleccion de la mejor oferta se
+calcula sobre todas las ofertas de la licitacion antes de filtrar o paginar.
+
+La cobertura HTTP integrada consta de tres casos: contrato CRC, detalle USD y
+filtro/orden/paginacion. Todos reutilizan la unica fixture PostgreSQL compartida.

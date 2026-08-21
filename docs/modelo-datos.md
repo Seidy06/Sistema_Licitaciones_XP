@@ -110,6 +110,8 @@ fecha son reglas del caso de uso; no son restricciones de base de datos.
 - `EstadosLicitacion`: catálogo único con Borrador, Publicada, Cerrada, Adjudicada y Cancelada.
 - `Licitaciones`: código único, título de hasta 250 caracteres, presupuesto `numeric(18,2)` positivo, cierre, estado y auditoría. Crear, publicar, editar y cierre funcional implementados (HU-10, HU-11, HU-12).
 - `LicitacionTransiciones`: historial de cambios de estado de licitaciones (HU-11).
+- El mismo historial registra el cierre manual `Publicada -> Cerrada` de HU-12;
+  no fue necesario cambiar el esquema ni crear una migracion adicional.
 - `Ofertas`: registro mediante API implementado en HU-14; relaciones restrictivas, monto positivo y unicidad por `(LicitacionId, ProveedorId)`.
 - `NivelesAprobacion`: límites `numeric(18,2)` y semillas Operativo, Gerencial y Directivo. Contiene checks de mínimo y rango, además de la restricción de exclusión `EX_NivelesAprobacion_SinTraslape` creada por la migración `CompleteInitialDomain`.
 - `TiposCambio`: valor `numeric(18,6)` positivo, fecha, indicador activo, índice único parcial sobre el registro activo y semilla USD/CRC con valor 500.

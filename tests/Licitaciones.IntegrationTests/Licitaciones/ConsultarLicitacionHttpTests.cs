@@ -1,5 +1,7 @@
 using System.Net;
+using System.Net.Http.Json;
 
+using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Infrastructure.Persistence;
 using Licitaciones.IntegrationTests.Common;
 using Licitaciones.IntegrationTests.Proveedores;
@@ -36,6 +38,32 @@ public sealed class ConsultarLicitacionHttpTests
         var response = await client.GetAsync("/api/v1/licitaciones");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    [Trait("HU", "HU-13")]
+    public async Task Api_GetListar_ConCodigoOrdenYPaginacion_DebeAplicarConsulta()
+    {
+        var prefijo = $"FILTRO-{Guid.NewGuid():N}";
+        await using (var context = _database.CrearContexto())
+        {
+            context.Licitaciones.AddRange(
+                Licitacion.Crear($"{prefijo}-A", "Primera", 2000m, Ahora.AddDays(2)),
+                Licitacion.Crear($"{prefijo}-B", "Segunda", 1000m, Ahora.AddDays(1)));
+            await context.SaveChangesAsync();
+        }
+
+        await using var factory = CrearApiFactory();
+        using var client = factory.CreateClient();
+        var response = await client.GetAsync(
+            $"/api/v1/licitaciones?codigo={prefijo}&ordenarPor=presupuesto" +
+            "&descendente=true&pagina=1&tamanoPagina=1");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var pagina = await response.Content.ReadFromJsonAsync<PaginaResponse>();
+        Assert.NotNull(pagina);
+        Assert.Equal(2, pagina.Total);
+        Assert.Equal("Primera", Assert.Single(pagina.Items).Titulo);
     }
 
     [Fact]
@@ -86,4 +114,12 @@ public sealed class ConsultarLicitacionHttpTests
                 });
             });
     }
+
+    private sealed record PaginaResponse(
+        IReadOnlyList<ItemResponse> Items,
+        int Total,
+        int Pagina,
+        int TamanoPagina);
+
+    private sealed record ItemResponse(Guid Id, string Titulo, decimal Presupuesto);
 }
