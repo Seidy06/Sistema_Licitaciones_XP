@@ -2,7 +2,9 @@
 
 ## Iteración 2 — Ciclo de licitaciones y ofertas
 
-**Estado: INICIADA — 18 de agosto de 2026.**
+**Estado: CERRADA — iniciada el 18 y cerrada documentalmente el 20 de agosto
+de 2026. La pequeña liberación `v0.2.0` queda pendiente de etiquetado después
+de fusionar la rama de cierre; la etiqueta aún no existe en el repositorio.**
 
 ### Objetivo
 
@@ -386,6 +388,156 @@ en la ejecución `32448992343`. La API lista ofertas por licitación y consulta
 una oferta por identificador; presenta CRC o USD usando el tipo de cambio activo
 y conserva CRC como valor persistido. La administración del tipo de cambio, su
 fecha en la presentación y las vistas MVC permanecen fuera de HU-17.
+
+## Cierre de la Iteración 2
+
+Cierre documental registrado el 20 de agosto de 2026 sobre el commit `9966565`
+de `main`, sin modificar código. Las fusiones se verificaron con
+`git log main --merges`; el estado de GitHub Actions se consultó en la API
+pública de GitHub durante este cierre; los componentes expuestos por HTTP se
+verificaron contra los controladores y el registro DI reales de `main`.
+
+### Verificación de fusión en `main`
+
+Las ocho historias seleccionadas están fusionadas en `main` mediante los PR #19
+a #26, cada uno con CI verde en el commit de fusión:
+
+| PR | Commit de fusión | Historia | SP | Ejecución de CI en `main` | Resultado |
+| --- | --- | --- | ---: | --- | --- |
+| #19 | `cccfa2d` | HU-10 — Crear licitación | 5 | `32217608694` | success |
+| #20 | `0fc34be` | HU-11 — Publicar licitación | 3 | `32258741686` | success |
+| #21 | `cbd8fed` | HU-12 — Editar y cerrar licitación | 5 | `32285499762` | success |
+| #22 | `1f5c453` | HU-13 — Listar y consultar licitaciones | 3 | `32318996472` | success |
+| #23 | `d154284` | HU-14 — Registrar oferta | 5 | `32337758472` | success |
+| #24 | `370e1ac` | HU-15 — Rechazar y auditar ofertas inválidas | 3 | `32383569802` | success |
+| #25 | `0be6570` | HU-16 — Calcular mejor oferta y clasificación de ahorro | 5 | `32397368491` | success |
+| #26 | `9966565` | HU-17 — Listar y consultar ofertas | 2 | `32450135648` | success |
+
+### Definition of Done por historia
+
+La evaluación aplica los criterios verificables de `plan-xp.md`. El criterio de
+recorridos HTTP reales obliga solo cuando la historia expone MVC o API; el
+criterio de exclusión alcanza a las historias cuyos criterios quedan cubiertos
+únicamente por pruebas directas que omiten una frontera técnica relevante.
+
+| Historia | SP | Cumple DoD | Observación verificada |
+| --- | ---: | --- | --- |
+| HU-10 | 5 | Sí | API (`POST /api/v1/licitaciones`) y MVC con recorridos HTTP reales; unicidad normalizada y CHECK de presupuesto probadas hasta PostgreSQL. |
+| HU-11 | 3 | Sí | Sin endpoint propio: sus criterios viven en Domain (`Licitacion.Publicar`) y persistencia (`licitacion_transiciones`) y se ejercitan dentro de los recorridos HTTP reales de HU-14, HU-16 y HU-17 mediante el helper compartido de pruebas. La exposición HTTP propia queda registrada como ajuste para la Iteración 3. |
+| HU-12 | 5 | **No** | Dominio, `EditarLicitacionService` y 10 pruebas unitarias fusionados, pero sin endpoints HTTP ni registro DI en Api/Web: ningún usuario puede invocar edición ni cierre. Sus criterios solo son alcanzables por prueba directa del servicio, lo que omite una frontera técnica relevante según el DoD. No cuenta para la velocidad observada. |
+| HU-13 | 3 | Sí | Endpoints `GET` de listado y detalle con estado efectivo y mejor oferta; recorridos HTTP y de persistencia reales. |
+| HU-14 | 5 | Sí | `POST /api/v1/ofertas` con orden de validación completo, FKs, CHECK e índice único probados sobre PostgreSQL real. |
+| HU-15 | 3 | Sí | Rechazos `409`/`422` e inmutabilidad de ofertas registradas verificados por HTTP real con comprobación posterior de la evidencia persistida. |
+| HU-16 | 5 | Sí | Selección, desempate, porcentaje y clasificación expuestos en el detalle y probados en Application y por HTTP real. |
+| HU-17 | 2 | Sí | Listado por licitación y detalle por identificador con CRC/USD e indicador de mejor oferta, probados por HTTP real. |
+
+El build Release, `dotnet format --verify-no-changes` (paso del workflow) y la
+suite completa sin errores ni omitidas están cubiertos por el CI verde de cada
+fusión para las ocho historias. La documentación de módulos quedó alineada en
+este cierre; `docs/modulos/ofertas.md` se corrigió para reflejar HU-17.
+
+### Velocidad planificada frente a observada
+
+- Velocidad planificada de referencia: **36 SP** (`plan-xp.md`).
+- Alcance seleccionado en el Planning Game: **31 SP**.
+- Alcance fusionado en `main`: **31 SP** (las ocho historias).
+- Velocidad observada al cierre: **26 SP**, contando únicamente las siete
+  historias que cumplen la Definition of Done (HU-10, HU-11, HU-13, HU-14,
+  HU-15, HU-16 y HU-17).
+- Desviación: **−10 SP** frente a la referencia planificada y **−5 SP** frente
+  al alcance seleccionado. La causa registrable es el pendiente de exposición
+  HTTP y DI de HU-12, no trabajo de dominio faltante: sus reglas están
+  implementadas y probadas a nivel servicio.
+
+### Ciclos TDD y refactorizaciones
+
+Las ocho historias siguieron ciclos rojo–verde–refactor con commits separados.
+El CI documenta los ciclos: los commits de pruebas en rojo fallaron
+(`dcd7ba0` en HU-11, `36c963a` en HU-12, `b869316` en HU-13, `7b1fcdd` en
+HU-14, `cecc41a` en HU-15, `0220ec8` en HU-16 y `fbfa912` en HU-17) y también
+fallaron dos verdes intermedios con pruebas o formato pendientes (`b6ed6a6` en
+HU-11 y `e62dca2` en HU-13); el commit verde final de cada rama quedó en
+success. `fc87fe0` falló únicamente por orden de imports y fue corregido en
+`7b49708` sin cambiar comportamiento.
+
+Refactorizaciones relevantes del cierre de cada ciclo (detalle por historia en
+las secciones anteriores):
+
+- HU-12: namespaces `Editar/` alineados, `LicitacionDto.FromEntity`,
+  `RepositorioEnMemoria` y helper `EstablecerEstado` compartidos.
+- HU-13: helpers `FixedClock` y `PublicarLicitacion` extraídos a un shared
+  helper de integración.
+- HU-14: `OfertaDuplicadaException` sustituye la comparación textual de errores
+  y la traducción de PostgreSQL se acota al índice único esperado.
+- HU-15: nombres de dependencias aclarados y construcción duplicada de
+  `DomainException` eliminada.
+- HU-16: `CalculadoraMejorOferta` convertida en servicio estático puro y
+  aserciones JSON sustituidas por validaciones directas del DTO.
+- HU-17: proyección compartida de oferta/proveedor y consolidación de las 22
+  clases de integración en una colección xUnit que reutiliza un único
+  Testcontainer PostgreSQL.
+
+### Participación Seidy/Tiffany
+
+La iteración acumula 46 commits entre `979e223` y `9966565`: Seidy Oporta 26
+(incluye 5 merges registrados como `Seidy06`) y Tiffany Alfaro 20 (incluye 4
+merges registrados como `tiffanyyulieth08`). La autoría alternó en las fases
+rojo, verde, refactor y documental de cada historia, y las tablas por historia
+registran la rotación Driver/Navigator. Git conserva la autoría del Driver; el
+rol Navigator se reconstruye a partir del trabajo coordinado de la pareja, sin
+atribuir sesiones sin evidencia.
+
+### Integración continua
+
+El workflow ejecuta restore, `dotnet format --verify-no-changes`, build Release
+y la suite completa con PostgreSQL 16 como servicio, en push y pull_request
+hacia `main`. Los ocho commits de fusión de la iteración terminaron en success
+(ejecuciones listadas en la tabla de fusiones). El workflow sigue sin medir
+cobertura, análisis estático ni construcción Docker.
+
+### Resultado de la demostración
+
+No existe en el repositorio un acta de demostración ni una aprobación firmada
+del cliente, por lo que no se registra retroalimentación externa. Lo demostrable
+y reproducible del incremento es:
+
+- Por HTTP real: crear licitación, registrar una oferta con sus reglas,
+  comprobar rechazos `409`/`422` y la inmutabilidad de ofertas, listar y
+  consultar licitaciones con estado efectivo, mejor oferta y clasificación de
+  ahorro, y listar/consultar ofertas en CRC o USD.
+- A nivel dominio y persistencia, ejercitado dentro de los recorridos HTTP
+  anteriores: publicar (con transición registrada) y el cierre funcional por
+  vencimiento.
+- No ejecutable aún por un usuario final: publicar, editar y cerrar desde una
+  superficie HTTP o MVC propia, porque HU-11/HU-12 no exponen endpoints ni
+  vistas.
+
+La suite que respalda esta demostración es la registrada en `pruebas.md`:
+175 pruebas superadas, 0 fallidas y 0 omitidas.
+
+### Retroalimentación y ajustes para la Iteración 3
+
+Sin acta del cliente, los ajustes se derivan exclusivamente de brechas
+verificables en el código fusionado:
+
+1. Exponer publicación, edición y cierre mediante endpoints API con registro
+   DI, completando la superficie de usuario de HU-11 y HU-12 y haciendo
+   ejecutable de punta a punta el ciclo crear → publicar → ofertar → cerrar.
+2. Incorporar paginación, filtro y ordenamiento a los listados de licitaciones
+   y ofertas: los enunciados de HU-13 y HU-17 los mencionan y los `GET`
+   actuales aún no aceptan esos parámetros.
+3. Construir las vistas MVC de licitaciones y ofertas; hoy solo existe el
+   formulario de creación.
+4. Priorizar HU-18 y HU-19 en el Planning Game: el nivel de aprobación del
+   detalle permanece `null` y la administración del tipo de cambio no existe;
+   HU-17 solo consulta el activo sembrado.
+
+### Pequeña liberación
+
+La etiqueta `v0.2.0` no existe todavía (`git tag -l` muestra solo `v0.1.0`).
+Se creará después de fusionar la rama de cierre documental, identificando el
+incremento HU-10 a HU-17 con la salvedad explícita de que la exposición HTTP de
+publicar/editar/cerrar queda pendiente para la Iteración 3.
 
 ---
 
