@@ -15,7 +15,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Licitaciones.IntegrationTests.Hu10;
 
-public sealed class CrearLicitacionHttpTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class CrearLicitacionHttpTests
 {
     private readonly PostgreSqlFixture _database;
 

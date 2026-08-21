@@ -16,6 +16,8 @@ La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedore
 | `GET /api/v1/licitaciones` | `200 OK` | No hay un contrato de error personalizado para esta acción. |
 | `GET /api/v1/licitaciones/{id}` | `200 OK` | `404 Not Found`. |
 | `POST /api/v1/licitaciones` | `201 Created` | `400 Bad Request`, `409 Conflict`. |
+| `GET /api/v1/ofertas` | `200 OK` | `400 Bad Request`. |
+| `GET /api/v1/ofertas/{id}` | `200 OK` | `400 Bad Request`, `404 Not Found`. |
 | `POST /api/v1/ofertas` | `201 Created` | `400 Bad Request`, `409 Conflict`, `422 Unprocessable Entity`. |
 | `PUT /api/v1/ofertas/{id}` | No modifica la oferta. | `422 Unprocessable Entity`. |
 | `DELETE /api/v1/ofertas/{id}` | No elimina la oferta. | `422 Unprocessable Entity`. |
@@ -192,3 +194,35 @@ asociada a una licitación cerrada, el `ProblemDetails` usa el título `Oferta
 inalterable` y explica que no puede editarse ni eliminarse. Estas rutas no
 persisten cambios: la oferta se conserva como evidencia con su licitación,
 proveedor y monto originales.
+
+## Listar y consultar ofertas (HU-17)
+
+`GET /api/v1/ofertas` requiere `licitacionId` y acepta `moneda`, cuyo valor
+predeterminado es `CRC`. Retorna las ofertas de la licitación ordenadas por
+monto y fecha de registro. Cada elemento incluye el nombre del proveedor y el
+indicador `esMejorOferta`; la mejor es la de menor monto y un empate se resuelve
+por la fecha de registro más temprana.
+
+```http
+GET /api/v1/ofertas?licitacionId=d5d2f6a1-0000-0000-0000-000000000001&moneda=CRC
+```
+
+```json
+[
+  {
+    "id": "9a3d94d0-0000-0000-0000-000000000003",
+    "proveedorNombre": "Empresa Central",
+    "monto": 8000.00,
+    "moneda": "CRC",
+    "fechaRegistro": "2026-08-20T14:30:00+00:00",
+    "esMejorOferta": true
+  }
+]
+```
+
+`GET /api/v1/ofertas/{id}` retorna el mismo DTO para una oferta o `404 Not
+Found` si no existe. En ambas rutas, `moneda=USD` presenta `monto / tipo de
+cambio USD→CRC activo`; el monto persistido continúa en CRC. Una moneda distinta
+de `CRC` o `USD`, o la ausencia de un tipo de cambio activo al solicitar USD,
+devuelve `400 Bad Request`. La respuesta no incluye todavía la fecha del tipo de
+cambio, comportamiento que permanece en el alcance futuro de HU-19.

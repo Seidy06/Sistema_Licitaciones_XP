@@ -4,7 +4,8 @@ using Licitaciones.Infrastructure.Persistence;
 
 namespace Licitaciones.IntegrationTests.Proveedores;
 
-public sealed class ProveedorConsultaPersistenceTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class ProveedorConsultaPersistenceTests
 {
     private readonly PostgreSqlFixture _database;
 

@@ -18,7 +18,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Licitaciones.IntegrationTests.Hu16;
 
-public sealed class CalcularMejorOfertaHttpTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class CalcularMejorOfertaHttpTests
 {
     private static readonly DateTimeOffset Ahora =
         new(2026, 8, 20, 12, 0, 0, TimeSpan.Zero);

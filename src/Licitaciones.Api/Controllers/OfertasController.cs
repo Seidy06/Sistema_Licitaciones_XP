@@ -1,4 +1,5 @@
 using Licitaciones.Application.Ofertas;
+using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Ofertas.Crear;
 using Licitaciones.Application.Ofertas.Proteger;
 using Licitaciones.Domain.Common;
@@ -16,13 +17,62 @@ public sealed class OfertasController : ControllerBase
 {
     private readonly CrearOfertaService _crearOfertaService;
     private readonly ProtegerOfertaService _protegerOfertaService;
+    private readonly ConsultarOfertaService _consultarOfertaService;
 
     public OfertasController(
         CrearOfertaService crearOfertaService,
-        ProtegerOfertaService protegerOfertaService)
+        ProtegerOfertaService protegerOfertaService,
+        ConsultarOfertaService consultarOfertaService)
     {
         _crearOfertaService = crearOfertaService;
         _protegerOfertaService = protegerOfertaService;
+        _consultarOfertaService = consultarOfertaService;
+    }
+
+    [HttpGet]
+    [ProducesResponseType<IReadOnlyList<OfertaConsultaDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<IReadOnlyList<OfertaConsultaDto>>> Listar(
+        [FromQuery] Guid licitacionId,
+        [FromQuery] string moneda = "CRC",
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return Ok(await _consultarOfertaService.ListarAsync(
+                licitacionId, moneda, cancellationToken));
+        }
+        catch (DomainException exception)
+        {
+            return BadRequest(CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Consulta de ofertas inválida",
+                exception.Message));
+        }
+    }
+
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType<OfertaConsultaDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<OfertaConsultaDto>> Obtener(
+        Guid id,
+        [FromQuery] string moneda = "CRC",
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var oferta = await _consultarOfertaService.ObtenerAsync(
+                id, moneda, cancellationToken);
+            return oferta is null ? NotFound() : Ok(oferta);
+        }
+        catch (DomainException exception)
+        {
+            return BadRequest(CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Consulta de oferta inválida",
+                exception.Message));
+        }
     }
 
     [HttpPost]

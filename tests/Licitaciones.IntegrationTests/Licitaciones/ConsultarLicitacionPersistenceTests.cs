@@ -13,7 +13,8 @@ using Ofertas = Licitaciones.Domain.Ofertas;
 
 namespace Licitaciones.IntegrationTests.Hu13;
 
-public sealed class ConsultarLicitacionPersistenceTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class ConsultarLicitacionPersistenceTests
 {
     private static readonly DateTimeOffset Ahora =
         new(2026, 8, 19, 12, 0, 0, TimeSpan.Zero);

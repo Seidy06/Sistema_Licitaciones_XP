@@ -34,7 +34,8 @@ public sealed class ProveedorHttpContractTests
     }
 }
 
-public sealed class ProveedorHttpTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class ProveedorHttpTests
 {
     private readonly PostgreSqlFixture _database;
 

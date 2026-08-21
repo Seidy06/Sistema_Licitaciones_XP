@@ -14,7 +14,8 @@ using MvcController = Licitaciones.Web.Controllers.ProveedoresController;
 
 namespace Licitaciones.IntegrationTests.Proveedores;
 
-public sealed class ProveedorEdicionHttpMvcTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class ProveedorEdicionHttpMvcTests
 {
     private readonly PostgreSqlFixture _database;
 

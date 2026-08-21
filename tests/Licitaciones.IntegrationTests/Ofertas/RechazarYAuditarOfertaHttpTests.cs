@@ -20,7 +20,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Licitaciones.IntegrationTests.Hu15;
 
-public sealed class RechazarYAuditarOfertaHttpTests : IClassFixture<PostgreSqlFixture>
+[Collection(PostgreSqlCollection.Name)]
+public sealed class RechazarYAuditarOfertaHttpTests
 {
     private static readonly DateTimeOffset Ahora =
         new(2030, 1, 15, 12, 0, 0, TimeSpan.Zero);
