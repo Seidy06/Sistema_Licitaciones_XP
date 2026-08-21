@@ -3,10 +3,10 @@
 ## Cobertura existente
 
 - `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de ahorro y nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo.
-- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; y HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta a través del endpoint de detalle.
+- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; y HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta.
 - `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC y el formulario de crear licitación.
 
-Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, Testcontainers inicia `postgres:16-alpine`; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
+Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, una colección compartida de xUnit inicia una sola instancia `postgres:16-alpine` para las 22 clases integradas y la elimina al terminar; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
 
 ## Comandos reproducibles
 
@@ -35,15 +35,15 @@ Remove-Item Env:LICITACIONES_INTEGRATION_CONNECTION_STRING
 
 ## Resultado verificado para el cierre
 
-Ejecución local del 20 de agosto de 2026, después del refactor de HU-16 y con
+Ejecución local del 21 de agosto de 2026, después del refactor de HU-17 y con
 PostgreSQL real iniciado por Testcontainers:
 
 | Proyecto | Superadas | Fallidas | Omitidas |
 | --- | ---: | ---: | ---: |
 | `Licitaciones.UnitTests` | 81 | 0 | 0 |
-| `Licitaciones.IntegrationTests` | 89 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 91 | 0 | 0 |
 | `Licitaciones.FunctionalTests` | 3 | 0 | 0 |
-| **Total ejecutado** | **173** | **0** | **0** |
+| **Total ejecutado** | **175** | **0** | **0** |
 
 Para HU-14, la cobertura específica incluye 8 casos unitarios del servicio, 6
 casos HTTP y 7 casos de persistencia (contando por separado los datos de las
@@ -59,6 +59,12 @@ integrados. Cubren menor monto, desempate por `FechaRegistro`, mensaje sin
 ofertas, ahorro exactamente igual a 10 %, ahorro entre 0 % y 10 %, y oferta
 igual al presupuesto. Las cinco pruebas HTTP usan PostgreSQL real mediante
 Testcontainers.
+
+Para HU-17 se agregaron dos casos HTTP integrados. El listado comprueba
+proveedor, monto CRC, fecha de registro y selección de la mejor oferta; el
+detalle solicita USD y comprueba la conversión mediante el tipo de cambio activo
+sin modificar el monto almacenado. Ambas pruebas recorren API, Application,
+Infrastructure y PostgreSQL real.
 
 Los recorridos end-to-end crean clientes sobre hosts ASP.NET Core reales. Así
 verifican activación por DI, routing, model binding, serialización, vistas,

@@ -24,7 +24,7 @@ y estimaciones se conservan sin reestimarlas en este inicio formal.
 | 5 | HU-15 — Rechazar y auditar ofertas inválidas | Alta | 3 | HU-14 y HU-12 para verificar duplicidad, exceso de presupuesto, vencimiento e inmutabilidad tras el cierre. | Terminada. |
 | 6 | HU-16 — Calcular mejor oferta y clasificación de ahorro | Alta | 5 | HU-14 para disponer de ofertas válidas. El nivel de aprobación correspondiente depende de HU-18, planificada para la Iteración 3. | Terminada. |
 | 7 | HU-13 — Listar y consultar licitaciones | Media | 3 | HU-12 y HU-16 para mostrar estado efectivo y mejor oferta. El nivel de aprobación depende de HU-18. | Terminada. |
-| 8 | HU-17 — Listar y consultar ofertas | Media | 2 | HU-14 y HU-16. La presentación alternable en USD depende del servicio de conversión de HU-19, planificado para la Iteración 3. | Seleccionada; no terminada |
+| 8 | HU-17 — Listar y consultar ofertas | Media | 2 | HU-14 y HU-16. Reutiliza el tipo de cambio activo existente para presentación en USD; la administración y fecha del tipo de cambio permanecen en HU-19. | Terminada. |
 |  | **Total seleccionado** |  | **31** | **26 SP de prioridad alta y 5 SP de prioridad media.** | **Velocidad observada no registrada** |
 
 El orden prioriza primero el recorrido ejecutable crear → publicar → ofertar →
@@ -334,6 +334,58 @@ clasificaciones `Oferta conveniente`, `Oferta aceptable` u `Oferta válida sin
 ahorro`; cuando no existen ofertas muestra `Sin ofertas válidas`. No se agregó
 listado de ofertas, conversión monetaria, vistas MVC ni comportamiento de
 historias futuras.
+
+### HU-17 — Listar y consultar ofertas
+
+#### Estado
+
+| Historia | SP | Estado |
+| --- | ---: | --- |
+| HU-17 — Listar y consultar ofertas | 2 | Terminada: listado por licitación y detalle por identificador con proveedor, monto CRC/USD, fecha de registro e indicador de mejor oferta. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-17 | Tiffany | Seidy | `fbfa912` |
+| VERDE HU-17 | Seidy | Tiffany | `fc87fe0`, `7b49708` |
+| Refactor HU-17 | Tiffany | Seidy | `6010638` |
+
+Los roles se registran a partir de la autoría alternada de los commits; Git
+conserva la autoría del Driver, no evidencia independiente del rol Navigator.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `fbfa912` — `test(ofertas): cubrir criterios de listar y consultar ofertas (HU-17)` | Agregó dos pruebas HTTP con PostgreSQL real para listado por licitación y detalle en USD. Fijó proveedor, monto, moneda, fecha de registro e indicador de mejor oferta; ambas fallaron inicialmente con `405 Method Not Allowed`. |
+| VERDE | `fc87fe0` — `feat(ofertas): implementar listar y consultar ofertas (HU-17)` | Incorporó servicio y DTO de consulta, repositorio con proveedor y tipo de cambio activo, endpoints GET y registro DI. `7b49708` ordenó imports para satisfacer CI sin cambiar comportamiento. |
+| Refactor | `6010638` — `refactor(ofertas): simplificar implementacion de HU-17` | Extrajo la proyección compartida de oferta y proveedor en el repositorio. Además consolidó las 22 clases integradas en una colección xUnit que reutiliza un solo PostgreSQL Testcontainer, evitando la creación paralela de contenedores. No agregó comportamiento de negocio. |
+
+#### Commits
+
+- `fbfa912` — pruebas de criterios de aceptación (ROJO).
+- `fc87fe0` — implementación mínima (VERDE).
+- `7b49708` — corrección de formato/imports para CI.
+- `6010638` — refactorización sin cambio funcional y fixture PostgreSQL compartida.
+
+#### Resultado
+
+La verificación final del 21 de agosto de 2026 se ejecutó con
+`dotnet test Licitaciones.sln --configuration Release --no-restore --no-build`
+y PostgreSQL real mediante una única instancia de Testcontainers compartida. El
+resultado fue:
+
+- 81 pruebas unitarias superadas.
+- 91 pruebas de integración superadas.
+- 3 pruebas funcionales superadas.
+- 0 fallidas y 0 omitidas; 175 ejecutadas.
+
+GitHub Actions confirmó el commit de refactor `6010638` con resultado exitoso
+en la ejecución `32448992343`. La API lista ofertas por licitación y consulta
+una oferta por identificador; presenta CRC o USD usando el tipo de cambio activo
+y conserva CRC como valor persistido. La administración del tipo de cambio, su
+fecha en la presentación y las vistas MVC permanecen fuera de HU-17.
 
 ---
 
