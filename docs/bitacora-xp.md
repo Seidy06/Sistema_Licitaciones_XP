@@ -1,5 +1,55 @@
 # Bitácora XP
 
+## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
+
+**Estado: INICIADA.**
+
+### Objetivo de la pequeña liberación
+
+Incorporar niveles de aprobación parametrizables, administración y conversión
+CRC/USD, una experiencia web completa con navegación, tema, mensajería y
+formato `es-CR`, y una API REST versionada documentada mediante OpenAPI/Swagger.
+
+### Planning Game y velocidad planificada
+
+Se seleccionan HU-18 a HU-27 en el orden del catálogo. Suman **38 SP**. La
+velocidad planificada de referencia permanece en **36 SP**; los 2 SP adicionales
+se registran como riesgo explícito de alcance. No existe todavía velocidad
+observada de la Iteración 3 y no se calculará hasta contar con evidencia de
+cierre. Ninguna historia está marcada como terminada.
+
+El orden y las dependencias son: HU-18 y HU-19 establecen las capacidades de
+negocio; HU-20 inicia la experiencia informativa; HU-21 establece la navegación;
+HU-22 depende del layout; HU-23 integra los casos de uso en MVC; HU-24 y HU-25
+uniforman retroalimentación y presentación; HU-26 consolida los contratos REST;
+HU-27 documenta interactivamente esos contratos. El desarrollo aplicará ciclos
+TDD rojo–verde–refactor, programación en pareja, integración continua y
+pequeñas liberaciones; las Issues se usan únicamente como trazabilidad XP.
+
+### Pareja, trazabilidad y ramas previstas
+
+La primera sesión queda asignada con **Tiffany como Driver/responsable
+principal** y **Seidy como Navigator/revisión** para HU-18. La pareja rota los
+roles en cada historia prevista:
+
+| Orden | HU | Prioridad | SP | Driver | Navigator | Issue | Estado inicial | Rama prevista |
+| ---: | --- | --- | ---: | --- | --- | --- | --- | --- |
+| 1 | HU-18 | Alta | 5 | Tiffany | Seidy | [#47](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/47) | OPEN; no iniciada | `iteracion-3/hu-18-niveles-aprobacion` |
+| 2 | HU-19 | Alta | 5 | Seidy | Tiffany | [#48](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/48) | OPEN; no iniciada | `iteracion-3/hu-19-tipo-cambio` |
+| 3 | HU-20 | Media | 3 | Tiffany | Seidy | [#49](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/49) | OPEN; no iniciada | `iteracion-3/hu-20-landing-page` |
+| 4 | HU-21 | Media | 2 | Seidy | Tiffany | [#50](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/50) | OPEN; no iniciada | `iteracion-3/hu-21-navegacion-global` |
+| 5 | HU-22 | Baja | 2 | Tiffany | Seidy | [#51](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/51) | OPEN; no iniciada | `iteracion-3/hu-22-tema-claro-oscuro` |
+| 6 | HU-23 | Alta | 8 | Seidy | Tiffany | [#52](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/52) | OPEN; no iniciada | `iteracion-3/hu-23-crud-web-completo` |
+| 7 | HU-24 | Media | 2 | Tiffany | Seidy | [#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53) | OPEN; no iniciada | `iteracion-3/hu-24-mensajeria` |
+| 8 | HU-25 | Baja | 1 | Seidy | Tiffany | [#54](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/54) | OPEN; no iniciada | `iteracion-3/hu-25-formato-es-cr` |
+| 9 | HU-26 | Alta | 8 | Tiffany | Seidy | [#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55) | OPEN; no iniciada | `iteracion-3/hu-26-api-rest-versionada` |
+| 10 | HU-27 | Media | 2 | Seidy | Tiffany | [#56](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/56) | OPEN; no iniciada | `iteracion-3/hu-27-swagger` |
+
+Las Issues son exclusivamente tarjetas de trazabilidad XP. Sus criterios
+permanecen sin marcar hasta que exista evidencia real en pruebas, código,
+integración continua y documentación. No se registran commits, Pull Requests,
+resultados de CI ni pequeñas liberaciones que aún no existen.
+
 ## Corrección posterior a la auditoría final de Iteración 2
 
 Driver: Codex. Navigator/responsable: Tiffany. La auditoría detectó que HU-11 y
