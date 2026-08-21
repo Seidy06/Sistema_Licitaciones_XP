@@ -37,6 +37,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** tener la estructura base del repositorio (solución .NET 9, carpetas `/src`, `/tests`, `/docs`, `/k8s`, `/docker`) con Git y `.gitignore` configurados
 - **Para:** iniciar el desarrollo incremental con una base limpia y trazable
 - **Prioridad:** Alta | **Estimación:** 2 SP
+- **Issue GitHub:** [#37](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/37) — referencia retrospectiva de Iteración 1.
 - **Criterios de aceptación:**
   - Given un repositorio vacío, When se ejecuta el setup inicial, Then existe una solución `.sln` con proyectos `Domain`, `Application`, `Infrastructure`, `Web` (MVC) y `Api`.
   - Given la estructura creada, When se revisa el repositorio, Then existen carpetas `/docs`, `/docs/assets`, `/k8s`, `/tests` vacías o con placeholders.
@@ -48,6 +49,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** registrar en `/docs/plan-xp.md` el plan de liberaciones, iteraciones y reglas de trabajo XP, y en `/docs/historias-usuario.md` el catálogo de historias con prioridad y estimación
 - **Para:** dejar evidencia verificable del proceso XP exigido por el proyecto
 - **Prioridad:** Alta | **Estimación:** 2 SP
+- **Issue GitHub:** [#38](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/38) — referencia retrospectiva del catálogo vigente de Iteración 1; no confundir con la numeración histórica del Issue #8.
 - **Criterios de aceptación:**
   - Given el archivo `/docs/plan-xp.md`, When se abre, Then contiene releases, iteraciones cortas, prácticas XP aplicadas (Planning Game, TDD, refactorización, integración continua, propiedad colectiva) y velocidad planificada.
   - Given `/docs/historias-usuario.md`, When se abre, Then contiene todas las historias con ID, prioridad, estimación y criterios de aceptación.
@@ -62,6 +64,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** definir las entidades `Proveedor`, `Licitacion`, `Oferta`, `NivelAprobacion`, `TipoCambio` y `EstadoLicitacion` en la capa `Domain`
 - **Para:** contar con un modelo de dominio rico, sin dependencias de infraestructura, que exprese las reglas de negocio
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#39](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/39) — referencia retrospectiva de Iteración 1.
 - **Criterios de aceptación:**
   - Given la capa Domain, When se compila, Then no tiene referencias a Entity Framework Core ni a ASP.NET.
   - Given la entidad `Proveedor`, When se instancia, Then el `Id` es generado internamente (Guid) y no editable desde fuera del constructor/factory.
@@ -74,6 +77,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** configurar `AppDbContext` con Npgsql (proveedor de PostgreSQL) y mapeos Fluent API para todas las entidades
 - **Para:** persistir el dominio en PostgreSQL respetando tipos, precisión decimal y restricciones
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#40](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/40) — referencia retrospectiva de Iteración 1.
 - **Criterios de aceptación:**
   - Given el `AppDbContext`, When se configura `Oferta.Monto`, Then el tipo de columna es `numeric(18,2)`.
   - Given la cadena de conexión, When se lee en tiempo de ejecución, Then proviene de variables de entorno/`appsettings` con soporte para secretos, no hardcodeada.
@@ -85,6 +89,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** generar la migración inicial de EF Core y datos semilla para `EstadoLicitacion`, `NivelAprobacion` y `TipoCambio`
 - **Para:** tener una base de datos reproducible desde cero en cualquier entorno
 - **Prioridad:** Alta | **Estimación:** 3 SP
+- **Issue GitHub:** [#41](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/41) — referencia retrospectiva de Iteración 1.
 - **Criterios de aceptación:**
   - Given una base de datos vacía, When se ejecuta `dotnet ef database update`, Then se crean todas las tablas, índices únicos, llaves foráneas y restricciones CHECK descritas en el modelo de datos.
   - Given la migración aplicada, When se consultan las tablas de catálogo, Then existen los 5 estados de licitación, al menos 3 niveles de aprobación sin traslape y un tipo de cambio activo inicial.
@@ -95,6 +100,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** un servicio `IClock`/`ISystemClock` inyectable que exponga la fecha/hora actual en UTC
 - **Para:** permitir pruebas deterministas de vencimiento de licitaciones y ofertas
 - **Prioridad:** Alta | **Estimación:** 2 SP
+- **Issue GitHub:** [#42](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/42) — referencia retrospectiva de Iteración 1.
 - **Criterios de aceptación:**
   - Given un servicio que valida vencimiento, When se inyecta `IClock`, Then no usa `DateTime.Now`/`DateTime.UtcNow` directamente.
   - Given una prueba unitaria, When se usa un `FakeClock` con fecha fija, Then el resultado de la validación es determinista y reproducible.
@@ -109,6 +115,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** registrar un proveedor indicando su nombre
 - **Para:** poder asociarlo posteriormente a ofertas de licitaciones
 - **Prioridad:** Alta | **Estimación:** 3 SP
+- **Issue GitHub:** [#8](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/8) — Issue histórico titulado “HU-01 Registrar proveedor”, equivalente a HU-06 en el catálogo vigente; se conserva sin recrearlo.
 - **Criterios de aceptación:**
   - Given un nombre válido y único, When se registra el proveedor, Then se persiste con `Id` autogenerado y `CreatedAt` establecido.
   - Given un nombre con espacios repetidos o mayúsculas/minúsculas distintas a uno ya existente tras normalización, When se intenta registrar, Then se rechaza con código 409/mensaje "proveedor duplicado".
@@ -123,6 +130,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** editar el nombre de un proveedor existente
 - **Para:** corregir datos manteniendo la integridad de unicidad
 - **Prioridad:** Media | **Estimación:** 2 SP
+- **Issue GitHub:** [#43](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/43) — referencia retrospectiva de Iteración 1.
 - **Criterios de aceptación:**
   - Given un proveedor existente, When se edita a un nombre que normalizado colisiona con otro proveedor activo, Then se rechaza la edición.
   - Given una edición concurrente con datos desactualizados (versión distinta), When se guarda, Then se detecta `DbUpdateConcurrencyException` y se informa al usuario para refrescar.
@@ -133,6 +141,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** eliminar un proveedor, con confirmación previa
 - **Para:** dar de baja proveedores sin perder trazabilidad de ofertas históricas
 - **Prioridad:** Media | **Estimación:** 3 SP
+- **Issue GitHub:** [#44](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/44) — referencia retrospectiva de Iteración 1.
 - **Criterios de aceptación:**
   - Given un proveedor sin ofertas asociadas, When se elimina, Then se aplica borrado lógico (`DeletedAt` establecido) tras confirmación explícita del usuario.
   - Given un proveedor con ofertas relacionadas, When se intenta eliminar físicamente, Then el sistema lo impide y traduce el error de integridad referencial a un mensaje controlado.
@@ -144,6 +153,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** listar proveedores con paginación, filtro por nombre y ordenamiento
 - **Para:** ubicar proveedores fácilmente en catálogos grandes
 - **Prioridad:** Media | **Estimación:** 3 SP
+- **Issue GitHub:** [#45](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/45) — referencia retrospectiva de Iteración 1.
 - **Criterios de aceptación:**
   - Given una lista de proveedores, When se solicita una página con tamaño N, Then se retorna solo esa porción junto con metadatos de paginación (total, página actual).
   - Given un filtro de texto, When se aplica, Then solo se muestran proveedores cuyo nombre lo contenga (case-insensitive).
@@ -159,6 +169,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** crear una licitación con código único, título, presupuesto y fecha/hora de cierre seleccionada mediante calendario
 - **Para:** iniciar el proceso de recepción de ofertas
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#29](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/29) — referencia retrospectiva de Iteración 2.
 - **Criterios de aceptación:**
   - Given un código ya existente (ignorando espacios laterales y mayúsculas/minúsculas), When se intenta crear, Then se rechaza como duplicado.
   - Given un presupuesto menor o igual a cero, When se intenta crear, Then se rechaza en cliente, servidor y base de datos (CHECK).
@@ -171,6 +182,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** publicar una licitación en estado `Borrador`
 - **Para:** habilitarla a recibir ofertas de proveedores
 - **Prioridad:** Alta | **Estimación:** 3 SP
+- **Issue GitHub:** [#30](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/30) — referencia retrospectiva de Iteración 2.
 - **Criterios de aceptación:**
   - Given una licitación en `Borrador`, When se publica, Then transiciona a `Publicada` y se registra la transición (tabla `licitacion_transiciones`).
   - Given una licitación en cualquier estado distinto de `Borrador`, When se intenta publicar, Then se rechaza indicando la transición inválida.
@@ -182,6 +194,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** editar datos permitidos de una licitación y cerrarla manual o automáticamente por vencimiento
 - **Para:** mantener el flujo de licitación consistente con la realidad temporal
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#31](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/31) — referencia retrospectiva de Iteración 2.
 - **Criterios de aceptación:**
   - Given una licitación cuya `FechaCierre` ya se alcanzó, When se consulta su estado efectivo, Then el sistema la trata como cerrada funcionalmente aunque el campo `Estado` todavía almacene `Publicada` (regla de "cierre funcional").
   - Given un presupuesto que se intenta reducir por debajo de una oferta ya registrada, When se guarda la edición, Then se rechaza.
@@ -193,6 +206,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** listar licitaciones con paginación, filtro (por estado, código, rango de fechas) y ordenamiento
 - **Para:** dar seguimiento al proceso de licitación
 - **Prioridad:** Media | **Estimación:** 3 SP
+- **Issue GitHub:** [#32](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/32) — referencia retrospectiva de Iteración 2.
 - **Criterios de aceptación:**
   - Given un filtro por estado efectivo (incluyendo cierre funcional), When se aplica, Then el listado refleja el estado real, no solo el campo persistido.
   - Given el detalle de una licitación, When se consulta, Then muestra la mejor oferta actual, su clasificación y el nivel de aprobación correspondiente.
@@ -207,6 +221,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** registrar una oferta económica de un proveedor para una licitación publicada
 - **Para:** participar en el proceso de licitación
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#33](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/33) — referencia retrospectiva de Iteración 2.
 - **Criterios de aceptación:**
   - Given una licitación no publicada o cerrada (formal o funcionalmente), When se intenta registrar una oferta, Then se rechaza con mensaje claro.
   - Given la fecha/hora actual igual o posterior a la fecha de cierre, When se intenta registrar, Then se rechaza (oferta vencida), usando `IClock` para la comparación.
@@ -220,6 +235,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** intentar registrar ofertas inválidas (duplicada, superior al presupuesto, vencida) y verificar su rechazo explícito
 - **Para:** garantizar la integridad del proceso de licitación (flujo funcional mínimo exigido por el proyecto)
 - **Prioridad:** Alta | **Estimación:** 3 SP
+- **Issue GitHub:** [#34](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/34) — referencia retrospectiva de Iteración 2.
 - **Criterios de aceptación:**
   - Given los tres escenarios (duplicada, sobre presupuesto, vencida), When se ejecutan como pruebas de integración/funcionales, Then todos son rechazados con el código HTTP y mensaje correspondiente (409/422).
   - Given una oferta cerrada (perteneciente a una licitación cerrada), When se intenta editar o eliminar, Then se rechaza siempre, conservándose como evidencia inalterable.
@@ -230,6 +246,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** consultar la mejor oferta de una licitación, su clasificación de ahorro y el nivel de aprobación correspondiente
 - **Para:** tomar decisiones informadas sobre la adjudicación
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#35](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/35) — referencia retrospectiva de Iteración 2.
 - **Criterios de aceptación:**
   - Given varias ofertas válidas, When se calcula la mejor oferta, Then es la de menor monto en CRC; en caso de empate, se selecciona la registrada primero (por `FechaRegistro`).
   - Given ninguna oferta válida, When se consulta, Then se muestra "Sin ofertas válidas".
@@ -243,6 +260,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** listar ofertas de una licitación con paginación, filtro y ordenamiento
 - **Para:** revisar el detalle de participación de proveedores
 - **Prioridad:** Media | **Estimación:** 2 SP
+- **Issue GitHub:** [#36](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/36) — referencia retrospectiva de Iteración 2.
 - **Criterios de aceptación:**
   - Given una licitación con ofertas, When se listan, Then se muestra proveedor, monto (CRC y USD alternable), fecha de registro y si es la mejor oferta.
 - **Notas técnicas:** Reutilizar el servicio de conversión CRC/USD de HU-19.
