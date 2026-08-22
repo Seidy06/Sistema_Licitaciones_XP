@@ -16,4 +16,23 @@ public sealed class TipoCambio : IAuditableEntity
     public bool Activo { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }
+
+    public static TipoCambio Crear(decimal valor, DateOnly fecha)
+    {
+        if (valor <= 0)
+        {
+            throw new DomainException("El valor del tipo de cambio debe ser mayor que cero.");
+        }
+
+        return new TipoCambio
+        {
+            MonedaOrigen = "USD",
+            MonedaDestino = "CRC",
+            Valor = valor,
+            Fecha = fecha,
+            Activo = true
+        };
+    }
+
+    public void Desactivar() => Activo = false;
 }

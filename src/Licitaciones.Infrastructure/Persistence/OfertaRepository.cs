@@ -1,6 +1,7 @@
 using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Ofertas.Crear;
 using Licitaciones.Application.Ofertas.Proteger;
+using Licitaciones.Application.TiposCambio;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Domain.Ofertas;
 using Licitaciones.Domain.Proveedores;
@@ -67,14 +68,20 @@ public sealed class OfertaRepository :
                 _context.Ofertas.Where(oferta => oferta.Id == id))
             .FirstOrDefaultAsync(cancellationToken);
 
-    public Task<decimal?> ObtenerTipoCambioUsdCrcAsync(
+    public Task<TipoCambioDto?> ObtenerTipoCambioUsdCrcAsync(
         CancellationToken cancellationToken = default) =>
         _context.TiposCambio
             .Where(tipo =>
                 tipo.Activo
                 && tipo.MonedaOrigen == "USD"
                 && tipo.MonedaDestino == "CRC")
-            .Select(tipo => (decimal?)tipo.Valor)
+            .Select(tipo => new TipoCambioDto(
+                tipo.Id,
+                tipo.MonedaOrigen,
+                tipo.MonedaDestino,
+                tipo.Valor,
+                tipo.Fecha,
+                tipo.Activo))
             .SingleOrDefaultAsync(cancellationToken);
 
     public async Task AgregarAsync(

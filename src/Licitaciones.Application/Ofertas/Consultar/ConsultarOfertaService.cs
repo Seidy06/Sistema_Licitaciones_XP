@@ -92,7 +92,7 @@ public sealed class ConsultarOfertaService
             ? await _repository.ObtenerTipoCambioUsdCrcAsync(cancellationToken)
             : null;
 
-        if (monedaNormalizada == "USD" && tipoCambio is null or <= 0)
+        if (monedaNormalizada == "USD" && (tipoCambio is null || tipoCambio.Valor <= 0))
         {
             throw new DomainException("No existe un tipo de cambio activo para USD.");
         }
@@ -107,10 +107,12 @@ public sealed class ConsultarOfertaService
             .Select(x => new OfertaConsultaDto(
                 x.Id,
                 x.ProveedorNombre,
-                monedaNormalizada == "USD" ? x.Monto / tipoCambio!.Value : x.Monto,
+                monedaNormalizada == "USD" ? x.Monto / tipoCambio!.Valor : x.Monto,
                 monedaNormalizada,
                 x.FechaRegistro,
-                x.Id == mejorOfertaId))
+                x.Id == mejorOfertaId,
+                monedaNormalizada == "USD" ? tipoCambio!.Valor : null,
+                monedaNormalizada == "USD" ? tipoCambio!.Fecha : null))
             .ToArray();
     }
 }
