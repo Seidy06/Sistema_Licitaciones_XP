@@ -11,7 +11,7 @@ no se agregaron fixtures ni contenedores por historia.
 ## Cobertura existente
 
 - `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de ahorro y nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo.
-- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; y HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta.
+- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta; y HU-18 sobre traslapes de rangos activos, rechazo del segundo rango abierto y resolución del aprobador desde la tabla.
 - `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC y el formulario de crear licitación.
 
 Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, una colección compartida de xUnit inicia una sola instancia `postgres:16-alpine` para las 22 clases integradas y la elimina al terminar; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
@@ -73,6 +73,33 @@ proveedor, monto CRC, fecha de registro y selección de la mejor oferta; el
 detalle solicita USD y comprueba la conversión mediante el tipo de cambio activo
 sin modificar el monto almacenado. Ambas pruebas recorren API, Application,
 Infrastructure y PostgreSQL real.
+
+## Resultado verificado para HU-18 (Iteración 3)
+
+Ejecución local del 22 de agosto de 2026 con `dotnet test Licitaciones.sln`,
+después del refactor de HU-18 y con PostgreSQL real iniciado por Testcontainers:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 83 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 101 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 3 | 0 | 0 |
+| **Total ejecutado** | **187** | **0** | **0** |
+
+HU-18 aporta cinco pruebas de integración sobre PostgreSQL real, todas con el
+trait `HU-18`. Dos (`NivelAprobacionOverlapPersistenceTests`) comprueban dentro
+de una transacción revertida que la restricción de exclusión rechaza un segundo
+rango traslapado y un segundo rango abierto con el error `23P01`. Tres
+(`NivelAprobacionAdminHttpTests`) verifican por HTTP real que el traslape
+responde `409 Conflict` sin persistir el segundo nivel, que un segundo rango
+abierto se rechaza con `409`, y que la resolución consulta realmente la tabla:
+inserta un nivel especial, resuelve un monto dentro de su rango y restaura el
+catálogo sembrado.
+
+La suite completa se ejecutó antes y después del refactor. En CI, el commit
+rojo `bd1f3d6` falló como es esperable en TDD (ejecución `32532418505`), el
+verde `249ab70` terminó en `success` (ejecución `32534822110`) y el refactor
+`1224ece` terminó en `success` (ejecución `32556366636`).
 
 Los recorridos end-to-end crean clientes sobre hosts ASP.NET Core reales. Así
 verifican activación por DI, routing, model binding, serialización, vistas,
