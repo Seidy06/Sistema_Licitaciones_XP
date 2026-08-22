@@ -32,6 +32,8 @@ La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedore
 | `POST /api/v1/ofertas` | `201 Created` | `400 Bad Request`, `409 Conflict`, `422 Unprocessable Entity`. |
 | `PUT /api/v1/ofertas/{id}` | No modifica la oferta. | `422 Unprocessable Entity`. |
 | `DELETE /api/v1/ofertas/{id}` | No elimina la oferta. | `422 Unprocessable Entity`. |
+| `POST /api/v1/niveles-aprobacion` | `201 Created` | `400 Bad Request`, `409 Conflict`. |
+| `GET /api/v1/niveles-aprobacion/resolver` | `200 OK` | `404 Not Found`. |
 
 ## Listar y consultar
 
@@ -237,3 +239,49 @@ cambio USD→CRC activo`; el monto persistido continúa en CRC. Una moneda disti
 de `CRC` o `USD`, o la ausencia de un tipo de cambio activo al solicitar USD,
 devuelve `400 Bad Request`. La respuesta no incluye todavía la fecha del tipo de
 cambio, comportamiento que permanece en el alcance futuro de HU-19.
+
+## Niveles de aprobación (HU-18)
+
+### Crear
+
+```http
+POST /api/v1/niveles-aprobacion
+Content-Type: application/json
+
+{
+  "nombre": "Compras Menores",
+  "montoMinimo": 0,
+  "montoMaximo": 1000000
+}
+```
+
+Una solicitud válida devuelve `201 Created`, una cabecera `Location` con
+`/api/v1/niveles-aprobacion/{id}` y el DTO siguiente:
+
+```json
+{ "id": 4, "nombre": "Compras Menores" }
+```
+
+Devuelve `409 Conflict` con título `Rango de aprobación en conflicto` cuando el
+rango traslapa un nivel activo, incluido el intento de crear un segundo rango
+abierto. Devuelve `400 Bad Request` con título `Nivel de aprobación inválido`
+para nombre vacío, monto mínimo negativo o máximo menor o igual que el mínimo.
+La creación aún no tiene operaciones complementarias: editar, listar y
+desactivar no están expuestos por API.
+
+### Resolver aprobador
+
+```http
+GET /api/v1/niveles-aprobacion/resolver?monto=7500000
+```
+
+Devuelve `200 OK` con el nivel activo que contiene el monto, eligiendo el de
+`MontoMinimo` más alto entre los que lo contienen:
+
+```json
+{ "id": 2, "nombre": "Gerencial" }
+```
+
+Si ningún nivel activo contiene el monto devuelve `404 Not Found`. La resolución
+consulta la tabla `NivelesAprobacion`; no existe lógica condicional fija por
+rangos en el código.

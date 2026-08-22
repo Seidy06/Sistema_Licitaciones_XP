@@ -50,9 +50,71 @@ permanecen sin marcar hasta que exista evidencia real en pruebas, código,
 integración continua y documentación. No se registran commits, Pull Requests,
 resultados de CI ni pequeñas liberaciones que aún no existen.
 
+### HU-18 — Administrar niveles de aprobación
+
+#### Estado
+
+| Historia | SP | Estado |
+| --- | ---: | --- |
+| HU-18 — Administrar niveles de aprobación | 5 | Criterios de aceptación cubiertos y verificados: creación con rechazo de traslapes en servidor y base de datos, rechazo del segundo rango abierto y resolución del aprobador consultando la tabla. La creación y la resolución están expuestas por API; las operaciones de editar, listar y desactivar mencionadas en el enunciado permanecen fuera de este incremento y se reportan como alcance restante. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-18 | Tiffany | Seidy | `bd1f3d6` |
+| VERDE HU-18 | Seidy | Tiffany | `249ab70` |
+| Refactor HU-18 | Tiffany | Seidy | `1224ece` |
+
+Los roles conservan la asignación planificada (Tiffany Driver, Seidy Navigator)
+y se reconstruyen a partir de la autoría alternada de los commits; Git conserva
+la autoría del Driver, no evidencia independiente del rol Navigator.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `bd1f3d6` — `test(aprobacion): cubrir criterios de administrar niveles de aprobación (tabla parametrizable) (HU-18)` | Agregó cinco pruebas de integración sobre PostgreSQL real: dos de persistencia para la restricción de exclusión (traslape y segundo rango abierto, error `23P01`) y tres HTTP (`409` sin persistir el segundo nivel, segundo rango abierto rechazado y resolución desde la tabla con restauración del catálogo). CI falló como es esperable en rojo (ejecución `32532418505`). |
+| VERDE | `249ab70` — `feat(aprobacion): implementar administrar niveles de aprobación (tabla parametrizable) (HU-18)` | Incorporó `NivelAprobacion.Crear`, `AdministrarNivelesAprobacionService`, `ResolverNivelAprobacionService`, `INivelAprobacionRepository`, `NivelAprobacionRepository`, el controlador `NivelesAprobacionController` con registro DI, la migración `AdministrarNivelesAprobacionHu18` (columna `Activo`, restricción de exclusión filtrada y secuencia de identificadores) y la consulta activa del resolutor. CI en `success` (ejecución `32534822110`). |
+| Refactor | `1224ece` — `refactor(aprobacion): simplificar implementacion de HU-18` | Renombró `ResolverNivelAprobacion` a `ResolverAsync` (redundancia con el nombre de la clase), alineó el helper `Problema` con la convención `CrearProblema` del resto de controladores y eliminó una línea sobrante en la interfaz del repositorio. Sin comportamiento nuevo; build sin errores ni advertencias. CI en `success` (ejecución `32556366636`). |
+
+#### Commits
+
+- `bd1f3d6` — pruebas de criterios de aceptación (ROJO).
+- `249ab70` — implementación mínima (VERDE).
+- `1224ece` — refactorización sin cambio funcional.
+
+#### Resultado de pruebas (HU-18)
+
+La suite completa se ejecutó localmente antes y después del refactor el 22 de
+agosto de 2026 con `dotnet test Licitaciones.sln` y PostgreSQL real mediante
+Testcontainers. Resultado final:
+
+- 83 pruebas unitarias superadas.
+- 101 pruebas de integración superadas (incluye las 5 de HU-18).
+- 3 pruebas funcionales superadas.
+- 0 fallidas y 0 omitidas; 187 ejecutadas.
+
+#### Pendientes y candidatos a Issues separadas
+
+1. Las operaciones de editar, listar y desactivar del enunciado de HU-18 no
+   están implementadas; solo creación y resolución quedaron cubiertas por los
+   criterios de aceptación de la Issue #47.
+2. Duplicación del helper `CrearProblema` en los cuatro controladores API,
+   con inconsistencia adicional en el campo `Type` de `ProblemDetails`.
+3. Ausencia de pruebas unitarias de `AdministrarNivelesAprobacionService` y
+   `ResolverNivelAprobacionService`; su cobertura actual es únicamente de
+   integración.
+4. `ResolverNivelAprobacionService` depende de `ILicitacionConsultaRepository`
+   del módulo de consulta de licitaciones en lugar de una abstracción propia
+   del módulo de aprobaciones.
+
+Estos puntos no se ocultaron dentro de HU-18: se registran como candidatos a
+Issues separadas. La Issue #47 permanece abierta y no se cierra desde esta fase.
+
 ## Corrección posterior a la auditoría final de Iteración 2
 
-Driver: Codex. Navigator/responsable: Tiffany. La auditoría detectó que HU-11 y
+Driver: Tiffany. Navigator/responsable: Seidy. La auditoría detectó que HU-11 y
 HU-12 no tenían superficie HTTP y que HU-13/HU-17 no completaban paginación,
 filtro y ordenamiento. Se agregaron pruebas unitarias y HTTP sobre PostgreSQL
 real, luego las operaciones Domain/Application/API y los contratos paginados.

@@ -1,6 +1,6 @@
 # Modelo de datos
 
-El modelo ejecutable está definido por `LicitacionesDbContext`, las configuraciones Fluent API y cuatro migraciones: `CreateProviders`, `CompleteInitialDomain`, `AddProveedorSoftDelete` e `ImplementCreateTenderHu10`/`ImplementPublishTenderHu11`.
+El modelo ejecutable está definido por `LicitacionesDbContext`, las configuraciones Fluent API y cuatro migraciones: `CreateProviders`, `CompleteInitialDomain`, `AddProveedorSoftDelete` e `ImplementCreateTenderHu10`/`ImplementPublishTenderHu11`. La migración `AdministrarNivelesAprobacionHu18` agrega la columna `Activo` de niveles de aprobación y su secuencia de identificadores.
 
 ```mermaid
 erDiagram
@@ -36,7 +36,8 @@ erDiagram
     NIVELES_APROBACION { int Id PK
         varchar Nombre
         decimal MontoMinimo
-        decimal MontoMaximo }
+        decimal MontoMaximo
+        bool Activo }
     TIPOS_CAMBIO { int Id PK
         varchar MonedaOrigen
         varchar MonedaDestino
@@ -105,6 +106,23 @@ sola oferta por proveedor y licitación, incluso ante registros concurrentes.
 El límite de la oferta respecto al presupuesto y la admisión por estado o
 fecha son reglas del caso de uso; no son restricciones de base de datos.
 
+## NivelesAprobacion
+
+| Columna | Tipo PostgreSQL | Regla |
+| --- | --- | --- |
+| `Id` | `integer` | Clave primaria; valor por defecto desde la secuencia `NivelesAprobacion_Id_seq`, iniciada en 4 tras las semillas. |
+| `Nombre` | `varchar(100)` | Obligatorio. |
+| `MontoMinimo` | `numeric(18,2)` | CHECK `CK_NivelesAprobacion_Minimo` (`>= 0`). |
+| `MontoMaximo` | `numeric(18,2)` | Nullable; CHECK `CK_NivelesAprobacion_Rango` (`MontoMaximo IS NULL OR MontoMaximo > MontoMinimo`). |
+| `Activo` | `boolean` | Por defecto `true`; filtra tanto la restricción de exclusión como la resolución del aprobador. |
+| `CreatedAt` / `UpdatedAt` | `timestamp with time zone` | Auditoría asignada por el contexto. |
+
+La restricción de exclusión `EX_NivelesAprobacion_SinTraslape` usa
+`EXCLUDE USING gist (numrange("MontoMinimo", "MontoMaximo", '[)') WITH &&)`
+con `WHERE ("Activo")`: impide dos niveles activos con rangos que se
+traslapen, incluido un segundo rango abierto, y fue recreada por
+`AdministrarNivelesAprobacionHu18` para aplicar ese filtro.
+
 ## Estado funcional del modelo
 
 - `EstadosLicitacion`: catálogo único con Borrador, Publicada, Cerrada, Adjudicada y Cancelada.
@@ -113,7 +131,7 @@ fecha son reglas del caso de uso; no son restricciones de base de datos.
 - El mismo historial registra el cierre manual `Publicada -> Cerrada` de HU-12;
   no fue necesario cambiar el esquema ni crear una migracion adicional.
 - `Ofertas`: registro mediante API implementado en HU-14; relaciones restrictivas, monto positivo y unicidad por `(LicitacionId, ProveedorId)`.
-- `NivelesAprobacion`: límites `numeric(18,2)` y semillas Operativo, Gerencial y Directivo. Contiene checks de mínimo y rango, además de la restricción de exclusión `EX_NivelesAprobacion_SinTraslape` creada por la migración `CompleteInitialDomain`.
+- `NivelesAprobacion`: límites `numeric(18,2)`, columna `Activo` y semillas Operativo, Gerencial y Directivo. Contiene checks de mínimo y rango, además de la restricción de exclusión `EX_NivelesAprobacion_SinTraslape`, recreada por la migración `AdministrarNivelesAprobacionHu18` con filtro `WHERE ("Activo")`. HU-18 expone la creación y la resolución del aprobador; editar, listar y desactivar no están implementados todavía.
 - `TiposCambio`: valor `numeric(18,6)` positivo, fecha, indicador activo, índice único parcial sobre el registro activo y semilla USD/CRC con valor 500.
 
 Las entidades auditables reciben `CreatedAt` y `UpdatedAt` desde `LicitacionesDbContext` mediante `IClock`.
