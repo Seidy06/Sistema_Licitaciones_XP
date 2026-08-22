@@ -27,7 +27,7 @@ public sealed class NivelesAprobacionController : ControllerBase
         decimal monto,
         CancellationToken cancellationToken)
     {
-        var nivel = await _resolver.ResolverNivelAprobacion(monto, cancellationToken);
+        var nivel = await _resolver.ResolverAsync(monto, cancellationToken);
         return nivel is null ? NotFound() : Ok(nivel);
     }
 
@@ -47,15 +47,15 @@ public sealed class NivelesAprobacionController : ControllerBase
         }
         catch (NivelAprobacionConflictoException exception)
         {
-            return Conflict(Problema(409, "Rango de aprobación en conflicto", exception.Message));
+            return Conflict(CrearProblema(409, "Rango de aprobación en conflicto", exception.Message));
         }
         catch (DomainException exception)
         {
-            return BadRequest(Problema(400, "Nivel de aprobación inválido", exception.Message));
+            return BadRequest(CrearProblema(400, "Nivel de aprobación inválido", exception.Message));
         }
     }
 
-    private ProblemDetails Problema(int status, string title, string detail) => new()
+    private ProblemDetails CrearProblema(int status, string title, string detail) => new()
     {
         Status = status,
         Title = title,

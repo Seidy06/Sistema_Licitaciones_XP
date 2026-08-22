@@ -9,7 +9,7 @@ public sealed class ResolverNivelAprobacionService
     public ResolverNivelAprobacionService(ILicitacionConsultaRepository repository) =>
         _repository = repository;
 
-    public Task<LicitacionNivelAprobacionDto?> ResolverNivelAprobacion(
+    public Task<LicitacionNivelAprobacionDto?> ResolverAsync(
         decimal monto,
         CancellationToken cancellationToken = default) =>
         _repository.ObtenerNivelAprobacionAsync(monto, cancellationToken);

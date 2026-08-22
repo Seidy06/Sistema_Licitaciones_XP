@@ -12,5 +12,4 @@ public interface INivelAprobacionRepository
     Task AgregarAsync(
         NivelAprobacion nivel,
         CancellationToken cancellationToken = default);
-
 }
