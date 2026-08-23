@@ -251,6 +251,55 @@ Estos puntos no se ocultaron dentro de HU-20: se registran como candidatos a
 Issues separadas. La Issue #49 permanece abierta y no se cierra ni marca sus
 criterios desde esta fase.
 
+### HU-21 — Menú de navegación global
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-21 — Menú de navegación global | 2 | [#50](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/50) | Criterios cubiertos y verificados localmente; la Issue permanece abierta y no se marca como completada desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-21 | Seidy | Tiffany | `a9dd711` |
+| VERDE HU-21 | Tiffany | Seidy | `0e226e7` |
+| Ajuste de estilo HU-21 | Tiffany | Seidy | `b206f9c` |
+| Refactor HU-21 | Seidy | Tiffany | `e2fbd06` |
+
+Los roles siguen la asignación planificada para HU-21 y se contrastan con la
+autoría alternada de los commits; Git conserva la autoría del Driver, no una
+evidencia independiente del rol Navigator.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+| Criterio de aceptación de la Issue #50 | Prueba | Evidencia de commits |
+| --- | --- | --- |
+| Cualquier página del sitio muestra el menú global y resalta la sección activa. | `Layout_CualquierPagina_DebeMostrarMenuGlobalConTodosLosModulos`, `Layout_EnPaginaInicio_DebeResaltarSeccionActiva` y `Layout_EnPaginaDeOtraSeccion_DebeMoverElResaltadoALaSeccionCorrespondiente` en `NavegacionGlobalWebTests`. | ROJO `a9dd711`; VERDE `0e226e7`; ajuste de estilo `b206f9c`; REFACTOR `e2fbd06`. |
+| El enlace de documentación de API abre Swagger UI. | `EnlaceADocumentacionApi_DebeAbrirSwaggerUi` en `NavegacionGlobalWebTests`. | ROJO `a9dd711`; VERDE `0e226e7`; ajuste de estilo `b206f9c`; REFACTOR `e2fbd06`. |
+
+El ROJO agregó las pruebas funcionales con trait `HU-21`; el VERDE incorporó
+el layout y el partial de navegación; el ajuste de estilo ordenó imports sin
+cambiar comportamiento; y el REFACTOR redujo la duplicación del marcado de
+las secciones MVC con una colección de rutas y etiquetas, sin ampliar la
+Issue. La prueba filtrada de HU-21 terminó con 6 correctas, 0 fallidas y 0
+omitidas. La suite completa local del 22 de agosto de 2026 terminó con 199
+correctas, 0 fallidas y 0 omitidas.
+
+#### Pull Request
+
+No existe un Pull Request de HU-21 creado o verificable en esta fase; por tanto
+no se inventa un número ni un estado de CI. La rama actual contiene los cuatro
+commits anteriores y la Issue #50 permanece abierta, sin cerrarse ni marcarse
+como completada.
+
+#### Pendientes y candidatos a Issues separadas
+
+No se identificó trabajo nuevo durante esta fase de refactor. Los cambios se
+limitaron al partial de navegación y no modificaron API, modelo de datos,
+Docker ni interfaces CRUD de otros módulos.
+
 ## Corrección posterior a la auditoría final de Iteración 2
 
 Driver: Tiffany. Navigator/responsable: Seidy. La auditoría detectó que HU-11 y

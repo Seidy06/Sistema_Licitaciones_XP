@@ -1,6 +1,6 @@
 # Módulo de interfaz web
 
-`Licitaciones.Web` usa ASP.NET Core MVC, vistas Razor, Bootstrap y validación unobtrusive. El incremento funcional de la Iteración 1 corresponde a proveedores; la Iteración 3 inicia la experiencia informativa con la landing page (HU-20).
+`Licitaciones.Web` usa ASP.NET Core MVC, vistas Razor, Bootstrap y validación unobtrusive. El incremento funcional de la Iteración 1 corresponde a proveedores; la Iteración 3 inicia la experiencia informativa con la landing page (HU-20) y la navegación global (HU-21).
 
 | Ruta MVC | Función |
 | --- | --- |
@@ -27,3 +27,18 @@ conversión monetaria mediante tarjetas en una rejilla responsiva Bootstrap
 (`col-12 col-md-6 col-xl-4`). La plantilla conserva además las páginas base
 Home y Privacy; siguen sin existir interfaces funcionales para licitaciones,
 ofertas, niveles de aprobación ni tipos de cambio (corresponden a HU-23).
+
+## Navegación global (HU-21)
+
+El layout compartido `Views/Shared/_Layout.cshtml` incluye el partial
+`Views/Shared/_NavegacionGlobal.cshtml` en todas las páginas MVC. El menú ofrece
+enlaces a Inicio (`/`), Licitaciones (`/Licitaciones`), Proveedores
+(`/Proveedores`), Ofertas (`/Ofertas`), Niveles de aprobación
+(`/NivelesAprobacion`), Tipo de cambio (`/TiposCambio`) y la documentación
+interactiva de la API (`/swagger/index.html`). La sección activa se determina a
+partir de la ruta HTTP actual y se marca con la clase `active`.
+
+La navegación solo proporciona los enlaces globales; no crea interfaces MVC
+adicionales para módulos cuyo CRUD web corresponde a HU-23. La evidencia de los
+dos criterios de aceptación está en las pruebas funcionales de
+`NavegacionGlobalWebTests`.
