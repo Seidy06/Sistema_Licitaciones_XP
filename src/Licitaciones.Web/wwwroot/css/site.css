@@ -29,3 +29,30 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+:root {
+  --lic-superficie: #ffffff;
+  --lic-texto: #212529;
+  --lic-borde: rgba(0, 0, 0, 0.175);
+}
+
+[data-bs-theme='dark'] {
+  color-scheme: dark;
+  --lic-superficie: #1b1f22;
+  --lic-texto: #e9ecef;
+  --lic-borde: rgba(255, 255, 255, 0.175);
+}
+
+[data-bs-theme='dark'] header nav.navbar {
+  background-color: var(--lic-superficie) !important;
+}
+
+[data-bs-theme='dark'] header nav.navbar .nav-link,
+[data-bs-theme='dark'] header nav.navbar .navbar-brand {
+  color: var(--lic-texto) !important;
+}
+
+[data-bs-theme='dark'] footer.footer {
+  background-color: var(--lic-superficie);
+  border-top-color: var(--lic-borde) !important;
+}

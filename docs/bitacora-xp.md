@@ -300,6 +300,101 @@ No se identificó trabajo nuevo durante esta fase de refactor. Los cambios se
 limitaron al partial de navegación y no modificaron API, modelo de datos,
 Docker ni interfaces CRUD de otros módulos.
 
+### HU-22 — Modo claro/oscuro persistente
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-22 — Modo claro/oscuro persistente | 2 | [#51](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/51) | Criterios cubiertos y verificados localmente (ROJO confirmado, VERDE y suite completa en verde, REFACTOR aplicado); la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-22 | Tiffany | Seidy | `12aa5c4` |
+| VERDE HU-22 | Seidy | Tiffany | `9975a05` |
+| Refactor HU-22 | Sin commit | Sin commit | Cambios locales pendientes de publicar |
+
+Los roles del ROJO y del VERDE se reconstruyen a partir de la autoría
+alternada de los commits (`12aa5c4` firmado por Tiffany, `9975a05` por Seidy);
+Git conserva la autoría del Driver, no una evidencia independiente del rol
+Navigator. El refactor aún no tiene commit, por lo que sus roles quedan sin
+registrar hasta que exista esa evidencia.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+| Criterio de aceptación de la Issue #51 | Prueba | Evidencia de commits |
+| --- | --- | --- |
+| Given el control de tema, When se cambia, Then la preferencia persiste entre sesiones (almacenamiento local del navegador). | `Layout_CualquierPagina_DebeMostrarControlVisibleParaAlternarTema` y `ControlDeTema_AlCambiar_DebePersistirPreferenciaEntreSesionesEnLocalStorage` en `TemaClaroOscuroWebTests`. | ROJO `12aa5c4`; VERDE `9975a05`; REFACTOR local sin commit. |
+| Given una nueva visita, When se carga la página, Then se respeta el último tema seleccionado. | `NuevaVisita_AlCargarPagina_DebeRespetarUltimoTemaSeleccionado` en `TemaClaroOscuroWebTests`. | ROJO `12aa5c4`; VERDE `9975a05`; REFACTOR local sin commit. |
+
+El ROJO agregó cinco casos funcionales HTTP con trait `HU-22` en
+`TemaClaroOscuroWebTests` y su ejecución filtrada terminó con 5 fallidas y 0
+superadas por comportamiento ausente: sin control `theme-toggle`, sin lógica de
+`localStorage` y sin paleta oscura. El VERDE incorporó el botón accesible en el
+partial de navegación, el script inicial contra parpadeo en el layout, la
+alternancia con persistencia en `site.js` y la paleta oscura en `site.css`;
+la ejecución filtrada quedó 5 correctas, 0 fallidas y 0 omitidas. El REFACTOR,
+aplicado localmente el 23 de agosto de 2026 sin commit todavía, eliminó la
+aplicación inicial del tema duplicada en `site.js` (quedó como única
+responsabilidad del script del layout), inlineó el helper usado una sola vez y
+añadió el salto de línea final de `site.css`, sin comportamiento nuevo. La
+suite completa posterior al refactor terminó con 204 correctas, 0 fallidas y 0
+omitidas.
+
+#### Commits
+
+- `12aa5c4` — `test(web): cubrir criterios de modo claro/oscuro persistente (HU-22)` (ROJO).
+- `9975a05` — `feat(web): implementar modo claro/oscuro persistente (HU-22)` (VERDE).
+- REFACTOR: cambios locales en `site.js` y `site.css` sin commit ni push en esta fase.
+
+#### Pull Request
+
+El PR [#62](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/62)
+(`iteracion-3/hu-22-modo-claro-oscuro` hacia `main`) está abierto, en estado
+mergeable, con los commits `12aa5c4` y `9975a05`; su verificación
+(`Build and Test`) está en verde. Los cambios del refactor permanecen locales y
+aún no forman parte del PR. La Issue #51 permanece abierta, sin cerrarse ni
+marcarse como completada.
+
+Nota de trazabilidad: la rama prevista registrada en Planning Game era
+`iteracion-3/hu-22-tema-claro-oscuro`, pero la rama real de trabajo es
+`iteracion-3/hu-22-modo-claro-oscuro`; la diferencia de nombre no altera
+alcance, criterios ni contenido de la historia.
+
+#### Resultado de pruebas (HU-22)
+
+Ejecuciones locales del 23 de agosto de 2026 con PostgreSQL real mediante
+Testcontainers:
+
+1. Fase ROJO, filtrada con `dotnet test tests\Licitaciones.FunctionalTests --filter "HU=HU-22"`:
+   5 fallidas y 0 superadas, todas por aserciones de comportamiento ausente.
+2. Fase VERDE, misma ejecución filtrada: 5 correctas, 0 fallidas, 0 omitidas.
+3. Tras el refactor, suite completa con `dotnet test Licitaciones.sln`:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 83 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 105 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| **Total ejecutado** | **204** | **0** | **0** |
+
+#### Pendientes y candidatos a Issues separadas
+
+1. El ícono del control de tema (&#9788;) es fijo y no refleja el tema activo;
+   mostrar un ícono distinto por tema es comportamiento nuevo fuera del alcance
+   de la Issue #51.
+2. La colección de páginas `PaginasDelSitio` se duplica entre
+   `NavegacionGlobalWebTests` (HU-21) y `TemaClaroOscuroWebTests` (HU-22);
+   extraerla a un dato compartido toca pruebas de otra historia.
+3. Discrepancia entre el nombre de rama previsto y el real, registrada como
+   nota de trazabilidad.
+
+Estos puntos no se ocultaron dentro de HU-22: se registran como candidatos a
+Issues separadas. La Issue #51 permanece abierta y no se cierra ni marca sus
+criterios desde esta fase.
+
 ## Corrección posterior a la auditoría final de Iteración 2
 
 Driver: Tiffany. Navigator/responsable: Seidy. La auditoría detectó que HU-11 y
