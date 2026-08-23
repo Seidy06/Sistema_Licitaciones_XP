@@ -34,6 +34,8 @@ La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedore
 | `DELETE /api/v1/ofertas/{id}` | No elimina la oferta. | `422 Unprocessable Entity`. |
 | `POST /api/v1/niveles-aprobacion` | `201 Created` | `400 Bad Request`, `409 Conflict`. |
 | `GET /api/v1/niveles-aprobacion/resolver` | `200 OK` | `404 Not Found`. |
+| `POST /api/v1/tipos-cambio` | `201 Created` | `400 Bad Request`. |
+| `GET /api/v1/tipos-cambio/activo` | `200 OK` | `404 Not Found`. |
 
 ## Listar y consultar
 
@@ -228,7 +230,9 @@ GET /api/v1/ofertas?licitacionId=d5d2f6a1-0000-0000-0000-000000000001&moneda=CRC
     "monto": 8000.00,
     "moneda": "CRC",
     "fechaRegistro": "2026-08-20T14:30:00+00:00",
-    "esMejorOferta": true
+    "esMejorOferta": true,
+    "tipoCambioValor": null,
+    "tipoCambioFecha": null
   }
 ]
 ```
@@ -237,8 +241,9 @@ GET /api/v1/ofertas?licitacionId=d5d2f6a1-0000-0000-0000-000000000001&moneda=CRC
 Found` si no existe. En ambas rutas, `moneda=USD` presenta `monto / tipo de
 cambio USD→CRC activo`; el monto persistido continúa en CRC. Una moneda distinta
 de `CRC` o `USD`, o la ausencia de un tipo de cambio activo al solicitar USD,
-devuelve `400 Bad Request`. La respuesta no incluye todavía la fecha del tipo de
-cambio, comportamiento que permanece en el alcance futuro de HU-19.
+devuelve `400 Bad Request`. Cuando la moneda es `USD`, la respuesta incluye
+`tipoCambioValor` y `tipoCambioFecha` del tipo de cambio utilizado (HU-19);
+con `CRC` ambos campos son nulos.
 
 ## Niveles de aprobación (HU-18)
 
@@ -285,3 +290,41 @@ Devuelve `200 OK` con el nivel activo que contiene el monto, eligiendo el de
 Si ningún nivel activo contiene el monto devuelve `404 Not Found`. La resolución
 consulta la tabla `NivelesAprobacion`; no existe lógica condicional fija por
 rangos en el código.
+
+## Tipos de cambio (HU-19)
+
+### Guardar tipo de cambio
+
+`POST /api/v1/tipos-cambio` registra un nuevo tipo de cambio activo USD→CRC y
+desactiva automáticamente cualquier registro previamente activo: siempre
+existe como máximo un tipo de cambio activo. Devuelve `201 Created`, una
+cabecera `Location` con `/api/v1/tipos-cambio/{id}` y el DTO siguiente:
+
+```http
+POST /api/v1/tipos-cambio
+Content-Type: application/json
+
+{ "valor": 512, "fecha": "2026-08-22" }
+```
+
+```json
+{
+  "id": 2,
+  "monedaOrigen": "USD",
+  "monedaDestino": "CRC",
+  "valor": 512,
+  "fecha": "2026-08-22",
+  "activo": true
+}
+```
+
+Devuelve `400 Bad Request` con título `Tipo de cambio inválido` cuando el
+valor no es mayor que cero.
+
+### Consultar tipo de cambio activo
+
+`GET /api/v1/tipos-cambio/activo` devuelve `200 OK` con el registro activo en
+el mismo formato, o `404 Not Found` si no existe ninguno. La conversión de
+ofertas en USD (`?moneda=USD`) consume este mismo registro administrado
+localmente, sin llamadas a servicios externos. No existen todavía edición,
+historial ni desactivación explícita por API.
