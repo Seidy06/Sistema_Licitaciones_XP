@@ -1,0 +1,45 @@
+@{
+    var rutaActual = ViewContext.HttpContext.Request.Path.Value ?? "/";
+
+    bool EsSeccionActiva(string seccion) =>
+        seccion == "/"
+            ? rutaActual == "/" || rutaActual.StartsWith("/Home", StringComparison.OrdinalIgnoreCase)
+            : rutaActual.StartsWith(seccion, StringComparison.OrdinalIgnoreCase);
+
+    string ClaseEnlace(string seccion) =>
+        EsSeccionActiva(seccion) ? "nav-link text-dark active" : "nav-link text-dark";
+}
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Licitaciones.Web</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item">
+                    <a class="@ClaseEnlace("/")" href="/">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="@ClaseEnlace("/Licitaciones")" href="/Licitaciones">Licitaciones</a>
+                </li>
+                <li class="nav-item">
+                    <a class="@ClaseEnlace("/Proveedores")" href="/Proveedores">Proveedores</a>
+                </li>
+                <li class="nav-item">
+                    <a class="@ClaseEnlace("/Ofertas")" href="/Ofertas">Ofertas</a>
+                </li>
+                <li class="nav-item">
+                    <a class="@ClaseEnlace("/NivelesAprobacion")" href="/NivelesAprobacion">Niveles de aprobación</a>
+                </li>
+                <li class="nav-item">
+                    <a class="@ClaseEnlace("/TiposCambio")" href="/TiposCambio">Tipo de cambio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="/swagger/index.html">Documentación de API</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
