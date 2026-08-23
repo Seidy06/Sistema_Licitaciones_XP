@@ -1,5 +1,5 @@
 using Licitaciones.Application.Aprobaciones;
-using Licitaciones.Application.Proveedores.Consultar;
+using Licitaciones.Application.Common;
 using Licitaciones.Domain.Common;
 using Licitaciones.Web.Models.NivelesAprobacion;
 

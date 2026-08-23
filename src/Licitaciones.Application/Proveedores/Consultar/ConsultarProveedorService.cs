@@ -1,3 +1,4 @@
+using Licitaciones.Application.Common;
 using Licitaciones.Domain.Proveedores;
 
 namespace Licitaciones.Application.Proveedores.Consultar;

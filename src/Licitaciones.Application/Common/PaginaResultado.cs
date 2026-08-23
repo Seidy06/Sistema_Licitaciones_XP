@@ -1,4 +1,4 @@
-namespace Licitaciones.Application.Proveedores.Consultar;
+namespace Licitaciones.Application.Common;
 
 public sealed record PaginaResultado<T>(
     IReadOnlyList<T> Items,

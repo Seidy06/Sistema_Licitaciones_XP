@@ -1,6 +1,6 @@
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Application.Licitaciones.Crear;
-using Licitaciones.Application.Proveedores.Consultar;
+using Licitaciones.Application.Common;
 using Licitaciones.Domain.Common;
 using Licitaciones.Web.Models.Licitaciones;
 

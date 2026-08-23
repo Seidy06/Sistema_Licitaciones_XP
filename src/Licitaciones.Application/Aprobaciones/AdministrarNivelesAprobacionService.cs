@@ -1,5 +1,5 @@
 using Licitaciones.Application.Licitaciones.Consultar;
-using Licitaciones.Application.Proveedores.Consultar;
+using Licitaciones.Application.Common;
 using Licitaciones.Domain.Aprobaciones;
 using Licitaciones.Domain.Common;
 

@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 
 using Licitaciones.Application.Proveedores;
+using Licitaciones.Application.Common;
 using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Domain.Ofertas;
