@@ -90,14 +90,21 @@ public sealed class ProveedorCreacionMvcTests
     [Fact]
     public void CreateView_DebeRenderizarMensajesDeValidacionDelNombre()
     {
-        var viewPath = Path.Combine(
-            FindSolutionDirectory(), "src", "Licitaciones.Web", "Views",
-            "Proveedores", "Create.cshtml");
+        var viewsPath = Path.Combine(
+            FindSolutionDirectory(), "src", "Licitaciones.Web", "Views");
 
-        var markup = File.ReadAllText(viewPath);
+        var markup = File.ReadAllText(
+            Path.Combine(viewsPath, "Proveedores", "Create.cshtml"));
 
-        Assert.Contains("asp-validation-summary=\"ModelOnly\"", markup, StringComparison.Ordinal);
         Assert.Contains("asp-validation-for=\"Nombre\"", markup, StringComparison.Ordinal);
+
+        Assert.Contains("<partial name=\"_Mensajes\"", markup, StringComparison.Ordinal);
+        var parcialMensajes = File.ReadAllText(
+            Path.Combine(viewsPath, "Shared", "_Mensajes.cshtml"));
+        Assert.Contains(
+            "asp-validation-summary=\"ModelOnly\"",
+            parcialMensajes,
+            StringComparison.Ordinal);
     }
 
     private static MvcController CrearController(LicitacionesDbContext context)

@@ -1,3 +1,6 @@
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
+
 using Licitaciones.Application.Aprobaciones;
 using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Consultar;
@@ -21,6 +24,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton(HtmlEncoder.Create(
+    UnicodeRanges.BasicLatin,
+    UnicodeRanges.Latin1Supplement));
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<CrearProveedorService>();
 builder.Services.AddScoped<ConsultarProveedorService>();

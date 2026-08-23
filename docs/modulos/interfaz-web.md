@@ -1,6 +1,6 @@
 # Módulo de interfaz web
 
-`Licitaciones.Web` usa ASP.NET Core MVC, vistas Razor, Bootstrap y validación unobtrusive. El incremento funcional de la Iteración 1 corresponde a proveedores; la Iteración 3 incorpora la experiencia informativa con la landing page (HU-20), la navegación global (HU-21), el modo claro/oscuro persistente (HU-22) y el CRUD web de HU-23.
+`Licitaciones.Web` usa ASP.NET Core MVC, vistas Razor, Bootstrap y validación unobtrusive. El incremento funcional de la Iteración 1 corresponde a proveedores; la Iteración 3 incorpora la experiencia informativa con la landing page (HU-20), la navegación global (HU-21), el modo claro/oscuro persistente (HU-22), el CRUD web de HU-23 y la mensajería unificada de éxito y error de HU-24.
 
 | Ruta MVC | Función |
 | --- | --- |
@@ -24,7 +24,7 @@
 | `GET /TiposCambio` | Listar, ordenar y paginar tipos de cambio. |
 | `GET/POST /TiposCambio/Create` | Mostrar formulario y registrar un tipo de cambio. |
 
-Los POST usan token antifalsificación. Los errores de nombre se presentan en el modelo, los conflictos de concurrencia en el resumen y los identificadores inexistentes producen 404. Tras crear o editar se usa `TempData` para el mensaje de éxito.
+Los POST usan token antifalsificación. Los errores de nombre se presentan en el modelo, los conflictos de concurrencia en el resumen y los identificadores inexistentes producen 404. Tras crear o editar se usa `TempData` para el mensaje de éxito, que las vistas muestran mediante el partial compartido `_Mensajes` (HU-24).
 
 Web aplica las migraciones de EF Core durante el arranque. Este comportamiento
 puede desactivarse con `Database:ApplyMigrationsOnStartup=false` para hosts de
@@ -75,3 +75,26 @@ persistencia de servidor. La evidencia de los dos criterios de aceptación está
 en las pruebas funcionales de `TemaClaroOscuroWebTests`. El ícono del control es
 fijo y no refleja el tema activo; ese refinamiento visual quedó registrado como
 candidato a Issue separada.
+
+## Mensajería de éxito y error (HU-24)
+
+El partial compartido `Views/Shared/_Mensajes.cshtml` centraliza la
+retroalimentación de las operaciones MVC. Cuando un controlador fija
+`TempData["MensajeExito"]`, el partial lo muestra como alerta Bootstrap
+dismisible (`alert alert-success`) en la vista destino, de modo que el mensaje
+sobrevive a la redirección posterior a crear, eliminar o desactivar. Cuando el
+`ModelState` contiene errores, el resumen `asp-validation-summary="ModelOnly"`
+se presenta dentro de una alerta `alert-danger`: los mensajes provienen de las
+reglas de dominio y aplicación (por ejemplo, traslape de rangos de niveles de
+aprobación) y son específicos y comprensibles, sin exponer stack traces.
+
+El partial está incluido en nueve vistas de los cinco módulos:
+`Licitaciones/Index`, `Ofertas/Index`, `Ofertas/Create`,
+`NivelesAprobacion/Index`, `NivelesAprobacion/Create`, `Proveedores/Create`,
+`Proveedores/Edit`, `TiposCambio/Index` y `TiposCambio/Create`. `Program.cs` registra un
+`HtmlEncoder` con los rangos `BasicLatin` y `Latin1Supplement` para que los
+mensajes con acentos se muestren correctamente. La evidencia de los criterios
+está en las pruebas de integración de `MensajeriaWebTests`; la variante de
+advertencia del título de la historia aún no tiene flujos que produzcan
+`TempData["MensajeAdvertencia"]` y quedó registrada como candidato a Issue
+separada.
