@@ -35,6 +35,6 @@ public sealed class PlantillaWebTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Licitaciones.Web", html, StringComparison.Ordinal);
-        Assert.Contains("Welcome", html, StringComparison.Ordinal);
+        Assert.Contains("Sistema de Licitaciones", html, StringComparison.Ordinal);
     }
 }
