@@ -184,6 +184,73 @@ Estos puntos no se ocultaron dentro de HU-19: se registran como candidatos a
 Issues separadas. La Issue #48 permanece abierta y no se cierra ni marca sus
 criterios desde esta fase.
 
+### HU-20 — Landing page informativa
+
+#### Estado
+
+| Historia | SP | Estado |
+| --- | ---: | --- |
+| HU-20 — Landing page informativa | 3 | Criterios de aceptación cubiertos y verificados: la ruta raíz `/` responde `200 OK` a un visitante sin autenticación mostrando las seis secciones explicativas (propósito de la aplicación, flujo de licitación, ofertas, mejor oferta, nivel de aprobación y conversión monetaria), y con un agente móvil se comprueba la meta viewport, la hoja de estilos Bootstrap, el cuerpo dentro de `<main>` y la rejilla por puntos de ruptura. La vista es Razor estática servida por un controlador delgado; el menú de navegación global pertenece a HU-21 y el CRUD web a HU-23. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO+VERDE HU-20 | Tiffany | Seidy | `8062619` |
+| Refactor HU-20 | Seidy | Tiffany | Sin commit: evaluado y rechazado |
+
+Los roles conservan la asignación planificada (Tiffany Driver, Seidy
+Navigator) con rotación por fase y se reconstruyen a partir de la autoría
+alternada de los commits; Git conserva la autoría del Driver, no evidencia
+independiente del rol Navigator.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO+VERDE | `8062619` — `test(web): cubrir criterios de landing page informativa (HU-20)` | Publicó en un único commit las dos pruebas funcionales con trait `HU-20` (acceso anónimo a la raíz con las seis secciones explicativas y responsividad con agente móvil: viewport con `width=device-width`, Bootstrap, cuerpo en `<main>` y al menos tres clases de columna por breakpoint) junto con la implementación mínima: la vista Razor estática `Views/Home/Index.cshtml` con el encabezado y las tarjetas explicativas. Ajustó a `HU-00` el trait de la prueba de plantilla preexistente sin alterar sus aserciones. Desviación de proceso registrada: al combinarse pruebas e implementación en un solo commit no existe evidencia separada de ROJO ni ejecución de CI fallida para esta historia. CI en `success` (ejecución `32613192010`). |
+| Refactor | Sin commit | Se evaluó eliminar la duplicación de los cinco bloques de tarjeta extrayéndolos a un bucle Razor; la extracción rompió la prueba porque `HtmlEncoder.Default` escapa los caracteres fuera de Basic Latin («licitaci&#243;n») y las alternativas (`Html.Raw` o reconfigurar el encoder global en `Program.cs`) eran compensaciones peores que la duplicación idiomática de una página estática. Se revirtió sin dejar cambios y la suite completa permaneció verde antes y después (193 pruebas). No se fabricó commit de refactor. |
+
+#### Commits
+
+- `8062619` — pruebas de los dos criterios de aceptación e implementación mínima de la vista (ROJO+VERDE combinados en un único commit publicado).
+
+#### Pull Request
+
+El PR [#60](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/60)
+(`iteracion-3/hu-20-landing-page` hacia `main`) está abierto, en estado
+mergeable, con el único commit `8062619`; su verificación (`Build and Test`)
+está en verde (ejecución `32613192010`). La Issue #49 permanece abierta hasta
+completar la Definition of Done.
+
+#### Resultado de pruebas (HU-20)
+
+La suite completa se ejecutó localmente el 22 de agosto de 2026 con
+`dotnet test Licitaciones.sln` y PostgreSQL real mediante Testcontainers.
+Resultado final:
+
+- 83 pruebas unitarias superadas.
+- 105 pruebas de integración superadas.
+- 5 pruebas funcionales superadas (incluye las 2 de HU-20).
+- 0 fallidas y 0 omitidas; 193 ejecutadas.
+
+#### Pendientes y candidatos a Issues separadas
+
+1. El setup de unas trece líneas de `WebApplicationFactory` se repite idéntico
+   en las tres clases de pruebas funcionales (`PlantillaWebTests`,
+   `CrearLicitacionFormTests` y `LandingPageWebTests`); extraerlo a un helper
+   compartido toca pruebas de otras historias (HU-00 y HU-10) y quedó fuera
+   del alcance de la Issue #49.
+2. `_Layout.cshtml` declara `lang="en"` con contenido en español; afecta
+   accesibilidad y SEO de todas las páginas y excede el alcance de esta HU.
+3. Ciclo TDD publicado como un único commit que combina pruebas e
+   implementación, sin evidencia separada de ROJO ni ejecución de CI fallida;
+   se registra como desviación de proceso de esta historia.
+
+Estos puntos no se ocultaron dentro de HU-20: se registran como candidatos a
+Issues separadas. La Issue #49 permanece abierta y no se cierra ni marca sus
+criterios desde esta fase.
+
 ## Corrección posterior a la auditoría final de Iteración 2
 
 Driver: Tiffany. Navigator/responsable: Seidy. La auditoría detectó que HU-11 y

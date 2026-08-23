@@ -12,7 +12,7 @@ no se agregaron fixtures ni contenedores por historia.
 
 - `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de ahorro y nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo.
 - `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta; HU-18 sobre traslapes de rangos activos, rechazo del segundo rango abierto y resolución del aprobador desde la tabla; y HU-19 sobre reemplazo del tipo de cambio activo, conversión USD sin modificar montos persistidos, fecha del tipo de cambio utilizado y operación sin conexión externa.
-- `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC y el formulario de crear licitación.
+- `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC, el formulario de crear licitación; y HU-20 sobre la landing informativa en la raíz `/`: acceso anónimo con las seis secciones explicativas y diseño responsivo (viewport, Bootstrap y rejilla por puntos de ruptura) simulando un agente móvil.
 
 Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, una colección compartida de xUnit inicia una sola instancia `postgres:16-alpine` para las 22 clases integradas y la elimina al terminar; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
 
@@ -142,6 +142,44 @@ Los recorridos end-to-end crean clientes sobre hosts ASP.NET Core reales. Así
 verifican activación por DI, routing, model binding, serialización, vistas,
 respuestas HTTP y persistencia PostgreSQL, además de las pruebas directas de
 controlador ya existentes.
+
+## Resultado verificado para HU-20 (Iteración 3)
+
+Ejecución local del 22 de agosto de 2026 con `dotnet test Licitaciones.sln`,
+después del ciclo de HU-20 y con PostgreSQL real iniciado por Testcontainers:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 83 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 105 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 5 | 0 | 0 |
+| **Total ejecutado** | **193** | **0** | **0** |
+
+HU-20 aporta dos pruebas funcionales HTTP reales mediante
+`WebApplicationFactory`, ambas con el trait `HU-20` y sin tocar persistencia:
+
+1. `Raiz_SinAutenticacion_DebeMostrarLandingConSeccionesExplicativas`: un
+   cliente anónimo obtiene `200 OK` en `/` sin redirección a autenticación y
+   el HTML contiene, sin distinguir mayúsculas, las seis secciones esperadas:
+   propósito de la aplicación, flujo de licitación, ofertas, mejor oferta,
+   nivel de aprobación y conversión monetaria.
+2. `Landing_ConDispositivoMovil_DebeSerResponsiva`: con un agente móvil,
+   verifica la meta viewport con `width=device-width`, la hoja de estilos de
+   Bootstrap, el cuerpo renderizado dentro de `<main>` y al menos tres clases
+   de columna por punto de ruptura en el contenido principal.
+
+La prueba funcional previa de la plantilla (`PlantillaWebTests`) conservó sus
+aserciones; solo ajustó su trait a `HU-00`. El ciclo de esta historia quedó
+publicado en un único commit que combina pruebas e implementación mínima, por
+lo que no existe ejecución de CI en rojo registrada para HU-20 (desviación de
+proceso anotada en la bitácora). En CI, el commit `8062619` terminó en
+`success` (ejecución `32613192010`) como parte del PR #60. El refactor se
+evaluó y se rechazó sin cambios de código: extraer los bloques repetidos a
+expresiones Razor rompe los caracteres acentuados porque `HtmlEncoder.Default`
+escapa todo lo que está fuera de Basic Latin, y las alternativas (`Html.Raw`
+o reconfigurar el encoder global) son peores que la duplicación idiomática de
+una página estática; la suite permaneció verde antes y después de esa
+verificación local.
 
 ## Integración continua
 
