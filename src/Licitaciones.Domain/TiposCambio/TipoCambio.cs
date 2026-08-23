@@ -4,6 +4,9 @@ namespace Licitaciones.Domain.TiposCambio;
 
 public sealed class TipoCambio : IAuditableEntity
 {
+    public const string MonedaOrigenPredeterminada = "USD";
+    public const string MonedaDestinoPredeterminada = "CRC";
+
     private TipoCambio()
     {
     }
@@ -26,8 +29,8 @@ public sealed class TipoCambio : IAuditableEntity
 
         return new TipoCambio
         {
-            MonedaOrigen = "USD",
-            MonedaDestino = "CRC",
+            MonedaOrigen = MonedaOrigenPredeterminada,
+            MonedaDestino = MonedaDestinoPredeterminada,
             Valor = valor,
             Fecha = fecha,
             Activo = true

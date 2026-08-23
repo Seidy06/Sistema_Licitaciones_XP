@@ -1,13 +1,21 @@
+using Licitaciones.Application.TiposCambio;
 using Licitaciones.Domain.Common;
+using Licitaciones.Domain.TiposCambio;
 
 namespace Licitaciones.Application.Ofertas.Consultar;
 
 public sealed class ConsultarOfertaService
 {
     private readonly IOfertaConsultaRepository _repository;
+    private readonly ITipoCambioRepository _tiposCambio;
 
-    public ConsultarOfertaService(IOfertaConsultaRepository repository) =>
+    public ConsultarOfertaService(
+        IOfertaConsultaRepository repository,
+        ITipoCambioRepository tiposCambio)
+    {
         _repository = repository;
+        _tiposCambio = tiposCambio;
+    }
 
     public async Task<PaginaOfertas> ListarAsync(
         ConsultarOfertasRequest consulta,
@@ -83,16 +91,17 @@ public sealed class ConsultarOfertaService
         CancellationToken cancellationToken)
     {
         var monedaNormalizada = moneda.Trim().ToUpperInvariant();
-        if (monedaNormalizada is not ("CRC" or "USD"))
+        var esDolares = monedaNormalizada == TipoCambio.MonedaOrigenPredeterminada;
+        if (!esDolares && monedaNormalizada != TipoCambio.MonedaDestinoPredeterminada)
         {
             throw new DomainException("La moneda debe ser CRC o USD.");
         }
 
-        var tipoCambio = monedaNormalizada == "USD"
-            ? await _repository.ObtenerTipoCambioUsdCrcAsync(cancellationToken)
+        var tipoCambio = esDolares
+            ? await _tiposCambio.ObtenerActivoAsync(cancellationToken)
             : null;
 
-        if (monedaNormalizada == "USD" && (tipoCambio is null || tipoCambio.Valor <= 0))
+        if (esDolares && (tipoCambio is null || tipoCambio.Valor <= 0))
         {
             throw new DomainException("No existe un tipo de cambio activo para USD.");
         }
@@ -107,12 +116,12 @@ public sealed class ConsultarOfertaService
             .Select(x => new OfertaConsultaDto(
                 x.Id,
                 x.ProveedorNombre,
-                monedaNormalizada == "USD" ? x.Monto / tipoCambio!.Valor : x.Monto,
+                esDolares ? x.Monto / tipoCambio!.Valor : x.Monto,
                 monedaNormalizada,
                 x.FechaRegistro,
                 x.Id == mejorOfertaId,
-                monedaNormalizada == "USD" ? tipoCambio!.Valor : null,
-                monedaNormalizada == "USD" ? tipoCambio!.Fecha : null))
+                esDolares ? tipoCambio!.Valor : null,
+                esDolares ? tipoCambio!.Fecha : null))
             .ToArray();
     }
 }

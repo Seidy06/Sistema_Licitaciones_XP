@@ -29,8 +29,8 @@ public sealed class TipoCambioConfiguration : IEntityTypeConfiguration<TipoCambi
         builder.HasData(new
         {
             Id = 1,
-            MonedaOrigen = "USD",
-            MonedaDestino = "CRC",
+            MonedaOrigen = TipoCambio.MonedaOrigenPredeterminada,
+            MonedaDestino = TipoCambio.MonedaDestinoPredeterminada,
             Valor = 500m,
             Fecha = new DateOnly(2026, 1, 1),
             Activo = true,

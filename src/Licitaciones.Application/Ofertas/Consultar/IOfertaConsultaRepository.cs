@@ -1,5 +1,3 @@
-using Licitaciones.Application.TiposCambio;
-
 namespace Licitaciones.Application.Ofertas.Consultar;
 
 public interface IOfertaConsultaRepository
@@ -10,9 +8,6 @@ public interface IOfertaConsultaRepository
 
     Task<OfertaConsultaRegistro?> ObtenerPorIdAsync(
         Guid id,
-        CancellationToken cancellationToken = default);
-
-    Task<TipoCambioDto?> ObtenerTipoCambioUsdCrcAsync(
         CancellationToken cancellationToken = default);
 }
 

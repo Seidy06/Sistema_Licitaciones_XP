@@ -17,8 +17,8 @@ public sealed class TipoCambioRepository : ITipoCambioRepository
         _context.TiposCambio
             .SingleOrDefaultAsync(
                 tipo => tipo.Activo
-                    && tipo.MonedaOrigen == "USD"
-                    && tipo.MonedaDestino == "CRC",
+                    && tipo.MonedaOrigen == TipoCambio.MonedaOrigenPredeterminada
+                    && tipo.MonedaDestino == TipoCambio.MonedaDestinoPredeterminada,
                 cancellationToken);
 
     public async Task ReemplazarActivoAsync(
