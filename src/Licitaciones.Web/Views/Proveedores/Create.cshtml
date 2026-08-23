@@ -6,16 +6,9 @@
 
 <h1>Registrar proveedor</h1>
 
-@if (TempData["MensajeExito"] is string mensaje)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @mensaje
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    </div>
-}
+<partial name="_Mensajes" />
 
 <form asp-action="Create" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
     <div class="mb-3">
         <label asp-for="Nombre" class="form-label"></label>
         <input asp-for="Nombre" class="form-control" />

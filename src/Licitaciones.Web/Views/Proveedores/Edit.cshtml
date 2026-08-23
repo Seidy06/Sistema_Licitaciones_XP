@@ -6,8 +6,9 @@
 
 <h1>Editar proveedor</h1>
 
+<partial name="_Mensajes" />
+
 <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
     <input asp-for="Id" type="hidden" />
     <input asp-for="Version" type="hidden" />
     <div class="mb-3">
