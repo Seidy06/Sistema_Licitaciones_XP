@@ -1,0 +1,39 @@
+@model Licitaciones.Web.Models.NivelesAprobacion.CrearNivelAprobacionViewModel
+
+@{
+    ViewData["Title"] = "Crear nivel de aprobación";
+}
+
+<h1>Crear nivel de aprobación</h1>
+
+@if (TempData["MensajeExito"] is string mensaje)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+    <div class="mb-3">
+        <label asp-for="Nombre" class="form-label"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="MontoMinimo" class="form-label"></label>
+        <input asp-for="MontoMinimo" type="number" min="0" step="0.01" class="form-control" />
+        <span asp-validation-for="MontoMinimo" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="MontoMaximo" class="form-label"></label>
+        <input asp-for="MontoMaximo" type="number" min="0" step="0.01" class="form-control" />
+        <span asp-validation-for="MontoMaximo" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Crear</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

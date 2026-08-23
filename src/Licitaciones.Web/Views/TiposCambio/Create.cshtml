@@ -1,0 +1,35 @@
+@model Licitaciones.Web.Models.TiposCambio.CrearTipoCambioViewModel
+
+@{
+    ViewData["Title"] = "Registrar tipo de cambio";
+}
+
+<h1>Registrar tipo de cambio</h1>
+
+@if (TempData["MensajeExito"] is string mensaje)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+    <div class="mb-3">
+        <label asp-for="Valor" class="form-label"></label>
+        <input asp-for="Valor" type="number" min="0.01" step="0.0001" class="form-control" />
+        <span asp-validation-for="Valor" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Fecha" class="form-label"></label>
+        <input asp-for="Fecha" class="form-control" />
+        <span asp-validation-for="Fecha" class="text-danger"></span>
+    </div>
+    <p class="text-muted">La conversión se registra de USD a CRC.</p>
+    <button type="submit" class="btn btn-primary">Registrar</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

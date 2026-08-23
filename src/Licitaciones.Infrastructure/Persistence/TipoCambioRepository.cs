@@ -21,6 +21,16 @@ public sealed class TipoCambioRepository : ITipoCambioRepository
                     && tipo.MonedaDestino == TipoCambio.MonedaDestinoPredeterminada,
                 cancellationToken);
 
+    public async Task<IReadOnlyList<TipoCambio>> ListarTodosAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var tipos = await _context.TiposCambio
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return tipos;
+    }
+
     public async Task ReemplazarActivoAsync(
         TipoCambio tipoCambio,
         CancellationToken cancellationToken = default)

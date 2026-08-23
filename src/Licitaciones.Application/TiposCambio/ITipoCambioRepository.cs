@@ -10,4 +10,7 @@ public interface ITipoCambioRepository
     Task ReemplazarActivoAsync(
         TipoCambio tipoCambio,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<TipoCambio>> ListarTodosAsync(
+        CancellationToken cancellationToken = default);
 }

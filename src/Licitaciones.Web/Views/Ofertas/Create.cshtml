@@ -1,0 +1,39 @@
+@model Licitaciones.Web.Models.Ofertas.CrearOfertaViewModel
+
+@{
+    ViewData["Title"] = "Registrar oferta";
+}
+
+<h1>Registrar oferta</h1>
+
+@if (TempData["MensajeExito"] is string mensaje)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+    <div class="mb-3">
+        <label asp-for="LicitacionId" class="form-label"></label>
+        <input asp-for="LicitacionId" class="form-control" />
+        <span asp-validation-for="LicitacionId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="ProveedorId" class="form-label"></label>
+        <input asp-for="ProveedorId" class="form-control" />
+        <span asp-validation-for="ProveedorId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Monto" class="form-label"></label>
+        <input asp-for="Monto" type="number" min="0.01" step="0.01" class="form-control" />
+        <span asp-validation-for="Monto" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Registrar</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
