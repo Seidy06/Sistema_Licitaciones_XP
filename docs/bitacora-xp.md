@@ -41,7 +41,7 @@ roles en cada historia prevista:
 | 5 | HU-22 | Baja | 2 | Tiffany | Seidy | [#51](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/51) | OPEN; no iniciada | `iteracion-3/hu-22-tema-claro-oscuro` |
 | 6 | HU-23 | Alta | 8 | Seidy | Tiffany | [#52](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/52) | OPEN; criterios verificados localmente; PR abierto | `iteracion-3/hu-23-crud-web` |
 | 7 | HU-24 | Media | 2 | Tiffany | Seidy | [#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53) | OPEN; ROJO y VERDE en rama con CI verde; refactor local sin commit | `iteracion-3/hu-24-mensajeria` |
-| 8 | HU-25 | Baja | 1 | Seidy | Tiffany | [#54](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/54) | OPEN; no iniciada | `iteracion-3/hu-25-formato-es-cr` |
+| 8 | HU-25 | Baja | 1 | Seidy | Tiffany | [#54](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/54) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); refactor en commit local sin publicar | `iteracion-3/hu-25-formato-es-cr` |
 | 9 | HU-26 | Alta | 8 | Tiffany | Seidy | [#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55) | OPEN; no iniciada | `iteracion-3/hu-26-api-rest-versionada` |
 | 10 | HU-27 | Media | 2 | Seidy | Tiffany | [#56](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/56) | OPEN; no iniciada | `iteracion-3/hu-27-swagger` |
 
@@ -516,6 +516,73 @@ errores y formato verificado.
 
 Estos puntos se reportan como candidatos a Issues separadas; no se ocultan
 dentro de esta historia. La Issue #53 permanece abierta.
+
+### HU-25 — Formato monetario y cultural es-CR
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-25 — Formato monetario y cultural es-CR | 1 | [#54](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/54) | Criterio cubierto por pruebas en verde; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-25 | Seidy | Tiffany | `857f458` |
+| VERDE HU-25 | Tiffany | Seidy | `f3ff76e` |
+| REFACTOR HU-25 | Seidy | Tiffany | `4fd4175` |
+
+Los roles conservan la asignación planificada (Seidy Driver, Tiffany Navigator)
+y se reconstruyen a partir de la autoría alternada de los commits; Git conserva
+la autoría del Driver, no evidencia independiente del rol Navigator.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #54 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Baja, estimación 1 SP y el criterio único coinciden.
+
+| Criterio de aceptación de la Issue #54 | Pruebas | Commits |
+| --- | --- | --- |
+| Un monto en CRC presentado en cualquier vista usa separador de miles y formato es-CR (ej. ₡1.500.000,00). | `Listado_Licitaciones_DebePresentarPresupuestoConFormatoEsCR`, `Listado_Ofertas_DebePresentarMontoConFormatoEsCR` y `Listado_NivelesAprobacion_DebePresentarMontosConFormatoEsCR` en `FormatoMonetarioWebTests`. | ROJO `857f458`; VERDE `f3ff76e`; REFACTOR `4fd4175`. |
+
+El PR [#65](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/65)
+(`iteracion-3/hu-25-formato-es-cr` hacia `main`) está abierto como draft. Los
+commits `857f458` y `f3ff76e` están publicados en la rama remota; el refactor
+`4fd4175` permanece local y todavía no forma parte del PR. No se atribuye
+resultado de CI al commit local del refactor.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `857f458` — `test(web): cubrir criterios de formato monetario y cultural es-cr (HU-25)` | Agregó tres pruebas de integración HTTP con trait `HU-25` en `FormatoMonetarioWebTests`, sobre PostgreSQL real y vistas MVC servidas por `WebApplicationFactory`: presupuesto de licitación, monto de oferta y montos de un nivel de aprobación, cada uno con su valor esperado exacto (`₡1.500.000,00`, `₡1.250.500,00`, `₡23.456.789,00` y `₡24.654.321,00`). Fallaron por comportamiento ausente: las vistas renderizaban `.ToString("N2")` sin cultura ni símbolo colón. CI fallido como es esperable en rojo (ejecución `32669889839`). Durante la fase se corrigió un fallo artificial (el rango sembrado traslapaba el nivel Directivo activo) desactivando temporalmente el nivel 3 y restaurándolo al final, igual que en `MensajeriaWebTests`. |
+| VERDE | `f3ff76e` — `feat(web): implementar formato monetario y cultural es-cr (HU-25)` | Incorporó el helper `FormatoMonetario` con métodos de extensión `Dinero()` sobre `decimal` y `decimal?` usando una cultura `es-CR` clonada con separador de miles `.` y congelada con `CultureInfo.ReadOnly`; amplió el `HtmlEncoder` registrado con `UnicodeRanges.CurrencySymbols` para que ₡ no se escape; y aplicó `.Dinero()` en los listados de licitaciones, ofertas y niveles de aprobación. Filtro HU-25 con 3 correctas; suite completa en 222 verdes; CI en `success` (ejecución `32673569441`). |
+| REFACTOR | `4fd4175` — `refactor(web): simplificar implementacion de HU-25` | Mejoras de legibilidad y consistencia solo en las pruebas: reemplazó los escapes `\u20A1` por el literal ₡ en las constantes de montos esperados e importó `Licitaciones.Domain.Aprobaciones` eliminando la calificación completa de `NivelAprobacion.Crear`, alineándose con `MensajeriaWebTests`. El código de producción se evaluó sin cambios justificados (helper único, sin duplicación, controladores delgados). Sin comportamiento nuevo; filtro HU-25 en 3 correctas, suite completa en 222 verdes y `dotnet format --verify-no-changes` sin diferencias. Permanece local sin ejecución de CI registrada. |
+
+#### Resultado de pruebas (HU-25)
+
+La línea base previa al incremento estaba verde con 219 pruebas. Tras el ROJO,
+la ejecución focalizada `dotnet test …IntegrationTests.csproj --filter
+"HU=HU-25"` terminó con 3 fallidas y 0 correctas. Después del VERDE, el mismo
+filtro terminó con 3 correctas, 0 fallidas y 0 omitidas, y la suite completa
+`dotnet test Licitaciones.sln` con 222 correctas, 0 fallidas y 0 omitidas. El
+refactor mantuvo la suite en 222 verdes, con formato verificado.
+
+#### Pendientes y candidatos a Issues separadas
+
+- `Views/NivelesAprobacion/Delete.cshtml` sigue presentando los montos mínimo y
+  máximo con `.ToString("N2")`; extender `.Dinero()` allí completaría el
+  criterio "cualquier vista" para vistas fuera de los listados.
+- El valor del tipo de cambio se muestra con `.ToString("N4")` en
+  `TiposCambio/Index`: no es un monto en colones, por lo que se dejó sin cambio.
+- Duplicación del arranque de `WebApplicationFactory` entre clases de
+  IntegrationTests; candidato a un builder compartido.
+- Pruebas unitarias dedicadas al helper `FormatoMonetario` si se desea
+  cobertura fina adicional.
+
+Estos puntos se reportan como candidatos a Issues separadas; no se ocultan
+dentro de esta historia. La Issue #54 permanece abierta.
 
 ## Corrección posterior a la auditoría final de Iteración 2
 

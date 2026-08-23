@@ -1,6 +1,6 @@
 # Módulo de interfaz web
 
-`Licitaciones.Web` usa ASP.NET Core MVC, vistas Razor, Bootstrap y validación unobtrusive. El incremento funcional de la Iteración 1 corresponde a proveedores; la Iteración 3 incorpora la experiencia informativa con la landing page (HU-20), la navegación global (HU-21), el modo claro/oscuro persistente (HU-22), el CRUD web de HU-23 y la mensajería unificada de éxito y error de HU-24.
+`Licitaciones.Web` usa ASP.NET Core MVC, vistas Razor, Bootstrap y validación unobtrusive. El incremento funcional de la Iteración 1 corresponde a proveedores; la Iteración 3 incorpora la experiencia informativa con la landing page (HU-20), la navegación global (HU-21), el modo claro/oscuro persistente (HU-22), el CRUD web de HU-23, la mensajería unificada de éxito y error de HU-24 y el formato monetario es-CR de HU-25.
 
 | Ruta MVC | Función |
 | --- | --- |
@@ -98,3 +98,23 @@ está en las pruebas de integración de `MensajeriaWebTests`; la variante de
 advertencia del título de la historia aún no tiene flujos que produzcan
 `TempData["MensajeAdvertencia"]` y quedó registrada como candidato a Issue
 separada.
+
+## Formato monetario es-CR (HU-25)
+
+Los montos en colones de las vistas MVC usan el helper `FormatoMonetario`
+(`src/Licitaciones.Web/FormatoMonetario.cs`), con métodos de extensión
+`Dinero()` sobre `decimal` y `decimal?`. El helper clona la cultura `es-CR`,
+fija el separador de miles en `.`, congela la instancia con
+`CultureInfo.ReadOnly` y formatea con el patrón moneda, produciendo valores como
+`₡1.500.000,00` de forma determinista independiente de la cultura del servidor.
+
+El formato se aplica en los listados de licitaciones (`Presupuesto`),
+ofertas (`Monto`) y niveles de aprobación (`MontoMinimo` y `MontoMaximo`, este
+último con el texto alternativo "Sin límite" cuando es nulo). Para que el
+símbolo ₡ (fuera de Latin-1) no se escape como entidad HTML, `Program.cs`
+amplió el `HtmlEncoder` registrado con `UnicodeRanges.CurrencySymbols`.
+
+La vista de confirmación `NivelesAprobacion/Delete` todavía presenta sus montos
+con `.ToString("N2")`; extender allí el helper quedó registrado como candidato
+a Issue separada. La evidencia del criterio está en las pruebas de integración
+de `FormatoMonetarioWebTests` (HU-25).

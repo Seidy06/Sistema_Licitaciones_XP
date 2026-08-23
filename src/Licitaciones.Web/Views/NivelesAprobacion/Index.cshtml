@@ -47,8 +47,8 @@
     {
         <tr>
             <td>@nivel.Nombre</td>
-            <td>@nivel.MontoMinimo.ToString("N2")</td>
-            <td>@(nivel.MontoMaximo?.ToString("N2") ?? "Sin límite")</td>
+            <td>@nivel.MontoMinimo.Dinero()</td>
+            <td>@(nivel.MontoMaximo.Dinero("Sin límite"))</td>
             <td class="text-end">
                 <a asp-action="Delete" asp-route-id="@nivel.Id" class="text-danger">Eliminar</a>
             </td>

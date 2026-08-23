@@ -26,7 +26,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(HtmlEncoder.Create(
     UnicodeRanges.BasicLatin,
-    UnicodeRanges.Latin1Supplement));
+    UnicodeRanges.Latin1Supplement,
+    UnicodeRanges.CurrencySymbols));
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<CrearProveedorService>();
 builder.Services.AddScoped<ConsultarProveedorService>();
