@@ -10,9 +10,8 @@ using Licitaciones.Domain.Common;
 using Licitaciones.Infrastructure.Persistence;
 using Licitaciones.Infrastructure.Time;
 
-using Microsoft.EntityFrameworkCore;
-
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
