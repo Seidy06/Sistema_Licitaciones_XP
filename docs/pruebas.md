@@ -12,9 +12,32 @@ no se agregaron fixtures ni contenedores por historia.
 
 - `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de ahorro y nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo.
 - `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta; HU-18 sobre traslapes de rangos activos, rechazo del segundo rango abierto y resolución del aprobador desde la tabla; y HU-19 sobre reemplazo del tipo de cambio activo, conversión USD sin modificar montos persistidos, fecha del tipo de cambio utilizado y operación sin conexión externa.
-- `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC, el formulario de crear licitación; y HU-20 sobre la landing informativa en la raíz `/`: acceso anónimo con las seis secciones explicativas y diseño responsivo (viewport, Bootstrap y rejilla por puntos de ruptura) simulando un agente móvil.
+- `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC, el formulario de crear licitación; HU-20 sobre la landing informativa en la raíz `/`: acceso anónimo con las seis secciones explicativas y diseño responsivo (viewport, Bootstrap y rejilla por puntos de ruptura) simulando un agente móvil; y HU-21 sobre la navegación global y el acceso a Swagger.
 
 Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, una colección compartida de xUnit inicia una sola instancia `postgres:16-alpine` para las 22 clases integradas y la elimina al terminar; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
+
+## Resultado verificado para HU-21 (Iteración 3)
+
+Ejecución local del 22 de agosto de 2026 con `dotnet test Licitaciones.sln`,
+después del refactor y con PostgreSQL real iniciado por Testcontainers:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 83 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 105 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 11 | 0 | 0 |
+| **Total ejecutado** | **199** | **0** | **0** |
+
+HU-21 aporta seis pruebas funcionales con trait `HU-21` en
+`NavegacionGlobalWebTests`: presencia del menú global en las páginas cubiertas,
+resaltado de Inicio, traslado del resaltado a Licitaciones y apertura de
+Swagger UI. La ejecución filtrada de HU-21 terminó con 6 correctas, 0 fallidas
+y 0 omitidas; la suite completa también se ejecutó antes y después del
+refactor.
+
+Los commits `a9dd711` (ROJO), `0e226e7` (VERDE), `b206f9c` (ajuste de estilo)
+y `e2fbd06` (REFACTOR) no tienen ejecución de CI asociada a un PR de HU-21 en
+esta fase.
 
 ## Comandos reproducibles
 
