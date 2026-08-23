@@ -12,7 +12,7 @@ no se agregaron fixtures ni contenedores por historia.
 
 - `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de ahorro y nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo.
 - `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta; HU-18 sobre traslapes de rangos activos, rechazo del segundo rango abierto y resolución del aprobador desde la tabla; y HU-19 sobre reemplazo del tipo de cambio activo, conversión USD sin modificar montos persistidos, fecha del tipo de cambio utilizado y operación sin conexión externa.
-- `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC, el formulario de crear licitación; HU-20 sobre la landing informativa en la raíz `/`: acceso anónimo con las seis secciones explicativas y diseño responsivo (viewport, Bootstrap y rejilla por puntos de ruptura) simulando un agente móvil; y HU-21 sobre la navegación global y el acceso a Swagger.
+- `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC, el formulario de crear licitación; HU-20 sobre la landing informativa en la raíz `/`: acceso anónimo con las seis secciones explicativas y diseño responsivo (viewport, Bootstrap y rejilla por puntos de ruptura) simulando un agente móvil; HU-21 sobre la navegación global y el acceso a Swagger; y HU-22 sobre modo claro/oscuro persistente: control visible en todas las páginas, persistencia de la preferencia en `localStorage` y respeto del último tema seleccionado al cargar.
 
 Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, una colección compartida de xUnit inicia una sola instancia `postgres:16-alpine` para las 22 clases integradas y la elimina al terminar; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
 
@@ -203,6 +203,35 @@ escapa todo lo que está fuera de Basic Latin, y las alternativas (`Html.Raw`
 o reconfigurar el encoder global) son peores que la duplicación idiomática de
 una página estática; la suite permaneció verde antes y después de esa
 verificación local.
+
+## Resultado verificado para HU-22 (Iteración 3)
+
+Ejecuciones locales del 23 de agosto de 2026 con PostgreSQL real iniciado por
+Testcontainers. La fase ROJO se confirmó con la ejecución filtrada
+`dotnet test tests\Licitaciones.FunctionalTests\Licitaciones.FunctionalTests.csproj --filter "HU=HU-22"`:
+5 fallidas y 0 superadas, todas por aserciones de comportamiento ausente (sin
+control `theme-toggle`, sin lógica de `localStorage`, sin paleta oscura), no por
+errores artificiales. Tras el VERDE (`9975a05`) la misma ejecución filtrada
+terminó con 5 correctas, 0 fallidas y 0 omitidas. Después del refactor local,
+la suite completa `dotnet test Licitaciones.sln` resultó:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 83 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 105 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| **Total ejecutado** | **204** | **0** | **0** |
+
+HU-22 aporta cinco casos funcionales con trait `HU-22` en
+`TemaClaroOscuroWebTests`, todos HTTP mediante `WebApplicationFactory` sin
+persistencia: presencia del control `theme-toggle` accesible en el encabezado de
+las tres páginas cubiertas; persistencia de la preferencia mediante
+`localStorage.setItem('theme', …)` con valores `light`/`dark` en `site.js`; y
+respeto del último tema seleccionado mediante un script inicial que lee
+`localStorage.getItem('theme')` sobre el elemento raíz más la paleta oscura
+definida en `site.css`. Los commits del ciclo son `12aa5c4` (ROJO) y `9975a05`
+(VERDE), ambos incluidos en el PR #62 con CI en verde; los cambios de refactor
+permanecen locales sin commit ni ejecución de CI registrada.
 
 ## Integración continua
 
