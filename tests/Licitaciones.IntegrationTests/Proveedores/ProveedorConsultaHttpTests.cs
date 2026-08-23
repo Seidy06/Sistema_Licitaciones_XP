@@ -1,6 +1,6 @@
 using Licitaciones.Api.Controllers;
-using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Common;
+using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Infrastructure.Persistence;
 
