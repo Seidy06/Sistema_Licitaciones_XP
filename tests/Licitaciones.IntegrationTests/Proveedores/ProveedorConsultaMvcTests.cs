@@ -1,3 +1,4 @@
+using Licitaciones.Application.Common;
 using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Infrastructure.Persistence;
 using Licitaciones.Web.Models.Proveedores;

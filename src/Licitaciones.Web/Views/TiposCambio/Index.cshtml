@@ -1,0 +1,73 @@
+@using Licitaciones.Application.Common
+@using Licitaciones.Web.Models.TiposCambio
+@model PaginaResultado<TipoCambioItemViewModel>
+
+@{
+    ViewData["Title"] = "Tipos de cambio";
+    var ordenarPor = (string)(ViewData["OrdenarPor"] ?? "fecha");
+    var descendente = (bool)(ViewData["Descendente"] ?? false);
+    var totalPaginas = (int)Math.Ceiling(Model.Total / (double)Model.TamanoPagina);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Tipos de cambio</h1>
+    <a asp-action="Create" class="btn btn-primary">Registrar tipo de cambio</a>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <label for="ordenarPor" class="visually-hidden">Ordenar por</label>
+        <select id="ordenarPor" name="ordenarPor" class="form-select">
+            <option value="fecha" selected="@(ordenarPor == "fecha")">Fecha</option>
+            <option value="valor" selected="@(ordenarPor == "valor")">Valor</option>
+        </select>
+    </div>
+    <div class="col-md-2 form-check align-self-center">
+        <input id="descendente" name="descendente" value="true" type="checkbox" checked="@descendente" class="form-check-input" />
+        <label for="descendente" class="form-check-label">Descendente</label>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Aplicar</button>
+    </div>
+</form>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr><th>Moneda origen</th><th>Moneda destino</th><th>Valor</th><th>Fecha</th><th>Activo</th></tr>
+    </thead>
+    <tbody>
+    @foreach (var tipo in Model.Items)
+    {
+        <tr>
+            <td>@tipo.MonedaOrigen</td>
+            <td>@tipo.MonedaDestino</td>
+            <td>@tipo.Valor.ToString("N4")</td>
+            <td>@tipo.Fecha.ToString("yyyy-MM-dd")</td>
+            <td>@(tipo.Activo ? "Sí" : "No")</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@if (Model.Items.Count == 0)
+{
+    <p>No se encontraron tipos de cambio.</p>
+}
+
+@if (totalPaginas > 1)
+{
+    <nav aria-label="Paginación de tipos de cambio">
+        <ul class="pagination">
+        @for (var pagina = 1; pagina <= totalPaginas; pagina++)
+        {
+            <li class="page-item @(pagina == Model.Pagina ? "active" : null)">
+                <a class="page-link" asp-action="Index" asp-route-pagina="@pagina"
+                   asp-route-tamanoPagina="@Model.TamanoPagina"
+                   asp-route-ordenarPor="@ordenarPor" asp-route-descendente="@descendente">@pagina</a>
+            </li>
+        }
+        </ul>
+    </nav>
+}

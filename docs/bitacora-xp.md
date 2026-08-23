@@ -39,7 +39,7 @@ roles en cada historia prevista:
 | 3 | HU-20 | Media | 3 | Tiffany | Seidy | [#49](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/49) | OPEN; no iniciada | `iteracion-3/hu-20-landing-page` |
 | 4 | HU-21 | Media | 2 | Seidy | Tiffany | [#50](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/50) | OPEN; no iniciada | `iteracion-3/hu-21-navegacion-global` |
 | 5 | HU-22 | Baja | 2 | Tiffany | Seidy | [#51](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/51) | OPEN; no iniciada | `iteracion-3/hu-22-tema-claro-oscuro` |
-| 6 | HU-23 | Alta | 8 | Seidy | Tiffany | [#52](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/52) | OPEN; no iniciada | `iteracion-3/hu-23-crud-web-completo` |
+| 6 | HU-23 | Alta | 8 | Seidy | Tiffany | [#52](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/52) | OPEN; criterios verificados localmente; PR abierto | `iteracion-3/hu-23-crud-web` |
 | 7 | HU-24 | Media | 2 | Tiffany | Seidy | [#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53) | OPEN; no iniciada | `iteracion-3/hu-24-mensajeria` |
 | 8 | HU-25 | Baja | 1 | Seidy | Tiffany | [#54](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/54) | OPEN; no iniciada | `iteracion-3/hu-25-formato-es-cr` |
 | 9 | HU-26 | Alta | 8 | Tiffany | Seidy | [#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55) | OPEN; no iniciada | `iteracion-3/hu-26-api-rest-versionada` |
@@ -394,6 +394,64 @@ Testcontainers:
 Estos puntos no se ocultaron dentro de HU-22: se registran como candidatos a
 Issues separadas. La Issue #51 permanece abierta y no se cierra ni marca sus
 criterios desde esta fase.
+
+### HU-23 — CRUD completo desde la interfaz web
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-23 — CRUD completo desde la interfaz web para todos los módulos | 8 | [#52](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/52) | Criterios cubiertos y verificados localmente; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-23 | Seidy | Tiffany | `b5ff1fe` |
+| VERDE HU-23 | Tiffany | Seidy | `e4b7973` |
+| Corrección de imports | Seidy | Tiffany | `5b3be34` |
+| REFACTOR HU-23 | Seidy | Tiffany | `2803c00` |
+
+Los roles se registran según la asignación de la pareja para cada incremento;
+Git conserva la autoría de los commits, pero no evidencia independiente del rol
+Navigator.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+| Criterio de aceptación de la Issue #52 | Pruebas | Commits |
+| --- | --- | --- |
+| Listados con paginación, filtrado y ordenamiento. | Las cinco pruebas de `CrudWebListadosTests`, una por módulo MVC. | ROJO `b5ff1fe`; VERDE `e4b7973`; corrección `5b3be34`; REFACTOR `2803c00`. |
+| Validación junto al campo y conservación de datos inválidos. | Las cinco pruebas de `CrudWebFormulariosInvalidosTests`, una por módulo MVC. | ROJO `b5ff1fe`; VERDE `e4b7973`; corrección `5b3be34`; REFACTOR `2803c00`. |
+| Confirmación antes de cualquier eliminación permitida. | Las dos pruebas de `CrudWebConfirmacionEliminacionTests` para proveedores y niveles de aprobación. | ROJO `b5ff1fe`; VERDE `e4b7973`; corrección `5b3be34`; REFACTOR `2803c00`. |
+
+El PR [#63](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/63)
+(`iteracion-3/hu-23-crud-web` hacia `main`) está abierto y mergeable. Los
+commits `b5ff1fe`, `e4b7973` y `5b3be34` están publicados en la rama remota;
+`2803c00` es local y todavía no forma parte del PR. No se atribuye un resultado
+de CI al refactor local.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `b5ff1fe` — `test(web): cubrir criterios de crud completo desde la interfaz web para todos los módulos (HU-23)` | Agregó 12 pruebas de integración HTTP con trait `HU-23`: cinco listados, cinco formularios inválidos y dos confirmaciones de eliminación. La ejecución inicial documentó el comportamiento ausente esperado en TDD. |
+| VERDE | `e4b7973` — `feat(web): implementar crud completo desde la interfaz web para todos los módulos (HU-23)` | Incorporó las acciones MVC, ViewModels, vistas, servicios y registro DI necesarios para los cinco módulos, respetando DTOs/ViewModels y las eliminaciones permitidas. |
+| Corrección | `5b3be34` — `fix(web): corregir orden de importaciones para CI (HU-23) refs #52` | Ajustó el orden de imports sin cambiar comportamiento ni criterios. |
+| REFACTOR | `2803c00` — `refactor(web): simplificar implementacion de HU-23` | Movió `PaginaResultado<T>` desde el namespace de Proveedores a `Licitaciones.Application.Common`, eliminando una responsabilidad compartida mal ubicada. No agregó comportamiento; la suite local permaneció verde. |
+
+#### Resultado de pruebas (HU-23)
+
+La línea base previa al refactor estaba verde con 216 pruebas. Después del
+refactor, la ejecución focalizada de HU-23 terminó con 12 correctas, 0 fallidas
+y 0 omitidas. La suite completa local `dotnet test Licitaciones.sln` terminó con
+216 correctas, 0 fallidas y 0 omitidas. Persisten dos advertencias `CS1998`
+preexistentes en pruebas funcionales.
+
+#### Pendientes y candidatos a Issues separadas
+
+No se identificó trabajo adicional necesario para cumplir HU-23. El estado del
+PR y la Issue se mantienen abiertos; no se documenta cierre, merge ni éxito de
+CI para el commit de refactor local.
 
 ## Corrección posterior a la auditoría final de Iteración 2
 

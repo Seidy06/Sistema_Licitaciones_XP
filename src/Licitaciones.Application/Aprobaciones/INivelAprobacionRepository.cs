@@ -12,4 +12,14 @@ public interface INivelAprobacionRepository
     Task AgregarAsync(
         NivelAprobacion nivel,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<NivelAprobacion>> ListarActivosAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<NivelAprobacion?> ObtenerPorIdAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
+    Task GuardarCambiosAsync(
+        CancellationToken cancellationToken = default);
 }

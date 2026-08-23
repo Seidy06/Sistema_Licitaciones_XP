@@ -32,6 +32,11 @@ public sealed class NivelAprobacion : IAuditableEntity
         };
     }
 
+    public void Desactivar()
+    {
+        Activo = false;
+    }
+
     private static void Validar(
         string nombre,
         decimal montoMinimo,

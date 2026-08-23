@@ -16,6 +16,37 @@ no se agregaron fixtures ni contenedores por historia.
 
 Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, una colección compartida de xUnit inicia una sola instancia `postgres:16-alpine` para las 22 clases integradas y la elimina al terminar; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
 
+## Resultado verificado para HU-23 (Iteración 3)
+
+HU-23 corresponde a la Issue [#52](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/52).
+Sus tres criterios se cubren mediante pruebas de integración HTTP reales con
+`WebApplicationFactory`, vistas MVC y PostgreSQL mediante Testcontainers:
+
+| Criterio de aceptación de la Issue #52 | Pruebas | Evidencia |
+| --- | --- | --- |
+| Cada listado soporta paginación, filtrado y ordenamiento. | `Listado_Proveedores_DebeSoportarPaginacionFiltroYOrden`, `Listado_Licitaciones_DebeSoportarPaginacionFiltroYOrden`, `Listado_Ofertas_DebeSoportarPaginacionFiltroYOrden`, `Listado_NivelesAprobacion_DebeSoportarPaginacionFiltroYOrden` y `Listado_TiposCambio_DebeSoportarPaginacionYOrden` en `CrudWebListadosTests`. | Comprueban tablas HTML, filtros, páginas sucesivas y orden descendente cuando aplica. |
+| Los formularios inválidos muestran validación junto al campo y conservan los datos ingresados. | `Formulario_Proveedores_DatosInvalidos_DebeMostrarErrorJuntoAlCampoYConservarDatos`, `Formulario_Licitaciones_DatosInvalidos_DebeMostrarErrorJuntoAlCampoYConservarDatos`, `Formulario_Ofertas_DatosInvalidos_DebeMostrarErrorJuntoAlCampoYConservarDatos`, `Formulario_NivelesAprobacion_DatosInvalidos_DebeMostrarErrorJuntoAlCampoYConservarDatos` y `Formulario_TiposCambio_DatosInvalidos_DebeMostrarErrorJuntoAlCampoYConservarDatos` en `CrudWebFormulariosInvalidosTests`. | Comprueban respuesta sin redirección, mensaje de validación asociado y valores enviados conservados. |
+| Toda eliminación permitida solicita confirmación antes de ejecutarse. | `Eliminacion_Proveedores_DebePedirConfirmacionAntesDeEjecutar` y `Eliminacion_NivelesAprobacion_DebePedirConfirmacionAntesDeEjecutar` en `CrudWebConfirmacionEliminacionTests`. | Comprueban la vista y formulario de confirmación, el estado intacto antes del POST y la baja lógica o desactivación posterior. |
+
+La ejecución focalizada de las tres clases terminó con **12 pruebas correctas,
+0 fallidas y 0 omitidas**. La suite completa posterior al refactor, ejecutada
+con `dotnet test Licitaciones.sln`, terminó con **216 correctas, 0 fallidas y
+0 omitidas**. El build reportó dos advertencias `CS1998` preexistentes en
+pruebas funcionales; no están relacionadas con HU-23.
+
+La secuencia TDD y el refactor quedan trazados así:
+
+- `b5ff1fe` — ROJO: agregó las pruebas de los tres criterios.
+- `e4b7973` — VERDE: implementó el CRUD MVC para los módulos cubiertos.
+- `5b3be34` — corrección de imports para CI, sin ampliar el alcance.
+- `2803c00` — REFACTOR local: movió `PaginaResultado<T>` a
+   `Licitaciones.Application.Common`, sin comportamiento nuevo.
+
+El PR [#63](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/63) está
+abierto y mergeable hacia `main`. Los commits hasta `5b3be34` están publicados;
+`2803c00` permanece local y no tiene ejecución de CI registrada. La Issue #52
+permanece abierta y no se marca como completada desde esta fase.
+
 ## Resultado verificado para HU-21 (Iteración 3)
 
 Ejecución local del 22 de agosto de 2026 con `dotnet test Licitaciones.sln`,

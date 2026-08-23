@@ -1,3 +1,4 @@
+using Licitaciones.Application.Common;
 using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Editar;

@@ -1,0 +1,84 @@
+@using Licitaciones.Application.Common
+@using Licitaciones.Web.Models.Ofertas
+@model PaginaResultado<OfertaItemViewModel>
+
+@{
+    ViewData["Title"] = "Ofertas";
+    var licitacionId = ViewData["LicitacionId"] as Guid?;
+    var proveedor = ViewData["Proveedor"] as string;
+    var ordenarPor = (string)(ViewData["OrdenarPor"] ?? "monto");
+    var descendente = (bool)(ViewData["Descendente"] ?? false);
+    var totalPaginas = (int)Math.Ceiling(Model.Total / (double)Model.TamanoPagina);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Ofertas</h1>
+    <a asp-action="Create" class="btn btn-primary">Registrar oferta</a>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <label for="licitacionId" class="visually-hidden">Licitación</label>
+        <input id="licitacionId" name="licitacionId" value="@licitacionId" class="form-control" placeholder="Identificador de la licitación" />
+    </div>
+    <div class="col-md-3">
+        <label for="proveedor" class="visually-hidden">Proveedor</label>
+        <input id="proveedor" name="proveedor" value="@proveedor" class="form-control" placeholder="Filtrar por proveedor" />
+    </div>
+    <div class="col-md-3">
+        <label for="ordenarPor" class="visually-hidden">Ordenar por</label>
+        <select id="ordenarPor" name="ordenarPor" class="form-select">
+            <option value="monto" selected="@(ordenarPor == "monto")">Monto</option>
+            <option value="proveedor" selected="@(ordenarPor == "proveedor")">Proveedor</option>
+            <option value="fechaRegistro" selected="@(ordenarPor == "fechaRegistro")">Fecha de registro</option>
+        </select>
+    </div>
+    <div class="col-md-1 form-check align-self-center">
+        <input id="descendente" name="descendente" value="true" type="checkbox" checked="@descendente" class="form-check-input" />
+        <label for="descendente" class="form-check-label">Desc.</label>
+    </div>
+    <div class="col-md-1">
+        <button type="submit" class="btn btn-outline-primary w-100">Aplicar</button>
+    </div>
+</form>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr><th>Proveedor</th><th>Monto</th><th>Moneda</th><th>Fecha de registro</th></tr>
+    </thead>
+    <tbody>
+    @foreach (var oferta in Model.Items)
+    {
+        <tr>
+            <td>@oferta.ProveedorNombre</td>
+            <td>@oferta.Monto.ToString("N2")</td>
+            <td>CRC</td>
+            <td>@oferta.FechaRegistro.ToString("g")</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@if (Model.Items.Count == 0)
+{
+    <p>No se encontraron ofertas.</p>
+}
+
+@if (totalPaginas > 1 && licitacionId is not null)
+{
+    <nav aria-label="Paginación de ofertas">
+        <ul class="pagination">
+        @for (var pagina = 1; pagina <= totalPaginas; pagina++)
+        {
+            <li class="page-item @(pagina == Model.Pagina ? "active" : null)">
+                <a class="page-link" asp-action="Index" asp-route-pagina="@pagina"
+                   asp-route-tamanoPagina="@Model.TamanoPagina"
+                   asp-route-licitacionId="@licitacionId" asp-route-proveedor="@proveedor"
+                   asp-route-ordenarPor="@ordenarPor" asp-route-descendente="@descendente">@pagina</a>
+            </li>
+        }
+        </ul>
+    </nav>
+}

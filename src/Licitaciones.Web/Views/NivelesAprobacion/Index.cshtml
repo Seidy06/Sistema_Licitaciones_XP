@@ -1,23 +1,21 @@
 @using Licitaciones.Application.Common
-@using Licitaciones.Application.Proveedores.Consultar
-@using Licitaciones.Web.Models.Proveedores
-@model PaginaResultado<ProveedorResumenViewModel>
+@using Licitaciones.Web.Models.NivelesAprobacion
+@model PaginaResultado<NivelesAprobacionItemViewModel>
 
 @{
-    ViewData["Title"] = "Proveedores";
+    ViewData["Title"] = "Niveles de aprobación";
     var nombre = ViewData["Nombre"] as string;
-    var ordenarPor = (ProveedorOrden)(ViewData["OrdenarPor"] ?? ProveedorOrden.Nombre);
+    var ordenarPor = (string)(ViewData["OrdenarPor"] ?? "montoMinimo");
     var descendente = (bool)(ViewData["Descendente"] ?? false);
     var totalPaginas = (int)Math.Ceiling(Model.Total / (double)Model.TamanoPagina);
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Proveedores</h1>
-    <div>
-        <a asp-action="History" class="btn btn-outline-secondary">Ver histórico</a>
-        <a asp-action="Create" class="btn btn-primary">Registrar proveedor</a>
-    </div>
+    <h1>Niveles de aprobación</h1>
+    <a asp-action="Create" class="btn btn-primary">Crear nivel</a>
 </div>
+
+<div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
 <form asp-action="Index" method="get" class="row g-2 mb-3">
     <div class="col-md-5">
@@ -27,8 +25,8 @@
     <div class="col-md-3">
         <label for="ordenarPor" class="visually-hidden">Ordenar por</label>
         <select id="ordenarPor" name="ordenarPor" class="form-select">
-            <option value="Nombre" selected="@(ordenarPor == ProveedorOrden.Nombre)">Nombre</option>
-            <option value="FechaCreacion" selected="@(ordenarPor == ProveedorOrden.FechaCreacion)">Fecha de creación</option>
+            <option value="montoMinimo" selected="@(ordenarPor == "montoMinimo")">Monto mínimo</option>
+            <option value="nombre" selected="@(ordenarPor == "nombre")">Nombre</option>
         </select>
     </div>
     <div class="col-md-2 form-check align-self-center">
@@ -42,17 +40,17 @@
 
 <table class="table table-striped align-middle">
     <thead>
-        <tr><th>Nombre</th><th>Fecha de creación</th><th></th></tr>
+        <tr><th>Nombre</th><th>Monto mínimo</th><th>Monto máximo</th><th></th></tr>
     </thead>
     <tbody>
-    @foreach (var proveedor in Model.Items)
+    @foreach (var nivel in Model.Items)
     {
         <tr>
-            <td>@proveedor.Nombre</td>
-            <td>@proveedor.CreatedAt.ToString("g")</td>
+            <td>@nivel.Nombre</td>
+            <td>@nivel.MontoMinimo.ToString("N2")</td>
+            <td>@(nivel.MontoMaximo?.ToString("N2") ?? "Sin límite")</td>
             <td class="text-end">
-                <a asp-action="Details" asp-route-id="@proveedor.Id">Ver detalle</a>
-                <a asp-action="Delete" asp-route-id="@proveedor.Id" class="ms-2 text-danger">Eliminar</a>
+                <a asp-action="Delete" asp-route-id="@nivel.Id" class="text-danger">Eliminar</a>
             </td>
         </tr>
     }
@@ -61,12 +59,12 @@
 
 @if (Model.Items.Count == 0)
 {
-    <p>No se encontraron proveedores.</p>
+    <p>No se encontraron niveles de aprobación.</p>
 }
 
 @if (totalPaginas > 1)
 {
-    <nav aria-label="Paginación de proveedores">
+    <nav aria-label="Paginación de niveles de aprobación">
         <ul class="pagination">
         @for (var pagina = 1; pagina <= totalPaginas; pagina++)
         {

@@ -40,6 +40,27 @@ public sealed class NivelAprobacionRepository : INivelAprobacionRepository
         }
     }
 
+    public async Task<IReadOnlyList<NivelAprobacion>> ListarActivosAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var niveles = await _context.NivelesAprobacion
+            .AsNoTracking()
+            .Where(nivel => nivel.Activo)
+            .ToListAsync(cancellationToken);
+
+        return niveles;
+    }
+
+    public Task<NivelAprobacion?> ObtenerPorIdAsync(
+        int id,
+        CancellationToken cancellationToken = default) =>
+        _context.NivelesAprobacion.FirstOrDefaultAsync(
+            nivel => nivel.Id == id, cancellationToken);
+
+    public Task GuardarCambiosAsync(
+        CancellationToken cancellationToken = default) =>
+        _context.SaveChangesAsync(cancellationToken);
+
     private static bool EsTraslape(DbUpdateException exception) =>
         exception.InnerException is PostgresException
         {
