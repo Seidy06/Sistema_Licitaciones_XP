@@ -298,6 +298,38 @@ definida en `site.css`. Los commits del ciclo son `12aa5c4` (ROJO) y `9975a05`
 (VERDE), ambos incluidos en el PR #62 con CI en verde; los cambios de refactor
 permanecen locales sin commit ni ejecución de CI registrada.
 
+## Resultado verificado para HU-25 (Iteración 3)
+
+Ejecuciones locales del 23 de agosto de 2026 con PostgreSQL real iniciado por
+Testcontainers. La fase ROJO se confirmó con la ejecución filtrada
+`dotnet test tests\Licitaciones.IntegrationTests\Licitaciones.IntegrationTests.csproj --filter "HU=HU-25"`:
+3 fallidas y 0 superadas, todas porque las vistas renderizaban los montos con
+`.ToString("N2")` sin cultura es-CR ni símbolo colón, no por errores
+artificiales. Tras el VERDE (`f3ff76e`) la misma ejecución filtrada terminó con
+3 correctas, 0 fallidas y 0 omitidas. Después del refactor (`4fd4175`), la suite
+completa `dotnet test Licitaciones.sln` resultó:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 83 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 123 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| **Total ejecutado** | **222** | **0** | **0** |
+
+HU-25 aporta tres casos de integración HTTP con trait `HU-25` en
+`FormatoMonetarioWebTests`, sobre PostgreSQL real y vistas MVC servidas por
+`WebApplicationFactory`: el listado de licitaciones presenta el presupuesto
+sembrado como `₡1.500.000,00`; el listado de ofertas presenta el monto de una
+oferta registrada vía servicios como `₡1.250.500,00`; y el listado de niveles de
+aprobación presenta `₡23.456.789,00` y `₡24.654.321,00` para un nivel sembrado
+con rango único (desactivando temporalmente el nivel Directivo del catálogo y
+restaurándolo al final). El ciclo quedó trazado así: `857f458` (ROJO) y
+`f3ff76e` (VERDE) están publicados en la rama del PR #65; en CI el rojo falló
+como es esperable (ejecución `32669889839`) y el verde terminó en `success`
+(ejecución `32673569441`). El refactor `4fd4175` solo ajusta legibilidad de las
+pruebas (literal ₡ e import de `Domain.Aprobaciones`), permanece local sin CI
+registrada, y el código de producción se evaluó sin cambios.
+
 ## Integración continua
 
 `.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release y ejecuta toda la solución. En esta iteración no mide cobertura ni construye imágenes Docker.
