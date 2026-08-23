@@ -1,5 +1,14 @@
 @{
     var rutaActual = ViewContext.HttpContext.Request.Path.Value ?? "/";
+    var secciones = new[]
+    {
+        (Ruta: "/", Etiqueta: "Inicio"),
+        (Ruta: "/Licitaciones", Etiqueta: "Licitaciones"),
+        (Ruta: "/Proveedores", Etiqueta: "Proveedores"),
+        (Ruta: "/Ofertas", Etiqueta: "Ofertas"),
+        (Ruta: "/NivelesAprobacion", Etiqueta: "Niveles de aprobación"),
+        (Ruta: "/TiposCambio", Etiqueta: "Tipo de cambio")
+    };
 
     bool EsSeccionActiva(string seccion) =>
         seccion == "/"
@@ -18,24 +27,12 @@
         </button>
         <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
             <ul class="navbar-nav flex-grow-1">
-                <li class="nav-item">
-                    <a class="@ClaseEnlace("/")" href="/">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="@ClaseEnlace("/Licitaciones")" href="/Licitaciones">Licitaciones</a>
-                </li>
-                <li class="nav-item">
-                    <a class="@ClaseEnlace("/Proveedores")" href="/Proveedores">Proveedores</a>
-                </li>
-                <li class="nav-item">
-                    <a class="@ClaseEnlace("/Ofertas")" href="/Ofertas">Ofertas</a>
-                </li>
-                <li class="nav-item">
-                    <a class="@ClaseEnlace("/NivelesAprobacion")" href="/NivelesAprobacion">Niveles de aprobación</a>
-                </li>
-                <li class="nav-item">
-                    <a class="@ClaseEnlace("/TiposCambio")" href="/TiposCambio">Tipo de cambio</a>
-                </li>
+                @foreach (var seccion in secciones)
+                {
+                    <li class="nav-item">
+                        <a class="@ClaseEnlace(seccion.Ruta)" href="@seccion.Ruta">@seccion.Etiqueta</a>
+                    </li>
+                }
                 <li class="nav-item">
                     <a class="nav-link text-dark" href="/swagger/index.html">Documentación de API</a>
                 </li>
