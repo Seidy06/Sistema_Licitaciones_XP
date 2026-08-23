@@ -21,6 +21,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton(
+    System.Text.Encodings.Web.HtmlEncoder.Create(
+        System.Text.Unicode.UnicodeRanges.BasicLatin,
+        System.Text.Unicode.UnicodeRanges.Latin1Supplement));
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<CrearProveedorService>();
 builder.Services.AddScoped<ConsultarProveedorService>();
