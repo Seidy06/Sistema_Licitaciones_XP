@@ -132,6 +132,6 @@ traslapen, incluido un segundo rango abierto, y fue recreada por
   no fue necesario cambiar el esquema ni crear una migracion adicional.
 - `Ofertas`: registro mediante API implementado en HU-14; relaciones restrictivas, monto positivo y unicidad por `(LicitacionId, ProveedorId)`.
 - `NivelesAprobacion`: límites `numeric(18,2)`, columna `Activo` y semillas Operativo, Gerencial y Directivo. Contiene checks de mínimo y rango, además de la restricción de exclusión `EX_NivelesAprobacion_SinTraslape`, recreada por la migración `AdministrarNivelesAprobacionHu18` con filtro `WHERE ("Activo")`. HU-18 expone la creación y la resolución del aprobador; editar, listar y desactivar no están implementados todavía.
-- `TiposCambio`: valor `numeric(18,6)` positivo, fecha, indicador activo, índice único parcial sobre el registro activo y semilla USD/CRC con valor 500.
+- `TiposCambio`: valor `numeric(18,6)` positivo, fecha, indicador activo, índice único parcial sobre el registro activo y semilla USD/CRC con valor 500. HU-19 administra el registro activo por API (guardar desactiva el previo) y lo consume para la conversión de presentación de ofertas; no agregó migraciones ni cambió el esquema.
 
 Las entidades auditables reciben `CreatedAt` y `UpdatedAt` desde `LicitacionesDbContext` mediante `IClock`.

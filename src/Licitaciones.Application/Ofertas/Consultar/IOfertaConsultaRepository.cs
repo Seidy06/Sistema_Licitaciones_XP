@@ -9,8 +9,5 @@ public interface IOfertaConsultaRepository
     Task<OfertaConsultaRegistro?> ObtenerPorIdAsync(
         Guid id,
         CancellationToken cancellationToken = default);
-
-    Task<decimal?> ObtenerTipoCambioUsdCrcAsync(
-        CancellationToken cancellationToken = default);
 }
 

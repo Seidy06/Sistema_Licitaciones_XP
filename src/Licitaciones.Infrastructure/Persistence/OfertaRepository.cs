@@ -67,16 +67,6 @@ public sealed class OfertaRepository :
                 _context.Ofertas.Where(oferta => oferta.Id == id))
             .FirstOrDefaultAsync(cancellationToken);
 
-    public Task<decimal?> ObtenerTipoCambioUsdCrcAsync(
-        CancellationToken cancellationToken = default) =>
-        _context.TiposCambio
-            .Where(tipo =>
-                tipo.Activo
-                && tipo.MonedaOrigen == "USD"
-                && tipo.MonedaDestino == "CRC")
-            .Select(tipo => (decimal?)tipo.Valor)
-            .SingleOrDefaultAsync(cancellationToken);
-
     public async Task AgregarAsync(
         Oferta oferta, CancellationToken cancellationToken = default) =>
         await _context.Ofertas.AddAsync(oferta, cancellationToken);

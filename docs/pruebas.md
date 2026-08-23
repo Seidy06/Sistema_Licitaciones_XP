@@ -11,7 +11,7 @@ no se agregaron fixtures ni contenedores por historia.
 ## Cobertura existente
 
 - `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de ahorro y nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo.
-- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta; y HU-18 sobre traslapes de rangos activos, rechazo del segundo rango abierto y resolución del aprobador desde la tabla.
+- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta; HU-18 sobre traslapes de rangos activos, rechazo del segundo rango abierto y resolución del aprobador desde la tabla; y HU-19 sobre reemplazo del tipo de cambio activo, conversión USD sin modificar montos persistidos, fecha del tipo de cambio utilizado y operación sin conexión externa.
 - `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC y el formulario de crear licitación.
 
 Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, una colección compartida de xUnit inicia una sola instancia `postgres:16-alpine` para las 22 clases integradas y la elimina al terminar; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
@@ -100,6 +100,43 @@ La suite completa se ejecutó antes y después del refactor. En CI, el commit
 rojo `bd1f3d6` falló como es esperable en TDD (ejecución `32532418505`), el
 verde `249ab70` terminó en `success` (ejecución `32534822110`) y el refactor
 `1224ece` terminó en `success` (ejecución `32556366636`).
+
+## Resultado verificado para HU-19 (Iteración 3)
+
+Ejecución local del 22 de agosto de 2026 con `dotnet test Licitaciones.sln
+--configuration Release --no-build`, antes y después del refactor, con
+PostgreSQL real iniciado por Testcontainers:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 83 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 105 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 3 | 0 | 0 |
+| **Total ejecutado** | **191** | **0** | **0** |
+
+HU-19 aporta cuatro pruebas de integración sobre PostgreSQL real, todas con el
+trait `HU-19` y recorridos HTTP reales mediante `WebApplicationFactory`:
+
+1. Guardar un nuevo tipo de cambio activo desactiva el previo y deja un único
+   registro activo; la comprobación consulta directamente la tabla y verifica
+   que la semilla quedó inactiva.
+2. Tras guardar una tasa nueva, el detalle de oferta en USD divide el monto
+   entre el nuevo valor sin modificar el monto persistido en CRC.
+3. La vista en USD incluye el valor y la fecha del tipo de cambio utilizado
+   (`tipoCambioValor` y `tipoCambioFecha`).
+4. Bloqueando toda llamada HTTP saliente, tanto la consulta del activo como
+   la conversión funcionan con el tipo de cambio administrado localmente.
+
+Cada prueba restaura el tipo de cambio semilla (USD→CRC, valor 500,
+2026-01-01) para no contaminar los escenarios restantes.
+
+En CI, el commit rojo `78be404` falló como es esperable en TDD (ejecución
+`32579740531`) y el verde `7ab8e09` terminó en `success` (ejecución
+`32597593088`). El commit de refactor `ff92f44` permanece local a la espera de
+publicarse en el PR #59: su verificación fue íntegramente local (build Release
+sin errores ni advertencias, `dotnet format --verify-no-changes` sin
+diferencias y suite completa en verde antes y después), por lo que todavía no
+tiene ejecución de CI registrada.
 
 Los recorridos end-to-end crean clientes sobre hosts ASP.NET Core reales. Así
 verifican activación por DI, routing, model binding, serialización, vistas,

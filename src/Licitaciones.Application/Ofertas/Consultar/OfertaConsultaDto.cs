@@ -6,5 +6,7 @@ public sealed record OfertaConsultaDto(
     decimal Monto,
     string Moneda,
     DateTimeOffset FechaRegistro,
-    bool EsMejorOferta);
+    bool EsMejorOferta,
+    decimal? TipoCambioValor = null,
+    DateOnly? TipoCambioFecha = null);
 

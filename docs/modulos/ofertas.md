@@ -54,7 +54,9 @@ Si no recibe ofertas, retorna `null`; Application lo presenta mediante
   listado completo de su licitación.
 
 Cada elemento es un `OfertaConsultaDto` con identificador, nombre del
-proveedor, monto, moneda, fecha de registro e indicador `EsMejorOferta`. El
+proveedor, monto, moneda, fecha de registro e indicador `EsMejorOferta`; al
+solicitar `USD` incluye además `tipoCambioValor` y `tipoCambioFecha` del
+tipo de cambio utilizado (HU-19), nulos con `CRC`. El
 indicador se calcula con la misma regla de HU-16: menor monto y, en caso de
 empate, la `FechaRegistro` más temprana. La moneda acepta `CRC` (valor
 persistido, por defecto) o `USD`; en USD el monto se divide entre el tipo de
@@ -68,7 +70,7 @@ almacenado permanece en CRC.
 | --- | --- |
 | Domain | `Oferta.Crear(...)` protege los invariantes propios de la entidad. `CalculadoraMejorOferta` selecciona, desempata y clasifica; `ResultadoMejorOferta` devuelve identificador, monto, porcentaje y clasificación. |
 | Application | `CrearOfertaService`, `CrearOfertaRequest`, `IOfertaRepository`, `OfertaDuplicadaException` y `OfertaDto` ejecutan el registro. `ProtegerOfertaService`, `IProteccionOfertaRepository` y `OfertaErrorCodes` expresan la inmutabilidad y los rechazos no procesables. `ConsultarLicitacionService` aplica el cálculo al detalle. `ConsultarOfertaService`, `IOfertaConsultaRepository` y `OfertaConsultaDto` implementan el listado y la consulta de HU-17. |
-| Infrastructure | `OfertaRepository` consulta licitación/proveedor, detecta duplicidad, persiste, obtiene la licitación asociada a una oferta y traduce la violación del índice compuesto esperado; como `IOfertaConsultaRepository` obtiene las ofertas con su proveedor y el tipo de cambio activo. `LicitacionConsultaRepository` obtiene las ofertas válidas para el cálculo de la mejor oferta. |
+| Infrastructure | `OfertaRepository` consulta licitación/proveedor, detecta duplicidad, persiste, obtiene la licitación asociada a una oferta y traduce la violación del índice compuesto esperado; como `IOfertaConsultaRepository` obtiene las ofertas con su proveedor. El tipo de cambio activo lo provee `TipoCambioRepository` mediante `ITipoCambioRepository` (HU-19). `LicitacionConsultaRepository` obtiene las ofertas válidas para el cálculo de la mejor oferta. |
 | API | `OfertasController` adapta el contrato HTTP y convierte rechazos de negocio en `400`, `409` o `422`; sus rutas `PUT` y `DELETE` protegen la evidencia en vez de modificarla. Las rutas `GET` atienden el listado y la consulta de HU-17. |
 
 ## Persistencia y concurrencia

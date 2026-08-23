@@ -13,6 +13,7 @@ using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Editar;
 using Licitaciones.Application.Proveedores.Eliminar;
+using Licitaciones.Application.TiposCambio;
 using Licitaciones.Domain.Common;
 using Licitaciones.Infrastructure.Persistence;
 using Licitaciones.Infrastructure.Time;
@@ -47,6 +48,8 @@ builder.Services.AddScoped<ProtegerOfertaService>();
 builder.Services.AddScoped<IOfertaRepository, OfertaRepository>();
 builder.Services.AddScoped<IOfertaConsultaRepository, OfertaRepository>();
 builder.Services.AddScoped<IProteccionOfertaRepository, OfertaRepository>();
+builder.Services.AddScoped<AdministrarTipoCambioService>();
+builder.Services.AddScoped<ITipoCambioRepository, TipoCambioRepository>();
 builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddDbContext<LicitacionesDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Licitaciones")));

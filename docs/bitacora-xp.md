@@ -112,6 +112,78 @@ Testcontainers. Resultado final:
 Estos puntos no se ocultaron dentro de HU-18: se registran como candidatos a
 Issues separadas. La Issue #47 permanece abierta y no se cierra desde esta fase.
 
+### HU-19 — Administrar tipo de cambio y conversión CRC/USD
+
+#### Estado
+
+| Historia | SP | Estado |
+| --- | ---: | --- |
+| HU-19 — Administrar tipo de cambio y conversión CRC/USD | 5 | Criterios de aceptación cubiertos y verificados: guardar un nuevo tipo de cambio desactiva automáticamente el previo (un único activo, respaldado además por el índice único parcial `UX_TiposCambio_Activo`), la conversión USD es solo de presentación (`monto / tipoCambio.Valor`) sin modificar el valor persistido en colones, la respuesta en USD incluye el valor y la fecha del tipo de cambio utilizado, y la conversión funciona sin conexión externa consultando el registro administrado localmente. La alternancia de moneda desde la interfaz web aún no existe; la exposición actual es por API y las vistas pertenecen a las historias web de la iteración. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-19 | Seidy | Tiffany | `78be404` |
+| VERDE HU-19 | Tiffany | Seidy | `7ab8e09` |
+| Refactor HU-19 | Seidy | Tiffany | `ff92f44` |
+
+Los roles conservan la asignación planificada (Seidy Driver, Tiffany
+Navigator) con rotación por fase y se reconstruyen a partir de la autoría
+alternada de los commits; Git conserva la autoría del Driver, no evidencia
+independiente del rol Navigator.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `78be404` — `test(moneda): cubrir criterios de administrar tipo de cambio y conversión crc/usd (HU-19)` | Agregó cuatro pruebas HTTP sobre PostgreSQL real con trait `HU-19`: reemplazo del activo quedando un solo registro (con verificación directa en la tabla), conversión USD como presentación conservando el monto persistido en CRC, inclusión del valor y la fecha del tipo de cambio utilizado, y conversión funcional bloqueando toda llamada saliente para simular ausencia de Internet. CI falló como es esperable en rojo (ejecución `32579740531`). |
+| VERDE | `7ab8e09` — `feat(moneda): implementar administrar tipo de cambio y conversión crc/usd (HU-19)` | Incorporó `TipoCambio.Crear`/`Desactivar`, `AdministrarTipoCambioService`, `ITipoCambioRepository`, `TipoCambioRepository.ReemplazarActivoAsync`, `TiposCambioController` (`POST /api/v1/tipos-cambio` y `GET /api/v1/tipos-cambio/activo`) con registro DI, y amplió la consulta de ofertas con `tipoCambioValor`/`tipoCambioFecha` al solicitar USD. Sin migraciones nuevas: reutiliza la tabla, la semilla y el índice existentes desde la iteración 1. CI en `success` (ejecución `32597593088`). |
+| Refactor | `ff92f44` — `refactor(moneda): simplificar implementacion de HU-19` | Centralizó el par de monedas administrado en las constantes `MonedaOrigenPredeterminada`/`MonedaDestinoPredeterminada` del dominio, eliminando los literales repetidos en repositorios, servicio y configuración; retiró la consulta duplicada `ObtenerTipoCambioUsdCrcAsync` de `IOfertaConsultaRepository`/`OfertaRepository` dejando `ITipoCambioRepository.ObtenerActivoAsync` como única fuente del registro activo; simplificó `ConvertirAsync` extrayendo `esDolares`. Sin comportamiento nuevo. Verificación local: build Release sin errores ni advertencias, `dotnet format --verify-no-changes` sin diferencias y suite completa en verde antes y después. El commit permanece local a la espera de publicarse en el PR #59, por lo que todavía no tiene ejecución de CI registrada. |
+
+#### Commits
+
+- `78be404` — pruebas de criterios de aceptación (ROJO).
+- `7ab8e09` — implementación mínima (VERDE).
+- `ff92f44` — refactorización sin cambio funcional (local, sin publicar).
+
+#### Pull Request
+
+El PR [#59](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/59)
+(`iteracion-3/hu-19-tipo-cambio` hacia `main`) está abierto con los commits
+ROJO y VERDE publicados; su verificación (`Build and Test`) está en verde sobre
+el último commit publicado `7ab8e09`. El commit de refactor `ff92f44`
+se incorporará al publicar la rama.
+
+#### Resultado de pruebas (HU-19)
+
+La suite completa se ejecutó localmente antes y después del refactor el 22 de
+agosto de 2026 con `dotnet test Licitaciones.sln --configuration Release
+--no-build` y PostgreSQL real mediante Testcontainers. Resultado final:
+
+- 83 pruebas unitarias superadas.
+- 105 pruebas de integración superadas (incluye las 4 de HU-19).
+- 3 pruebas funcionales superadas.
+- 0 fallidas y 0 omitidas; 191 ejecutadas.
+
+#### Pendientes y candidatos a Issues separadas
+
+1. La alternancia CRC/USD desde la interfaz web no está implementada: los
+   criterios de HU-19 quedaron cubiertos por API (`?moneda=USD` retorna monto
+   convertido, `tipoCambioValor` y `tipoCambioFecha`); las vistas MVC
+   pertenecen a las historias web de la Iteración 3.
+2. Mojibake preexistente en los mensajes de error de
+   `ConsultarOfertaService.ValidarConsulta` («licitaciÃ³n», «paginaciÃ³n»,
+   «ordenamiento»), introducido por el commit `fc87fe0` de HU-17 y detectado
+   durante el refactor de HU-19; quedó fuera del alcance de la Issue #48.
+3. Duplicación del helper `CrearProblema`: con `TiposCambioController` son ya
+   cinco copias en los controladores API (pendiente registrado por HU-18 con
+   cuatro).
+
+Estos puntos no se ocultaron dentro de HU-19: se registran como candidatos a
+Issues separadas. La Issue #48 permanece abierta y no se cierra ni marca sus
+criterios desde esta fase.
+
 ## Corrección posterior a la auditoría final de Iteración 2
 
 Driver: Tiffany. Navigator/responsable: Seidy. La auditoría detectó que HU-11 y
