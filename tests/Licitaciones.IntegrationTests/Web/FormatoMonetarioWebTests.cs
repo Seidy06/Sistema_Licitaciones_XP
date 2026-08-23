@@ -1,5 +1,6 @@
 using Licitaciones.Application.Ofertas.Crear;
 using Licitaciones.Application.Proveedores.Crear;
+using Licitaciones.Domain.Aprobaciones;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Infrastructure.Persistence;
 using Licitaciones.IntegrationTests.Common;
@@ -19,10 +20,10 @@ namespace Licitaciones.IntegrationTests.Hu25;
 [Collection(PostgreSqlCollection.Name)]
 public sealed class FormatoMonetarioWebTests
 {
-    private const string MontoEsperadoPresupuesto = "\u20A11.500.000,00";
-    private const string MontoEsperadoOferta = "\u20A11.250.500,00";
-    private const string MontoEsperadoNivelMinimo = "\u20A123.456.789,00";
-    private const string MontoEsperadoNivelMaximo = "\u20A124.654.321,00";
+    private const string MontoEsperadoPresupuesto = "₡1.500.000,00";
+    private const string MontoEsperadoOferta = "₡1.250.500,00";
+    private const string MontoEsperadoNivelMinimo = "₡23.456.789,00";
+    private const string MontoEsperadoNivelMaximo = "₡24.654.321,00";
 
     private readonly PostgreSqlFixture _database;
 
@@ -110,7 +111,7 @@ public sealed class FormatoMonetarioWebTests
                 "UPDATE \"NivelesAprobacion\" SET \"Activo\" = {0} WHERE \"Id\" = {1}",
                 false, 3);
 
-            var nivel = Domain.Aprobaciones.NivelAprobacion.Crear(
+            var nivel = NivelAprobacion.Crear(
                 $"Nivel formato HU25{run}",
                 23_456_789m,
                 24_654_321m);
