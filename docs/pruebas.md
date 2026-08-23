@@ -47,6 +47,40 @@ abierto y mergeable hacia `main`. Los commits hasta `5b3be34` están publicados;
 `2803c00` permanece local y no tiene ejecución de CI registrada. La Issue #52
 permanece abierta y no se marca como completada desde esta fase.
 
+## Resultado verificado para HU-24 (Iteración 3)
+
+HU-24 corresponde a la Issue [#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53).
+Sus dos criterios se cubren mediante pruebas de integración HTTP reales con
+`WebApplicationFactory`, vistas MVC y PostgreSQL mediante Testcontainers:
+
+| Criterio de aceptación de la Issue #53 | Pruebas | Evidencia |
+| --- | --- | --- |
+| Una operación exitosa muestra un mensaje de confirmación (toast/alert). | `Operacion_Exitosa_EliminacionNivel_DebeMostrarAlertaConfirmacionEnDestino` y `Operacion_Exitosa_RegistroOferta_DebeMostrarAlertaConfirmacionEnListado` en `MensajeriaWebTests`. | Siguen la redirección del POST y comprueban que la página destino presenta `alert-success` con el mensaje de confirmación. |
+| Un error de negocio produce un mensaje específico y comprensible, sin stack trace. | `ErrorNegocio_TraslapeNiveles_DebeMostrarAlertaConMensajeEspecificoSinStacktrace` en `MensajeriaWebTests`. | Comprueba `alert-danger`, el mensaje específico de traslape de rangos y la ausencia de stack traces en la respuesta. |
+
+La ejecución focalizada con
+`dotnet test tests\Licitaciones.IntegrationTests\Licitaciones.IntegrationTests.csproj --filter "HU=HU-24"`
+terminó en ROJO con **3 fallidas y 0 correctas** (comportamiento ausente) y tras
+el VERDE con **3 correctas, 0 fallidas y 0 omitidas**. La suite completa
+ejecutada con `dotnet test Licitaciones.sln` pasó de **216** a **219 correctas,
+0 fallidas y 0 omitidas**, y se mantuvo en 219 después del refactor.
+
+La secuencia TDD queda trazada así:
+
+- `6b15bed` — ROJO: agregó las tres pruebas de mensajería; CI fallido como es
+  esperable en rojo.
+- `e6213df` — VERDE: parcial compartido `_Mensajes` con alertas de éxito y
+  error incluido en las vistas destino; CI en verde.
+- REFACTOR local sin commit: extendió el parcial a las vistas restantes con
+  bloques duplicados, limpió los usings de `Program.cs` y ajustó la prueba
+  estructural `CreateView_DebeRenderizarMensajesDeValidacionDelNombre` al nuevo
+  formato sin reducir su intención.
+
+El PR [#64](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/64)
+(`iteracion-3/hu-24-mensajeria` hacia `main`) está abierto como draft. El
+refactor permanece local, sin push ni CI registrado. La Issue #53 permanece
+abierta y no se marca como completada desde esta fase.
+
 ## Resultado verificado para HU-21 (Iteración 3)
 
 Ejecución local del 22 de agosto de 2026 con `dotnet test Licitaciones.sln`,

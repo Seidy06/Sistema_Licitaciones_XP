@@ -40,7 +40,7 @@ roles en cada historia prevista:
 | 4 | HU-21 | Media | 2 | Seidy | Tiffany | [#50](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/50) | OPEN; no iniciada | `iteracion-3/hu-21-navegacion-global` |
 | 5 | HU-22 | Baja | 2 | Tiffany | Seidy | [#51](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/51) | OPEN; no iniciada | `iteracion-3/hu-22-tema-claro-oscuro` |
 | 6 | HU-23 | Alta | 8 | Seidy | Tiffany | [#52](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/52) | OPEN; criterios verificados localmente; PR abierto | `iteracion-3/hu-23-crud-web` |
-| 7 | HU-24 | Media | 2 | Tiffany | Seidy | [#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53) | OPEN; no iniciada | `iteracion-3/hu-24-mensajeria` |
+| 7 | HU-24 | Media | 2 | Tiffany | Seidy | [#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53) | OPEN; ROJO y VERDE en rama con CI verde; refactor local sin commit | `iteracion-3/hu-24-mensajeria` |
 | 8 | HU-25 | Baja | 1 | Seidy | Tiffany | [#54](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/54) | OPEN; no iniciada | `iteracion-3/hu-25-formato-es-cr` |
 | 9 | HU-26 | Alta | 8 | Tiffany | Seidy | [#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55) | OPEN; no iniciada | `iteracion-3/hu-26-api-rest-versionada` |
 | 10 | HU-27 | Media | 2 | Seidy | Tiffany | [#56](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/56) | OPEN; no iniciada | `iteracion-3/hu-27-swagger` |
@@ -452,6 +452,70 @@ preexistentes en pruebas funcionales.
 No se identificó trabajo adicional necesario para cumplir HU-23. El estado del
 PR y la Issue se mantienen abiertos; no se documenta cierre, merge ni éxito de
 CI para el commit de refactor local.
+
+### HU-24 — Mensajería de éxito, advertencia y error
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-24 — Mensajería de éxito, advertencia y error | 2 | [#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53) | Criterios cubiertos por pruebas en verde; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-24 | Tiffany | Seidy | `6b15bed` |
+| VERDE HU-24 | Seidy | Tiffany | `e6213df` |
+| REFACTOR HU-24 | Tiffany | Seidy | Cambios locales sin commit |
+
+Los roles conservan la asignación planificada (Tiffany Driver, Seidy Navigator)
+y se reconstruyen a partir de la autoría alternada de los commits; Git conserva
+la autoría del Driver, no evidencia independiente del rol Navigator.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+| Criterio de aceptación de la Issue #53 | Pruebas | Commits |
+| --- | --- | --- |
+| Una operación exitosa muestra un mensaje de confirmación (toast/alert). | `Operacion_Exitosa_EliminacionNivel_DebeMostrarAlertaConfirmacionEnDestino` y `Operacion_Exitosa_RegistroOferta_DebeMostrarAlertaConfirmacionEnListado` en `MensajeriaWebTests`. | ROJO `6b15bed`; VERDE `e6213df`; REFACTOR local sin commit. |
+| Un error de negocio produce un mensaje específico y comprensible, no un stack trace. | `ErrorNegocio_TraslapeNiveles_DebeMostrarAlertaConMensajeEspecificoSinStacktrace` en `MensajeriaWebTests`. | ROJO `6b15bed`; VERDE `e6213df`; REFACTOR local sin commit. |
+
+El PR [#64](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/64)
+(`iteracion-3/hu-24-mensajeria` hacia `main`) está abierto como draft. Los
+commits `6b15bed` y `e6213df` están publicados en la rama remota; el refactor
+permanece local y todavía no forma parte del PR. No se atribuye un resultado de
+CI al refactor local.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `6b15bed` — `test(web): cubrir criterios de mensajería de éxito, advertencia y error (HU-24)` | Agregó tres pruebas de integración HTTP con trait `HU-24` en `MensajeriaWebTests`: dos operaciones exitosas con redirección (eliminación de nivel y registro de oferta) y un error de negocio por traslape de rangos. Fallaron por comportamiento ausente: las vistas destino no mostraban la alerta de confirmación y los errores de negocio aparecían solo como texto del resumen de validación, sin componente `alert-danger`. CI fallido como es esperable en rojo (ejecución `32664841423`). Durante la fase se corrigió un fallo artificial (monto de oferta mayor al presupuesto sembrado) para que el rojo reflejara solo el comportamiento esperado. |
+| VERDE | `e6213df` — `feat(web): implementar mensajería de éxito, advertencia y error (HU-24)` | Incorporó el parcial compartido `_Mensajes.cshtml` (alerta `alert-success` desde `TempData["MensajeExito"]` y resumen de validación dentro de `alert-danger`), su inclusión en las vistas destino de las redirecciones y el registro de un `HtmlEncoder` con soporte Latin-1 para los acentos. Filtro HU-24 con 3 correctas; suite completa en 219 verdes; CI en `success` (ejecución `32665845522`). |
+| REFACTOR | Sin commit — cambios locales | Extendió `<partial name="_Mensajes" />` a las vistas que aún mantenían bloques duplicados (`Proveedores/Create`, `Proveedores/Edit`, `Ofertas/Create`, `TiposCambio/Create`, `TiposCambio/Index`, `Licitaciones/Index`), extrajo los usings de `HtmlEncoder`/`UnicodeRanges` en `Program.cs` y ajustó la prueba estructural `CreateView_DebeRenderizarMensajesDeValidacionDelNombre` para validar el resumen a través del parcial, preservando su intención. Sin comportamiento nuevo; suite completa en 219 verdes y `dotnet format --verify-no-changes` sin diferencias. |
+
+#### Resultado de pruebas (HU-24)
+
+La línea base previa al incremento estaba verde con 216 pruebas. Tras el ROJO,
+la ejecución focalizada de HU-24 terminó con 3 fallidas y 0 correctas. Después
+del VERDE, el filtro HU-24 terminó con 3 correctas, 0 fallidas y 0 omitidas, y
+la suite completa `dotnet test Licitaciones.sln` con 219 correctas, 0 fallidas
+y 0 omitidas. El refactor local mantuvo la suite en 219 verdes, con build sin
+errores y formato verificado.
+
+#### Pendientes y candidatos a Issues separadas
+
+- El POST exitoso de `Licitaciones/Create` fija `TempData["MensajeExito"]`,
+  pero la vista correspondiente aún no incluye el parcial `_Mensajes`, por lo
+  que esa confirmación no llega a mostrarse.
+- La edición exitosa de un proveedor fija `TempData["MensajeExito"]` y
+  redirige a `Details`, vista que tampoco renderiza el mensaje.
+- El título de HU-24 menciona la variante de advertencia, pero ningún flujo
+  produce todavía `TempData["MensajeAdvertencia"]`; el parcial actual cubre
+  éxito y error.
+
+Estos puntos se reportan como candidatos a Issues separadas; no se ocultan
+dentro de esta historia. La Issue #53 permanece abierta.
 
 ## Corrección posterior a la auditoría final de Iteración 2
 
