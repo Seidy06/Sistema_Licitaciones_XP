@@ -1,6 +1,6 @@
 # Modelo de datos
 
-El modelo ejecutable está definido por `LicitacionesDbContext`, las configuraciones Fluent API y cuatro migraciones: `CreateProviders`, `CompleteInitialDomain`, `AddProveedorSoftDelete` e `ImplementCreateTenderHu10`/`ImplementPublishTenderHu11`. La migración `AdministrarNivelesAprobacionHu18` agrega la columna `Activo` de niveles de aprobación y su secuencia de identificadores.
+El modelo ejecutable está definido por `LicitacionesDbContext`, las configuraciones Fluent API y cuatro migraciones: `CreateProviders`, `CompleteInitialDomain`, `AddProveedorSoftDelete` e `ImplementCreateTenderHu10`/`ImplementPublishTenderHu11`. La migración `AdministrarNivelesAprobacionHu18` agrega la columna `Activo` de niveles de aprobación y su secuencia de identificadores. La migración `AddLicitacionConcurrencyToken` (HU-29) agrega a `Licitaciones` el token de concurrencia optimista `xmin`.
 
 ```mermaid
 erDiagram
@@ -22,7 +22,8 @@ erDiagram
         varchar Titulo
         decimal Presupuesto
         timestamptz FechaCierre
-        int Estado FK }
+        int Estado FK
+        xid xmin }
     LICITACION_TRANSICIONES { uuid Id PK
         uuid LicitacionId FK
         int EstadoAnterior
@@ -74,6 +75,7 @@ El índice parcial único `UX_Proveedores_NombreNormalizado`, filtrado por `"Del
 | `CreatedAt` | `timestamp with time zone` | Obligatorio; asignado al insertar. |
 | `UpdatedAt` | `timestamp with time zone` | Obligatorio; actualizado al modificar. |
 | `DeletedAt` | `timestamp with time zone` | Nullable; indica baja lógica. |
+| `xmin` | `xid` | Token de concurrencia optimista (HU-29); ante dos actualizaciones concurrentes sobre la misma fila, la segunda lanza `DbUpdateConcurrencyException`. |
 
 ## LicitacionTransiciones
 
@@ -126,7 +128,7 @@ traslapen, incluido un segundo rango abierto, y fue recreada por
 ## Estado funcional del modelo
 
 - `EstadosLicitacion`: catálogo único con Borrador, Publicada, Cerrada, Adjudicada y Cancelada.
-- `Licitaciones`: código único, título de hasta 250 caracteres, presupuesto `numeric(18,2)` positivo, cierre, estado y auditoría. Crear, publicar, editar y cierre funcional implementados (HU-10, HU-11, HU-12).
+- `Licitaciones`: código único, título de hasta 250 caracteres, presupuesto `numeric(18,2)` positivo, cierre, estado y auditoría. Crear, publicar, editar y cierre funcional implementados (HU-10, HU-11, HU-12). HU-29 añadió el token de concurrencia optimista `xmin` mediante la migración `AddLicitacionConcurrencyToken`.
 - `LicitacionTransiciones`: historial de cambios de estado de licitaciones (HU-11).
 - El mismo historial registra el cierre manual `Publicada -> Cerrada` de HU-12;
   no fue necesario cambiar el esquema ni crear una migracion adicional.

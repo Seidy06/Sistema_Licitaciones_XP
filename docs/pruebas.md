@@ -11,10 +11,10 @@ no se agregaron fixtures ni contenedores por historia.
 ## Cobertura existente
 
 - `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de ahorro y nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo. Desde HU-28 también: validación y monedas predeterminadas del tipo de cambio, administración del tipo de cambio activo con orden/paginación, validaciones y desactivación de niveles de aprobación, administración de niveles (traslape, filtro, orden, desactivación) y consulta de ofertas con conversión CRC/USD, filtro, orden, paginación e indicador de mejor oferta.
-- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta; HU-18 sobre traslapes de rangos activos, rechazo del segundo rango abierto y resolución del aprobador desde la tabla; y HU-19 sobre reemplazo del tipo de cambio activo, conversión USD sin modificar montos persistidos, fecha del tipo de cambio utilizado y operación sin conexión externa.
+- `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta; HU-18 sobre traslapes de rangos activos, rechazo del segundo rango abierto y resolución del aprobador desde la tabla; HU-19 sobre reemplazo del tipo de cambio activo, conversión USD sin modificar montos persistidos, fecha del tipo de cambio utilizado y operación sin conexión externa; y HU-29 sobre el contrato del contenedor PostgreSQL real (conectividad, proveedor Npgsql, migraciones aplicadas sin pendientes y versión 16 del servidor), rechazo directo por EF Core de un código duplicado con `SqlState` `23505` e índice `UX_Licitaciones_CodigoNormalizado`, y concurrencia optimista `xmin` donde la segunda actualización lanza `DbUpdateConcurrencyException`.
 - `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC, el formulario de crear licitación; HU-20 sobre la landing informativa en la raíz `/`: acceso anónimo con las seis secciones explicativas y diseño responsivo (viewport, Bootstrap y rejilla por puntos de ruptura) simulando un agente móvil; HU-21 sobre la navegación global y el acceso a Swagger; y HU-22 sobre modo claro/oscuro persistente: control visible en todas las páginas, persistencia de la preferencia en `localStorage` y respeto del último tema seleccionado al cargar.
 
-Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, una colección compartida de xUnit inicia una sola instancia `postgres:16-alpine` para las 22 clases integradas y la elimina al terminar; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
+Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, una colección compartida de xUnit inicia una sola instancia `postgres:16-alpine` para las 34 clases integradas y la elimina al terminar; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
 
 ## Resultado verificado para HU-23 (Iteración 3)
 
@@ -467,6 +467,53 @@ pasó de **233** a **267 correctas, 0 fallidas y 0 omitidas** (119 unitarias,
 [#80](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/80)
 (`iteracion-4/hu-28-cobertura-pruebas` hacia `main`) está abierto y mergeable
 con CI en verde en ambos commits; la Issue #69 permanece abierta y no se marca
+como completada desde esta fase.
+
+## Resultado verificado para HU-29 (Iteración 4)
+
+HU-29 corresponde a la Issue [#70](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/70).
+Sus tres criterios se cubren con una clase de integración sobre el PostgreSQL
+real de la fixture compartida (`RestriccionesYConcurrenciaPostgreSqlTests`,
+namespace `Hu29`, trait `HU-29`), que reutiliza la infraestructura Testcontainers
+existente desde la Iteración 2 en lugar de levantar contenedores adicionales:
+
+| Criterio de aceptación de la Issue #70 | Pruebas | Evidencia |
+| --- | --- | --- |
+| El proyecto `Tests.Integration` levanta un contenedor PostgreSQL real vía Testcontainers y aplica las migraciones. | `Contenedor_DebeSerPostgreSqlRealConMigracionesAplicadas`. | Comprueba conectividad, proveedor `Npgsql.EntityFrameworkCore.PostgreSQL`, migraciones aplicadas sin pendientes y `ServerVersion` 16 del servidor. La fixture compartida arranca `postgres:16-alpine` y ejecuta `MigrateAsync()` en su inicialización. |
+| Insertar un código de licitación duplicado directamente vía EF Core es rechazado por la base (constraint violation capturada y traducida). | `Insertar_CodigoDuplicadoViaEfCore_DebeRechazarloComoViolacionUnica`. | Dos contextos consecutivos; el segundo inserta un código equivalente (espacios y mayúsculas) y comprueba `DbUpdateException` con `PostgresException` interna, `SqlState` `23505` e índice `UX_Licitaciones_CodigoNormalizado`. |
+| Dos actualizaciones concurrentes sobre el mismo registro: la segunda lanza `DbUpdateConcurrencyException`. | `DosActualizacionesConcurrentes_SobreMismaLicitacion_LaSegundaDebeFallar`. | Dos contextos cargan la misma fila, ambos llaman a `Editar` y guardan; el token optimista `xmin` hace fallar el segundo `SaveChangesAsync` con `DbUpdateConcurrencyException`. |
+
+La secuencia TDD queda trazada así:
+
+- `8a62387` — ROJO: agregó los tres casos con trait `HU-29`. Los dos primeros
+  pasaron porque el comportamiento ya existía (fixture Testcontainers e índice
+  único parcial desde iteraciones previas); el tercero falló por comportamiento
+  ausente — `Licitaciones` carecía de token de concurrencia—. CI falló como es
+  esperable en rojo (`Build and Test` en `failure` sobre `8a62387`).
+- `ba17ba0` — VERDE: incorporó la propiedad `Version` en `Licitacion`, su
+  configuración `IsRowVersion()` (token `xmin` de PostgreSQL) y la migración
+  `AddLicitacionConcurrencyToken`; sin cambios en controladores ni servicios.
+  CI en `success` sobre `ba17ba0`.
+- REFACTOR local sin commit: deduplicó la creación de la licitación de prueba;
+  el caso de concurrencia reutiliza ahora el helper `NuevaLicitacion` mediante
+  una sobrecarga con fecha de cierre, eliminando los literales repetidos
+  («Compra para pruebas HU-29», presupuesto 1000). Sin comportamiento nuevo.
+
+La ejecución local registró una incidencia ambiental antes del refactor: con
+Smart App Control de Windows activo, el primer intento no pudo cargar los
+ensamblados recién compilados (`0x800711C7`, afectando también las suites
+previamente verdes); tras reconstruir la solución los binarios cargaron con
+normalidad y la verificación concluyó así: filtro HU-29 con **3 correctas,
+0 fallidas y 0 omitidas**, y suite completa con `dotnet test Licitaciones.sln`
+pasó de **267** a **270 correctas, 0 fallidas y 0 omitidas** (119 unitarias,
+135 de integración, 16 funcionales).
+`dotnet format Licitaciones.sln --verify-no-changes --no-restore` terminó sin
+diferencias.
+
+El PR [#81](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/81)
+(`iteracion-4/hu-29-pruebas-integracion` hacia `main`) está abierto y mergeable
+con los commits ROJO y VERDE publicados; el refactor permanece local sin push
+ni ejecución de CI registrada. La Issue #70 permanece abierta y no se marca
 como completada desde esta fase.
 
 ## Integración continua
