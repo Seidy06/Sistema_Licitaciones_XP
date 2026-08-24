@@ -46,6 +46,9 @@ jobs:
       - name: Compilar solución
         run: dotnet build Licitaciones.sln --configuration Release --no-restore
 
+      - name: Instalar navegadores de Playwright
+        run: pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium
+
       - name: Ejecutar pruebas
         run: dotnet test Licitaciones.sln --configuration Release --no-build
         env:

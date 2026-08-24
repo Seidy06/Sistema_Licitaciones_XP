@@ -1,6 +1,6 @@
 # Módulo de interfaz web
 
-`Licitaciones.Web` usa ASP.NET Core MVC, vistas Razor, Bootstrap y validación unobtrusive. El incremento funcional de la Iteración 1 corresponde a proveedores; la Iteración 3 incorpora la experiencia informativa con la landing page (HU-20), la navegación global (HU-21), el modo claro/oscuro persistente (HU-22), el CRUD web de HU-23, la mensajería unificada de éxito y error de HU-24 y el formato monetario es-CR de HU-25.
+`Licitaciones.Web` usa ASP.NET Core MVC, vistas Razor, Bootstrap y validación unobtrusive. El incremento funcional de la Iteración 1 corresponde a proveedores; la Iteración 3 incorpora la experiencia informativa con la landing page (HU-20), la navegación global (HU-21), el modo claro/oscuro persistente (HU-22), el CRUD web de HU-23, la mensajería unificada de éxito y error de HU-24 y el formato monetario es-CR de HU-25; la Iteración 4 añade la publicación desde el listado y la consulta de ofertas en CRC o USD (HU-30).
 
 | Ruta MVC | Función |
 | --- | --- |
@@ -15,7 +15,8 @@
 | `GET /Proveedores/HistoryDetails/{id}` | Consultar el detalle histórico. |
 | `GET /Licitaciones` | Listar, filtrar, ordenar y paginar licitaciones. |
 | `GET/POST /Licitaciones/Create` | Mostrar formulario y registrar una licitación. |
-| `GET /Ofertas?licitacionId={id}` | Listar, filtrar, ordenar y paginar ofertas de una licitación. |
+| `POST /Licitaciones/Publicar` | Publicar una licitación en Borrador desde el listado (HU-30). |
+| `GET /Ofertas?licitacionId={id}` | Listar, filtrar, ordenar y paginar ofertas de una licitación, con moneda CRC/USD y panel de mejor oferta (HU-30). |
 | `GET/POST /Ofertas/Create` | Mostrar formulario y registrar una oferta. |
 | `GET /NivelesAprobacion` | Listar, filtrar, ordenar y paginar niveles activos. |
 | `GET/POST /NivelesAprobacion/Create` | Mostrar formulario y crear un nivel de aprobación. |
@@ -118,3 +119,25 @@ La vista de confirmación `NivelesAprobacion/Delete` todavía presenta sus monto
 con `.ToString("N2")`; extender allí el helper quedó registrado como candidato
 a Issue separada. La evidencia del criterio está en las pruebas de integración
 de `FormatoMonetarioWebTests` (HU-25).
+
+## Publicación desde el listado y ofertas en CRC/USD (HU-30)
+
+El listado de licitaciones muestra, para cada fila en estado `Borrador`, un
+botón «Publicar» (`data-accion='publicar'`) que envía por POST con token
+antifalsificación a `LicitacionesController.Publicar`. La acción delega en
+`PublicarLicitacionService`, redirige al listado conservando el filtro de
+código y presenta los rechazos de dominio mediante `TempData["MensajeError"]`
+con el partial `_Mensajes` (HU-24); un identificador inexistente responde 404.
+
+El listado de ofertas acepta ahora el parámetro `moneda` (CRC por defecto) con
+un selector `select#moneda` que reenvía el formulario; los montos se formatean
+con la sobrecarga `FormatoMonetario.Dinero(valor, moneda)`, que presenta USD
+como `N2 US$` y conserva el formato es-CR con ₡ para CRC. El modelo
+`OfertasIndexViewModel` agrega la moneda seleccionada, la columna Moneda por
+fila y la mejor oferta de la licitación consultada a `ConsultarLicitacionService`,
+presentada en un panel `data-mejor-oferta` con monto y clasificación mientras
+la vista esté en CRC.
+
+La evidencia de estos comportamientos está en las pruebas E2E de
+`FlujoMinimoE2ETests` (HU-30), que los recorren desde Chromium headless contra
+la aplicación real.

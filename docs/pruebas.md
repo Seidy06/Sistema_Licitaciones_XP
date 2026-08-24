@@ -13,8 +13,11 @@ no se agregaron fixtures ni contenedores por historia.
 - `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de ahorro y nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo. Desde HU-28 también: validación y monedas predeterminadas del tipo de cambio, administración del tipo de cambio activo con orden/paginación, validaciones y desactivación de niveles de aprobación, administración de niveles (traslape, filtro, orden, desactivación) y consulta de ofertas con conversión CRC/USD, filtro, orden, paginación e indicador de mejor oferta.
 - `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta; HU-18 sobre traslapes de rangos activos, rechazo del segundo rango abierto y resolución del aprobador desde la tabla; HU-19 sobre reemplazo del tipo de cambio activo, conversión USD sin modificar montos persistidos, fecha del tipo de cambio utilizado y operación sin conexión externa; y HU-29 sobre el contrato del contenedor PostgreSQL real (conectividad, proveedor Npgsql, migraciones aplicadas sin pendientes y versión 16 del servidor), rechazo directo por EF Core de un código duplicado con `SqlState` `23505` e índice `UX_Licitaciones_CodigoNormalizado`, y concurrencia optimista `xmin` donde la segunda actualización lanza `DbUpdateConcurrencyException`.
 - `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC, el formulario de crear licitación; HU-20 sobre la landing informativa en la raíz `/`: acceso anónimo con las seis secciones explicativas y diseño responsivo (viewport, Bootstrap y rejilla por puntos de ruptura) simulando un agente móvil; HU-21 sobre la navegación global y el acceso a Swagger; y HU-22 sobre modo claro/oscuro persistente: control visible en todas las páginas, persistencia de la preferencia en `localStorage` y respeto del último tema seleccionado al cargar.
+- `Licitaciones.E2ETests` (HU-30): ocho pasos ordenados `Paso01…Paso08` con trait `HU-30` que recorren el flujo funcional mínimo completo desde Chromium headless contra la aplicación real: inicio servido en navegador, registro de proveedor, creación y publicación de licitación, registro de oferta válida, rechazo de oferta duplicada y sobre presupuesto, mejor oferta con monto y clasificación, y alternancia CRC/USD.
 
 Las pruebas de integración usan PostgreSQL real. Si no se define `LICITACIONES_INTEGRATION_CONNECTION_STRING`, una colección compartida de xUnit inicia una sola instancia `postgres:16-alpine` para las 34 clases integradas y la elimina al terminar; esto requiere Docker en ejecución. En CI se usa el PostgreSQL 16 declarado como servicio del workflow.
+
+Las pruebas E2E de HU-30 usan además un contenedor PostgreSQL propio (fixture `LicitacionesE2EFixture`, aislada de la fixture compartida de integración) y lanzan la aplicación como proceso real sobre un puerto libre de loopback, con Chromium headless. La selección del navegador respeta la variable `LICITACIONES_E2E_BROWSER_CHANNEL` y reserva MS Edge o Chrome instalados si los navegadores de Playwright no están descargados.
 
 ## Resultado verificado para HU-23 (Iteración 3)
 
@@ -516,9 +519,62 @@ con los commits ROJO y VERDE publicados; el refactor permanece local sin push
 ni ejecución de CI registrada. La Issue #70 permanece abierta y no se marca
 como completada desde esta fase.
 
+## Resultado verificado para HU-30 (Iteración 4)
+
+HU-30 corresponde a la Issue [#71](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/71).
+Sus dos criterios se cubren con el proyecto `tests/Licitaciones.E2ETests`
+(Playwright 1.62.0, Testcontainers.PostgreSql 4.13.0), que lanza Chromium
+headless contra la aplicación ejecutándose como proceso real sobre un
+contenedor PostgreSQL `postgres:16-alpine` propio:
+
+| Criterio de aceptación de la Issue #71 | Pruebas | Evidencia |
+| --- | --- | --- |
+| El flujo funcional mínimo completo pasa automatizado como prueba E2E. | `Paso01_Inicio…`, `Paso02_Proveedores…`, `Paso03_Licitaciones…`, `Paso04_Licitaciones_PublicarDesdeElListadoWeb…`, `Paso05_Ofertas_RegistrarOfertaValida…`, `Paso06_Ofertas_VerificarRechazoDeOfertaDuplicadaYSobrePresupuesto`, `Paso07_Ofertas_ConsultarMejorOferta…` y `Paso08_Ofertas_AlternarMonedaEntreCRCyUSD…` en `FlujoMinimoE2ETests` (trait `HU-30`, orden alfabético garantizado por `OrdenCasosPruebaAlfabeticamente` con paralelismo deshabilitado). | Recorren navegador real: landing servida, proveedor y licitación creados desde formularios MVC, publicación desde el listado (`[data-accion='publicar']`), oferta válida listada, rechazos de duplicada y sobre presupuesto visibles como mensajes, panel `[data-mejor-oferta]` con monto y clasificación, y selector `select#moneda` que convierte a USD sin alterar el valor oficial en CRC. |
+| En CI las pruebas E2E corren contra la aplicación levantada en modo headless. | El job de CI instala los navegadores antes de probar (`pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium`) y luego ejecuta `dotnet test Licitaciones.sln`. | La suite corre Chromium headless dentro del runner; CI fallida en el ROJO `7ac0633` (ejecución `32745900834`) y `success` en el VERDE `c2ae985` (ejecución `32758023420`). |
+
+La fase ROJO se confirmó con la ejecución filtrada
+`dotnet test tests\Licitaciones.E2ETests\Licitaciones.E2ETests.csproj --filter "HU=HU-30"`:
+**5 fallidas y 3 superadas**, todas las fallidas por comportamiento ausente
+(sin control publicar, sin panel de mejor oferta, sin selector de moneda y con
+el registro de ofertas rechazado porque la licitación seguía en Borrador);
+los pasos 01 a 03 pasaban porque ese comportamiento existía desde la Iteración
+3. Tras el VERDE (`c2ae985`) la misma ejecución filtrada terminó con **8
+correctas, 0 fallidas y 0 omitidas**. Después del refactor local (`55d97c0`,
+deduplicación de helpers de la clase de pruebas sin cambios en producción), la
+suite completa `dotnet test Licitaciones.sln` resultó:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 119 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 135 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **278** | **0** | **0** |
+
+La secuencia TDD queda trazada así:
+
+- `b8a2d18` — ROJO: creó el proyecto E2E con fixture y ocho pasos; 5 fallidas /
+  3 superadas por comportamiento ausente.
+- `7ac0633` — alta del proyecto en `Licitaciones.sln`; CI fallida esperable.
+- `c2ae985` — VERDE: acción MVC de publicación, moneda y mejor oferta en el
+  listado web de ofertas, formato USD, mensaje de error vía `_Mensajes`,
+  registro DI y paso Playwright en `ci.yml`; CI en `success`.
+- `55d97c0` — REFACTOR local sin publicar: helpers compartidos entre los ocho
+  pasos (+38/−28); sin comportamiento nuevo ni CI registrada.
+
+El PR [#82](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/82)
+(`iteracion-4/hu-30-pruebas-e2e` hacia `main`) está abierto como draft y
+mergeable. La Issue #71 permanece abierta y no se marca como completada desde
+esta fase.
+
+Nota técnica: la Issue sugería correr las E2E contra Docker Compose en el job
+de CI; la implementación levanta aplicación y PostgreSQL con Testcontainers
+dentro del runner (mismo aislamiento, paso de CI más simple). La desviación de
+enfoque consta en la bitácora.
+
 ## Integración continua
 
-`.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release y ejecuta toda la solución. En esta iteración no mide cobertura ni construye imágenes Docker.
+`.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release, instala los navegadores de Playwright (`pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium`, añadido por HU-30) y ejecuta toda la solución, incluidas las pruebas E2E con Chromium headless. En esta iteración no mide cobertura ni construye imágenes Docker.
 
 Estado verificado en la API pública de GitHub al cierre de la Iteración 2 (20
 de agosto de 2026): los ocho commits de fusión del incremento terminaron en

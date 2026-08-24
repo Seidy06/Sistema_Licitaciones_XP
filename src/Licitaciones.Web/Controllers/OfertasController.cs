@@ -1,4 +1,5 @@
 using Licitaciones.Application.Common;
+using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Ofertas.Crear;
 using Licitaciones.Domain.Common;
@@ -10,20 +11,29 @@ namespace Licitaciones.Web.Controllers;
 
 public sealed class OfertasController : Controller
 {
+    private const string MonedaPredeterminada = "CRC";
+
     private readonly ConsultarOfertaService _consultarService;
     private readonly CrearOfertaService _crearService;
+    private readonly ConsultarLicitacionService _consultarLicitacionService;
+    private readonly IClock _clock;
 
     public OfertasController(
         ConsultarOfertaService consultarService,
-        CrearOfertaService crearService)
+        CrearOfertaService crearService,
+        ConsultarLicitacionService consultarLicitacionService,
+        IClock clock)
     {
         _consultarService = consultarService;
         _crearService = crearService;
+        _consultarLicitacionService = consultarLicitacionService;
+        _clock = clock;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index(
         Guid licitacionId,
+        string? moneda = null,
         string? proveedor = null,
         int pagina = 1,
         int tamanoPagina = 20,
@@ -31,12 +41,16 @@ public sealed class OfertasController : Controller
         bool descendente = false,
         CancellationToken cancellationToken = default)
     {
+        var monedaSeleccionada = string.IsNullOrWhiteSpace(moneda)
+            ? MonedaPredeterminada
+            : moneda.Trim().ToUpperInvariant();
+
         try
         {
             var resultado = await _consultarService.ListarAsync(
                 new ConsultarOfertasRequest(
                     licitacionId,
-                    "CRC",
+                    monedaSeleccionada,
                     proveedor,
                     ordenarPor,
                     descendente,
@@ -44,17 +58,22 @@ public sealed class OfertasController : Controller
                     tamanoPagina),
                 cancellationToken);
 
-            var model = new PaginaResultado<OfertaItemViewModel>(
-                resultado.Items
-                    .Select(oferta => new OfertaItemViewModel(
-                        oferta.Id,
-                        oferta.ProveedorNombre,
-                        oferta.Monto,
-                        oferta.FechaRegistro))
-                    .ToArray(),
-                resultado.Total,
-                resultado.Pagina,
-                resultado.TamanoPagina);
+            var model = new OfertasIndexViewModel(
+                new PaginaResultado<OfertaItemViewModel>(
+                    resultado.Items
+                        .Select(oferta => new OfertaItemViewModel(
+                            oferta.Id,
+                            oferta.ProveedorNombre,
+                            oferta.Monto,
+                            oferta.Moneda,
+                            oferta.EsMejorOferta,
+                            oferta.FechaRegistro))
+                        .ToArray(),
+                    resultado.Total,
+                    resultado.Pagina,
+                    resultado.TamanoPagina),
+                await ObtenerMejorOfertaAsync(licitacionId, cancellationToken),
+                monedaSeleccionada);
 
             ViewData["LicitacionId"] = licitacionId == Guid.Empty ? null : licitacionId;
             ViewData["Proveedor"] = proveedor;
@@ -65,8 +84,11 @@ public sealed class OfertasController : Controller
         catch (DomainException exception)
         {
             ModelState.AddModelError(string.Empty, exception.Message);
-            return View(new PaginaResultado<OfertaItemViewModel>(
-                Array.Empty<OfertaItemViewModel>(), 0, pagina, tamanoPagina));
+            return View(new OfertasIndexViewModel(
+                new PaginaResultado<OfertaItemViewModel>(
+                    Array.Empty<OfertaItemViewModel>(), 0, pagina, tamanoPagina),
+                null,
+                monedaSeleccionada));
         }
     }
 
@@ -104,5 +126,21 @@ public sealed class OfertasController : Controller
 
         TempData["MensajeExito"] = "La oferta se registró correctamente.";
         return RedirectToAction(nameof(Index), new { licitacionId = model.LicitacionId });
+    }
+
+    private async Task<LicitacionMejorOfertaDto?> ObtenerMejorOfertaAsync(
+        Guid licitacionId,
+        CancellationToken cancellationToken)
+    {
+        if (licitacionId == Guid.Empty)
+        {
+            return null;
+        }
+
+        var detalle = await _consultarLicitacionService.ObtenerDetalleAsync(
+            licitacionId,
+            _clock,
+            cancellationToken);
+        return detalle?.MejorOferta;
     }
 }

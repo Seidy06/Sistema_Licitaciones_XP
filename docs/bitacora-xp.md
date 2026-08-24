@@ -45,7 +45,7 @@ roles en cada historia prevista:
 | ---: | --- | --- | ---: | --- | --- | --- | --- | --- |
 | 1 | HU-28 — Pruebas unitarias del dominio | Alta | 5 | Tiffany | Seidy | [#69](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/69) | OPEN; no iniciada | `iteracion-4/hu-28-pruebas-unitarias-dominio` |
 | 2 | HU-29 — Integración PostgreSQL real | Alta | 5 | Seidy | Tiffany | [#70](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/70) | OPEN; no iniciada | `iteracion-4/hu-29-integracion-postgresql` |
-| 3 | HU-30 — Pruebas E2E de navegador | Alta | 8 | Tiffany | Seidy | [#71](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/71) | OPEN; no iniciada | `iteracion-4/hu-30-pruebas-e2e` |
+| 3 | HU-30 — Pruebas E2E de navegador | Alta | 8 | Tiffany | Seidy | [#71](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/71) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR en commit local sin publicar | `iteracion-4/hu-30-pruebas-e2e` |
 | 4 | HU-31 — Dockerfile multi-stage | Alta | 3 | Seidy | Tiffany | [#72](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/72) | OPEN; no iniciada | `iteracion-4/hu-31-dockerfile` |
 | 5 | HU-32 — Docker Compose local | Alta | 3 | Tiffany | Seidy | [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73) | OPEN; no iniciada | `iteracion-4/hu-32-docker-compose` |
 | 6 | HU-33 — Manifiestos K8s de la app | Alta | 5 | Seidy | Tiffany | [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74) | OPEN; no iniciada | `iteracion-4/hu-33-k8s-app` |
@@ -274,6 +274,112 @@ diferencias.
   aserción junto con la imagen.
 
 La Issue #70 permanece abierta.
+
+### HU-30 — Pruebas funcionales de extremo a extremo (E2E)
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-30 — Pruebas funcionales de extremo a extremo (E2E) | 8 | [#71](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/71) | Criterios cubiertos por pruebas en verde (filtro HU-30 8/8 y suite completa 278 verdes tras el refactor); la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-30 | Seidy | Tiffany | `b8a2d18` |
+| Proyecto E2E en la solución | Seidy | Tiffany | `7ac0633` |
+| VERDE HU-30 | Tiffany | Seidy | `c2ae985` |
+| REFACTOR HU-30 | Seidy | Tiffany | `55d97c0` (local, sin publicar) |
+
+La asignación planificada para esta historia era Tiffany Driver/Seidy
+Navigator; la autoría real de los commits muestra el ROJO, el alta del proyecto
+en la solución y el REFACTOR firmados por Seidy, y el VERDE firmado por
+Tiffany. Git conserva la autoría del Driver de cada incremento; el rol
+Navigator se reconstruye a partir del trabajo coordinado de la pareja, sin
+atribuir sesiones sin evidencia.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #71 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Alta, estimación 8 SP, iteración 4 (RELEASE 8), pareja y los
+dos criterios coinciden literalmente. La rama real coincide con la prevista en
+el Planning Game (`iteracion-4/hu-30-pruebas-e2e`) y los commits usan
+`refs #71` correctamente.
+
+Inspección previa para no duplicar escenarios ni infraestructura: las suites
+previas ya recorrían API, Application e Infrastructure mediante
+`WebApplicationFactory` con PostgreSQL real (HU-10 a HU-29); lo que faltaba era
+un navegador real automatizando la experiencia completa desde fuera del
+proceso. El nuevo proyecto no reemplaza ninguna prueba previa: añade Chromium
+headless contra la aplicación ejecutándose como proceso real (`ASPNETCORE_URLS`
+con puerto libre de loopback y `Database:ApplyMigrationsOnStartup=true`) sobre
+un contenedor PostgreSQL propio (`postgres:16-alpine`, fixture
+`LicitacionesE2EFixture` aislada de la fixture compartida de integración). La
+selección del navegador prefiere el canal indicado en
+`LICITACIONES_E2E_BROWSER_CHANNEL` y, si no existe, usa los navegadores de
+Playwright con reserva en MS Edge y Chrome instalados en el equipo.
+
+| Criterio de aceptación de la Issue #71 | Pruebas | Commits |
+| --- | --- | --- |
+| El flujo funcional mínimo completo pasa de forma automatizada como prueba E2E. | Los ocho casos ordenados `Paso01…Paso08` de `FlujoMinimoE2ETests` (trait `HU-30`, orden `OrdenCasosPruebaAlfabeticamente` y paralelismo deshabilitado): inicio servido en navegador headless; registro de proveedor desde el formulario web; creación de licitación; publicación desde el listado; registro de oferta válida; rechazo de oferta duplicada y sobre presupuesto; consulta de la mejor oferta con monto y clasificación; alternancia CRC/USD sin alterar el valor oficial. | ROJO `b8a2d18`; proyecto en la solución `7ac0633`; VERDE `c2ae985`. |
+| En CI las pruebas E2E corren contra la aplicación levantada en modo headless. | Paso «Instalar navegadores de Playwright» añadido al job de CI (`pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium`) antes de `dotnet test Licitaciones.sln`; la suite lanza Chromium headless contra la aplicación real en el runner. | Ídem. |
+
+El PR [#82](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/82)
+(`iteracion-4/hu-30-pruebas-e2e` hacia `main`) está abierto como draft y
+mergeable, con los commits hasta `c2ae985` publicados: CI fallida en el ROJO
+`7ac0633` como es esperable (ejecución `32745900834`) y `Build and Test` en
+`success` sobre el VERDE `c2ae985` (ejecución `32758023420`). El refactor
+permanece local, sin push ni ejecución de CI registrada.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `b8a2d18` — `test(e2e): cubrir criterios de pruebas funcionales de extremo a extremo (e2e) (HU-30)` | Creó el proyecto `tests/Licitaciones.E2ETests` (Playwright 1.62.0, Testcontainers.PostgreSql 4.13.0, xunit 2.9.2) con la fixture `LicitacionesE2EFixture` (PostgreSQL real más proceso real de `Licitaciones.Web`) y `FlujoMinimoE2ETests` con ocho pasos ordenados y trait `HU-30`. Ejecución filtrada: 5 fallidas y 3 superadas, todas las fallidas por comportamiento ausente —sin control `[data-accion='publicar']` en el listado, sin panel `[data-mejor-oferta]`, sin selector `select#moneda`, y el registro de ofertas rechazado porque la licitación seguía en Borrador («La licitacion debe estar publicada para registrar ofertas.»)—; los pasos 01 a 03 pasaban porque landing y CRUD de proveedor/licitación existían desde la Iteración 3. CI fallida como es esperable en rojo. |
+| Alta en solución | `7ac0633` — `test(e2e): agregar proyecto de pruebas a la solución (HU-30)` | Incorporó `Licitaciones.E2ETests.csproj` a `Licitaciones.sln` para que build, formato y `dotnet test` lo incluyan. CI fallida (ejecución `32745900834`) porque el VERDE aún no existía. |
+| VERDE | `c2ae985` — `feat(e2e): implementar pruebas funcionales de extremo a extremo (e2e) (HU-30)` | Implementó el comportamiento ausente: acción MVC `POST /Licitaciones/Publicar` con botón `[data-accion='publicar']` solo para Borrador; `OfertasController.Index` acepta `moneda` (CRC por defecto) y expone `OfertasIndexViewModel` con mejor oferta y moneda seleccionada; panel `[data-mejor-oferta]` con monto y clasificación en `Ofertas/Index`; selector `select#moneda` CRC/USD; sobrecarga `FormatoMonetario.Dinero(valor, moneda)` que presenta USD como `N2 US$`; mensaje de error vía `TempData` en `_Mensajes`; registro DI de `PublicarLicitacionService`; paso de instalación de navegadores Playwright en `ci.yml`. Las reglas de negocio permanecen en Domain/Application. Filtro HU-30 8/8 correctas; suite completa en verde; CI en `success` (ejecución `32758023420`). |
+| REFACTOR | `55d97c0` — `refactor(e2e): simplificar implementacion de HU-30` (local, sin publicar) | Deduplicó `FlujoMinimoE2ETests` extrayendo los helpers `RegistrarProveedorAsync`, `FilaDeLaLicitacionDelFlujoAsync`, `IdDeLaLicitacionDelFlujoAsync` e `IdDeProveedorAsync`, reutilizados por los ocho pasos (+38/−28). Sin cambios en código de producción ni comportamiento nuevo. Suite completa 278 verdes y formato sin diferencias; sin push ni CI todavía. |
+
+#### Resultado de pruebas (HU-30)
+
+La línea base previa al incremento estaba verde con 270 pruebas en la solución
+(CI `success` tras la fusión de HU-29). Verificación posterior al refactor,
+con Docker Desktop en ejecución, PostgreSQL real iniciado por Testcontainers y
+Chromium headless:
+
+1. Ejecución focalizada
+   `dotnet test tests\Licitaciones.E2ETests\Licitaciones.E2ETests.csproj --configuration Release --no-build --filter "HU=HU-30"`:
+   8 correctas, 0 fallidas y 0 omitidas.
+2. Suite completa con `dotnet test Licitaciones.sln`:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 119 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 135 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **278** | **0** | **0** |
+
+`dotnet format Licitaciones.sln --verify-no-changes --no-restore` terminó sin
+diferencias.
+
+#### Pendientes y candidatos a Issues separadas
+
+- La rotación Driver/Navigator observada difiere parcialmente de la pareja
+  planificada (ROJO, alta en solución y REFACTOR firmados por Seidy; VERDE por
+  Tiffany); se reconstruye por autoría de commits.
+- La nota técnica de la Issue #71 sugería ejecutar las E2E contra la app en
+  Docker Compose dentro del job de CI; la implementación opta por levantar la
+  aplicación como proceso real con su PostgreSQL vía Testcontainers dentro del
+  propio runner, con el mismo aislamiento y un paso de CI más simple. La
+  desviación de enfoque se registra sin ocultarla.
+- El commit de refactor `55d97c0` permanece local, sin push ni CI.
+- Los pasos 01 a 03 no produjeron fallos en ROJO porque cubrían comportamiento
+  ya existente desde la Iteración 3; el estado rojo del ciclo quedó demostrado
+  por los cinco pasos restantes.
+
+La Issue #71 permanece abierta.
 
 ## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
 

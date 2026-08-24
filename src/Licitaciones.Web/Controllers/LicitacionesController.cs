@@ -1,6 +1,8 @@
 using Licitaciones.Application.Common;
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Application.Licitaciones.Crear;
+using Licitaciones.Application.Licitaciones.Editar;
+using Licitaciones.Application.Licitaciones.Publicar;
 using Licitaciones.Domain.Common;
 using Licitaciones.Web.Models.Licitaciones;
 
@@ -12,15 +14,18 @@ public sealed class LicitacionesController : Controller
 {
     private readonly CrearLicitacionService _crearService;
     private readonly ConsultarLicitacionService _consultarService;
+    private readonly PublicarLicitacionService _publicarService;
     private readonly IClock _clock;
 
     public LicitacionesController(
         CrearLicitacionService crearService,
         ConsultarLicitacionService consultarService,
+        PublicarLicitacionService publicarService,
         IClock clock)
     {
         _crearService = crearService;
         _consultarService = consultarService;
+        _publicarService = publicarService;
         _clock = clock;
     }
 
@@ -106,5 +111,28 @@ public sealed class LicitacionesController : Controller
 
         TempData["MensajeExito"] = "La licitación se creó correctamente.";
         return RedirectToAction(nameof(Create));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Publicar(
+        Guid id,
+        string? codigo = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _publicarService.PublicarAsync(id, cancellationToken);
+        }
+        catch (LicitacionNoEncontradaException)
+        {
+            return NotFound();
+        }
+        catch (DomainException exception)
+        {
+            TempData["MensajeError"] = exception.Message;
+        }
+
+        return RedirectToAction(nameof(Index), new { codigo });
     }
 }
