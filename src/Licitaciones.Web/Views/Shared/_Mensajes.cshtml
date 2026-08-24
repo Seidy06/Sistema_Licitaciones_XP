@@ -6,6 +6,11 @@
     </div>
 }
 
+@if (TempData["MensajeError"] is string mensajeError)
+{
+    <div class="alert alert-danger" role="alert">@mensajeError</div>
+}
+
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger" role="alert">

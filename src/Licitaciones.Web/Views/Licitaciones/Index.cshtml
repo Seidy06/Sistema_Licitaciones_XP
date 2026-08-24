@@ -1,4 +1,5 @@
 @using Licitaciones.Application.Common
+@using Licitaciones.Domain.Licitaciones
 @using Licitaciones.Web.Models.Licitaciones
 @model PaginaResultado<LicitacionItemViewModel>
 
@@ -41,7 +42,7 @@
 
 <table class="table table-striped align-middle">
     <thead>
-        <tr><th>Título</th><th>Presupuesto</th><th>Fecha de cierre</th><th>Estado</th></tr>
+        <tr><th>Título</th><th>Presupuesto</th><th>Fecha de cierre</th><th>Estado</th><th></th></tr>
     </thead>
     <tbody>
     @foreach (var licitacion in Model.Items)
@@ -51,6 +52,16 @@
             <td>@licitacion.Presupuesto.Dinero()</td>
             <td>@licitacion.FechaCierre.ToString("g")</td>
             <td>@licitacion.Estado</td>
+            <td>
+                @if (licitacion.Estado == nameof(EstadoLicitacion.Borrador))
+                {
+                    <form asp-action="Publicar" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@licitacion.Id" />
+                        <input type="hidden" name="codigo" value="@codigo" />
+                        <button type="submit" class="btn btn-sm btn-outline-success" data-accion="publicar">Publicar</button>
+                    </form>
+                }
+            </td>
         </tr>
     }
     </tbody>

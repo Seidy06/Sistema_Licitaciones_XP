@@ -1,6 +1,6 @@
 @using Licitaciones.Application.Common
 @using Licitaciones.Web.Models.Ofertas
-@model PaginaResultado<OfertaItemViewModel>
+@model OfertasIndexViewModel
 
 @{
     ViewData["Title"] = "Ofertas";
@@ -8,7 +8,7 @@
     var proveedor = ViewData["Proveedor"] as string;
     var ordenarPor = (string)(ViewData["OrdenarPor"] ?? "monto");
     var descendente = (bool)(ViewData["Descendente"] ?? false);
-    var totalPaginas = (int)Math.Ceiling(Model.Total / (double)Model.TamanoPagina);
+    var totalPaginas = (int)Math.Ceiling(Model.Ofertas.Total / (double)Model.Ofertas.TamanoPagina);
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -19,7 +19,7 @@
 <partial name="_Mensajes" />
 
 <form asp-action="Index" method="get" class="row g-2 mb-3">
-    <div class="col-md-4">
+    <div class="col-md-3">
         <label for="licitacionId" class="visually-hidden">Licitación</label>
         <input id="licitacionId" name="licitacionId" value="@licitacionId" class="form-control" placeholder="Identificador de la licitación" />
     </div>
@@ -27,12 +27,19 @@
         <label for="proveedor" class="visually-hidden">Proveedor</label>
         <input id="proveedor" name="proveedor" value="@proveedor" class="form-control" placeholder="Filtrar por proveedor" />
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <label for="ordenarPor" class="visually-hidden">Ordenar por</label>
         <select id="ordenarPor" name="ordenarPor" class="form-select">
             <option value="monto" selected="@(ordenarPor == "monto")">Monto</option>
             <option value="proveedor" selected="@(ordenarPor == "proveedor")">Proveedor</option>
             <option value="fechaRegistro" selected="@(ordenarPor == "fechaRegistro")">Fecha de registro</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label for="moneda" class="visually-hidden">Moneda</label>
+        <select id="moneda" name="moneda" class="form-select" onchange="this.form.submit()">
+            <option value="CRC" selected="@(Model.Moneda == "CRC")">CRC</option>
+            <option value="USD" selected="@(Model.Moneda == "USD")">USD</option>
         </select>
     </div>
     <div class="col-md-1 form-check align-self-center">
@@ -44,24 +51,32 @@
     </div>
 </form>
 
+@if (Model.MejorOferta is not null && Model.Moneda == "CRC")
+{
+    <div class="alert alert-info mb-3" data-mejor-oferta>
+        <strong>Mejor oferta:</strong>
+        @Model.MejorOferta.Monto.Dinero() (@Model.MejorOferta.Clasificacion)
+    </div>
+}
+
 <table class="table table-striped align-middle">
     <thead>
         <tr><th>Proveedor</th><th>Monto</th><th>Moneda</th><th>Fecha de registro</th></tr>
     </thead>
     <tbody>
-    @foreach (var oferta in Model.Items)
+    @foreach (var oferta in Model.Ofertas.Items)
     {
         <tr>
             <td>@oferta.ProveedorNombre</td>
-            <td>@oferta.Monto.Dinero()</td>
-            <td>CRC</td>
+            <td>@oferta.Monto.Dinero(@oferta.Moneda)</td>
+            <td>@oferta.Moneda</td>
             <td>@oferta.FechaRegistro.ToString("g")</td>
         </tr>
     }
     </tbody>
 </table>
 
-@if (Model.Items.Count == 0)
+@if (Model.Ofertas.Items.Count == 0)
 {
     <p>No se encontraron ofertas.</p>
 }
@@ -72,9 +87,11 @@
         <ul class="pagination">
         @for (var pagina = 1; pagina <= totalPaginas; pagina++)
         {
-            <li class="page-item @(pagina == Model.Pagina ? "active" : null)">
-                <a class="page-link" asp-action="Index" asp-route-pagina="@pagina"
-                   asp-route-tamanoPagina="@Model.TamanoPagina"
+            <li class="page-item @(pagina == Model.Ofertas.Pagina ? "active" : null)">
+                <a class="page-link" asp-action="Index"
+                   asp-route-pagina="@pagina"
+                   asp-route-tamanoPagina="@Model.Ofertas.TamanoPagina"
+                   asp-route-moneda="@Model.Moneda"
                    asp-route-licitacionId="@licitacionId" asp-route-proveedor="@proveedor"
                    asp-route-ordenarPor="@ordenarPor" asp-route-descendente="@descendente">@pagina</a>
             </li>
