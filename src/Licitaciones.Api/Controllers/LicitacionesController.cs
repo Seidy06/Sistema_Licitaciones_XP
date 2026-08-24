@@ -1,3 +1,4 @@
+using Licitaciones.Api.Infraestructura;
 using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Cerrar;
 using Licitaciones.Application.Licitaciones.Consultar;
@@ -56,11 +57,19 @@ public sealed class LicitacionesController : ControllerBase
         }
         catch (LicitacionNoEncontradaException exception)
         {
-            return NotFound(CrearProblema(404, "LicitaciÃ³n no encontrada", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Licitación no encontrada",
+                exception.Message,
+                "licitacion_no_encontrada");
         }
         catch (DomainException exception)
         {
-            return BadRequest(CrearProblema(400, "EdiciÃ³n invÃ¡lida", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Edición inválida",
+                exception.Message,
+                "edicion_licitacion_invalida");
         }
     }
 
@@ -86,21 +95,24 @@ public sealed class LicitacionesController : ControllerBase
         }
         catch (LicitacionNoEncontradaException exception)
         {
-            return NotFound(CrearProblema(404, "LicitaciÃ³n no encontrada", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Licitación no encontrada",
+                exception.Message,
+                "licitacion_no_encontrada");
         }
         catch (DomainException exception)
         {
-            return BadRequest(CrearProblema(400, "TransiciÃ³n invÃ¡lida", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Transición inválida",
+                exception.Message,
+                "transicion_licitacion_invalida");
         }
     }
 
-    private ProblemDetails CrearProblema(int status, string title, string detail) => new()
-    {
-        Status = status,
-        Title = title,
-        Detail = detail,
-        Instance = HttpContext.Request.Path
-    };
+    private ObjectResult CrearProblema(int estado, string titulo, string detalle, string codigoError) =>
+        RespuestaProblema.Crear(HttpContext, estado, titulo, detalle, codigoError);
 
     [HttpGet]
     [ProducesResponseType<PaginaLicitaciones>(StatusCodes.Status200OK)]
@@ -116,7 +128,11 @@ public sealed class LicitacionesController : ControllerBase
         }
         catch (DomainException exception)
         {
-            return BadRequest(CrearProblema(400, "Consulta invÃ¡lida", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Consulta inválida",
+                exception.Message,
+                "consulta_licitaciones_invalida");
         }
     }
 
@@ -130,12 +146,13 @@ public sealed class LicitacionesController : ControllerBase
         var detalle = await _consultarService.ObtenerDetalleAsync(
             id, _clock, cancellationToken);
 
-        if (detalle is null)
-        {
-            return NotFound();
-        }
-
-        return Ok(detalle);
+        return detalle is null
+            ? CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Licitación no encontrada",
+                "La licitación solicitada no existe.",
+                "licitacion_no_encontrada")
+            : Ok(detalle);
     }
 
     [HttpPost]
@@ -160,12 +177,11 @@ public sealed class LicitacionesController : ControllerBase
         }
         catch (LicitacionDuplicadoException exception)
         {
-            return Conflict(new ProblemDetails
-            {
-                Status = StatusCodes.Status409Conflict,
-                Title = "Licitación duplicada",
-                Detail = exception.Message
-            });
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Licitación duplicada",
+                exception.Message,
+                "licitacion_duplicada");
         }
     }
 }

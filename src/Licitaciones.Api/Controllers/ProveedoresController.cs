@@ -1,3 +1,4 @@
+using Licitaciones.Api.Infraestructura;
 using Licitaciones.Application.Common;
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Consultar;
@@ -48,7 +49,11 @@ public sealed class ProveedoresController : ControllerBase
         }
         catch (Licitaciones.Application.Proveedores.Eliminar.ProveedorNoEncontradoException exception)
         {
-            return NotFound(CrearProblema(404, "Proveedor no encontrado", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Proveedor no encontrado",
+                exception.Message,
+                "proveedor_no_encontrado");
         }
     }
 
@@ -72,30 +77,40 @@ public sealed class ProveedoresController : ControllerBase
         }
         catch (Licitaciones.Application.Proveedores.Editar.ProveedorNoEncontradoException exception)
         {
-            return NotFound(CrearProblema(404, "Proveedor no encontrado", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Proveedor no encontrado",
+                exception.Message,
+                "proveedor_no_encontrado");
         }
         catch (ProveedorConcurrenciaException exception)
         {
-            return Conflict(CrearProblema(409, "Conflicto de actualización", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Conflicto de actualización",
+                exception.Message,
+                "conflicto_actualizacion");
         }
         catch (Licitaciones.Application.Proveedores.Editar.ProveedorDuplicadoException exception)
         {
-            return Conflict(CrearProblema(409, "Proveedor duplicado", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Proveedor duplicado",
+                exception.Message,
+                "proveedor_duplicado");
         }
         catch (ArgumentException exception)
         {
-            return BadRequest(CrearProblema(400, "Nombre de proveedor inválido", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Nombre de proveedor inválido",
+                exception.Message,
+                "nombre_proveedor_invalido");
         }
     }
 
-    private ProblemDetails CrearProblema(int status, string title, string detail) => new()
-    {
-        Status = status,
-        Title = title,
-        Detail = detail,
-        Type = $"https://httpstatuses.com/{status}",
-        Instance = HttpContext.Request.Path
-    };
+    private ObjectResult CrearProblema(int estado, string titulo, string detalle, string codigoError) =>
+        RespuestaProblema.Crear(HttpContext, estado, titulo, detalle, codigoError);
 
     [HttpGet]
     [ProducesResponseType<PaginaResultado<ProveedorDto>>(StatusCodes.Status200OK)]
@@ -135,7 +150,7 @@ public sealed class ProveedoresController : ControllerBase
 
     [HttpGet("historico/{id:guid}")]
     [ProducesResponseType<ProveedorHistoricoDto>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ProveedorHistoricoDto>> ObtenerHistoricoPorId(
         Guid id,
         CancellationToken cancellationToken)
@@ -143,18 +158,30 @@ public sealed class ProveedoresController : ControllerBase
         var proveedor = await _consultarService!.ObtenerHistoricoPorIdAsync(
             id,
             cancellationToken);
-        return proveedor is null ? NotFound() : Ok(proveedor);
+        return proveedor is null
+            ? CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Proveedor no encontrado",
+                "El proveedor solicitado no existe.",
+                "proveedor_no_encontrado")
+            : Ok(proveedor);
     }
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType<ProveedorDto>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ProveedorDto>> ObtenerPorId(
         Guid id,
         CancellationToken cancellationToken)
     {
         var proveedor = await _consultarService!.ObtenerPorIdAsync(id, cancellationToken);
-        return proveedor is null ? NotFound() : Ok(proveedor);
+        return proveedor is null
+            ? CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Proveedor no encontrado",
+                "El proveedor solicitado no existe.",
+                "proveedor_no_encontrado")
+            : Ok(proveedor);
     }
 
     [HttpPost]
@@ -175,25 +202,19 @@ public sealed class ProveedoresController : ControllerBase
         }
         catch (Licitaciones.Application.Proveedores.Crear.ProveedorDuplicadoException)
         {
-            return Conflict(new ProblemDetails
-            {
-                Status = StatusCodes.Status409Conflict,
-                Title = "Proveedor duplicado",
-                Detail = "Ya existe un proveedor con el mismo nombre.",
-                Type = "https://httpstatuses.com/409",
-                Instance = HttpContext.Request.Path
-            });
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Proveedor duplicado",
+                "Ya existe un proveedor con el mismo nombre.",
+                "proveedor_duplicado");
         }
         catch (ArgumentException exception)
         {
-            return BadRequest(new ProblemDetails
-            {
-                Status = StatusCodes.Status400BadRequest,
-                Title = "Nombre de proveedor inválido",
-                Detail = exception.Message,
-                Type = "https://httpstatuses.com/400",
-                Instance = HttpContext.Request.Path
-            });
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Nombre de proveedor inválido",
+                exception.Message,
+                "nombre_proveedor_invalido");
         }
     }
 }

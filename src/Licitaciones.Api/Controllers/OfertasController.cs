@@ -1,3 +1,4 @@
+using Licitaciones.Api.Infraestructura;
 using Licitaciones.Application.Ofertas;
 using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Ofertas.Crear;
@@ -52,10 +53,11 @@ public sealed class OfertasController : ControllerBase
         }
         catch (DomainException exception)
         {
-            return BadRequest(CrearProblema(
+            return CrearProblema(
                 StatusCodes.Status400BadRequest,
                 "Consulta de ofertas inválida",
-                exception.Message));
+                exception.Message,
+                "consulta_ofertas_invalida");
         }
     }
 
@@ -72,14 +74,21 @@ public sealed class OfertasController : ControllerBase
         {
             var oferta = await _consultarOfertaService.ObtenerAsync(
                 id, moneda, cancellationToken);
-            return oferta is null ? NotFound() : Ok(oferta);
+            return oferta is null
+                ? CrearProblema(
+                    StatusCodes.Status404NotFound,
+                    "Oferta no encontrada",
+                    "La oferta solicitada no existe.",
+                    "oferta_no_encontrada")
+                : Ok(oferta);
         }
         catch (DomainException exception)
         {
-            return BadRequest(CrearProblema(
+            return CrearProblema(
                 StatusCodes.Status400BadRequest,
                 "Consulta de oferta inválida",
-                exception.Message));
+                exception.Message,
+                "consulta_oferta_invalida");
         }
     }
 
@@ -103,31 +112,28 @@ public sealed class OfertasController : ControllerBase
         }
         catch (OfertaDuplicadaException exception)
         {
-            return Conflict(new ProblemDetails
-            {
-                Status = StatusCodes.Status409Conflict,
-                Title = "Oferta duplicada",
-                Detail = exception.Message,
-                Instance = HttpContext.Request.Path
-            });
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Oferta duplicada",
+                exception.Message,
+                "oferta_duplicada");
         }
         catch (DomainException exception)
             when (exception.Code == OfertaErrorCodes.NoProcesable)
         {
-            return UnprocessableEntity(CrearProblema(
+            return CrearProblema(
                 StatusCodes.Status422UnprocessableEntity,
                 "Oferta rechazada",
-                exception.Message));
+                exception.Message,
+                "oferta_no_procesable");
         }
         catch (DomainException exception)
         {
-            return BadRequest(new ProblemDetails
-            {
-                Status = StatusCodes.Status400BadRequest,
-                Title = "Oferta rechazada",
-                Detail = exception.Message,
-                Instance = HttpContext.Request.Path
-            });
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Solicitud inválida",
+                exception.Message,
+                "solicitud_invalida");
         }
     }
 
@@ -157,19 +163,14 @@ public sealed class OfertasController : ControllerBase
         catch (DomainException exception)
             when (exception.Code == OfertaErrorCodes.NoProcesable)
         {
-            return UnprocessableEntity(CrearProblema(
+            return CrearProblema(
                 StatusCodes.Status422UnprocessableEntity,
                 "Oferta inalterable",
-                exception.Message));
+                exception.Message,
+                "oferta_inalterable");
         }
     }
 
-    private ProblemDetails CrearProblema(int status, string title, string detail) => new()
-    {
-        Status = status,
-        Title = title,
-        Detail = detail,
-        Type = $"https://httpstatuses.com/{status}",
-        Instance = HttpContext.Request.Path
-    };
+    private ObjectResult CrearProblema(int estado, string titulo, string detalle, string codigoError) =>
+        RespuestaProblema.Crear(HttpContext, estado, titulo, detalle, codigoError);
 }

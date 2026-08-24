@@ -1,4 +1,5 @@
 using Licitaciones.Api.Contracts.Aprobaciones;
+using Licitaciones.Api.Infraestructura;
 using Licitaciones.Application.Aprobaciones;
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Domain.Common;
@@ -23,12 +24,20 @@ public sealed class NivelesAprobacionController : ControllerBase
     }
 
     [HttpGet("resolver")]
+    [ProducesResponseType<LicitacionNivelAprobacionDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<LicitacionNivelAprobacionDto>> Resolver(
         decimal monto,
         CancellationToken cancellationToken)
     {
         var nivel = await _resolver.ResolverAsync(monto, cancellationToken);
-        return nivel is null ? NotFound() : Ok(nivel);
+        return nivel is null
+            ? CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Nivel de aprobación no encontrado",
+                "No existe un nivel de aprobación configurado para el monto indicado.",
+                "nivel_aprobacion_no_encontrado")
+            : Ok(nivel);
     }
 
     [HttpPost]
@@ -47,20 +56,22 @@ public sealed class NivelesAprobacionController : ControllerBase
         }
         catch (NivelAprobacionConflictoException exception)
         {
-            return Conflict(CrearProblema(409, "Rango de aprobación en conflicto", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Rango de aprobación en conflicto",
+                exception.Message,
+                "nivel_aprobacion_conflicto");
         }
         catch (DomainException exception)
         {
-            return BadRequest(CrearProblema(400, "Nivel de aprobación inválido", exception.Message));
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Nivel de aprobación inválido",
+                exception.Message,
+                "nivel_aprobacion_invalido");
         }
     }
 
-    private ProblemDetails CrearProblema(int status, string title, string detail) => new()
-    {
-        Status = status,
-        Title = title,
-        Detail = detail,
-        Type = $"https://httpstatuses.com/{status}",
-        Instance = HttpContext.Request.Path
-    };
+    private ObjectResult CrearProblema(int estado, string titulo, string detalle, string codigoError) =>
+        RespuestaProblema.Crear(HttpContext, estado, titulo, detalle, codigoError);
 }
