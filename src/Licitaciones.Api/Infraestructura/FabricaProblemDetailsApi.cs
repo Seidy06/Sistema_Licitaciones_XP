@@ -24,7 +24,7 @@ public sealed class FabricaProblemDetailsApi : ProblemDetailsFactory
             Detail = detail ?? DetallePorDefecto(estado),
             Instance = instance ?? httpContext.Request.Path
         };
-        AplicarExtensiones(httpContext, problema);
+        ContratoProblemasApi.AplicarExtensiones(httpContext, problema);
 
         return problema;
     }
@@ -50,17 +50,9 @@ public sealed class FabricaProblemDetailsApi : ProblemDetailsFactory
             Detail = detail ?? DetallePorDefecto(estado),
             Instance = instance ?? httpContext.Request.Path
         };
-        AplicarExtensiones(httpContext, problema);
+        ContratoProblemasApi.AplicarExtensiones(httpContext, problema);
 
         return problema;
-    }
-
-    private static void AplicarExtensiones(HttpContext httpContext, ProblemDetails problema)
-    {
-        problema.Extensions.TryAdd(
-            "codigoError",
-            $"error_http_{problema.Status ?? StatusCodes.Status500InternalServerError}");
-        problema.Extensions["correlacionId"] = httpContext.TraceIdentifier;
     }
 
     private static string TituloPorDefecto(int estado) => estado switch

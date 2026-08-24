@@ -26,8 +26,7 @@ public static class RespuestaProblema
             Type = $"https://httpstatuses.com/{estado}",
             Instance = contexto.Request.Path
         };
-        problema.Extensions["codigoError"] = codigoError;
-        problema.Extensions["correlacionId"] = contexto.TraceIdentifier;
+        ContratoProblemasApi.AplicarExtensiones(contexto, problema, codigoError);
 
         var resultado = estado switch
         {

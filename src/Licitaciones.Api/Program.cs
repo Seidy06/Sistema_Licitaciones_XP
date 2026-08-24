@@ -78,22 +78,22 @@ app.UseExceptionHandler(new ExceptionHandlerOptions
             ? StatusCodes.Status422UnprocessableEntity
             : StatusCodes.Status500InternalServerError;
 
+        var fabrica = contexto.RequestServices
+            .GetRequiredService<ProblemDetailsFactory>();
+        var problema = fabrica.CreateProblemDetails(
+            contexto,
+            estado,
+            esReglaNegocio ? "Solicitud no procesable" : "Error interno del servidor",
+            detail: esReglaNegocio
+                ? "La solicitud no pudo procesarse por una regla del negocio."
+                : "Ocurrió un error interno inesperado. Intente nuevamente más tarde.");
+        ContratoProblemasApi.AplicarExtensiones(
+            contexto,
+            problema,
+            esReglaNegocio ? "regla_negocio_no_procesable" : "error_interno");
+
         contexto.Response.StatusCode = estado;
         contexto.Response.ContentType = RespuestaProblema.TipoContenido;
-
-        var problema = new ProblemDetails
-        {
-            Status = estado,
-            Title = esReglaNegocio ? "Solicitud no procesable" : "Error interno del servidor",
-            Detail = esReglaNegocio
-                ? "La solicitud no pudo procesarse por una regla del negocio."
-                : "Ocurrió un error interno inesperado. Intente nuevamente más tarde.",
-            Type = $"https://httpstatuses.com/{estado}",
-            Instance = contexto.Request.Path
-        };
-        problema.Extensions["codigoError"] =
-            esReglaNegocio ? "regla_negocio_no_procesable" : "error_interno";
-        problema.Extensions["correlacionId"] = contexto.TraceIdentifier;
 
         await contexto.Response.WriteAsync(
             JsonSerializer.Serialize(problema, OpcionesJsonHttp.Instancia));
@@ -106,7 +106,7 @@ app.MapControllers();
 
 app.Run();
 
-internal static partial class OpcionesJsonHttp
+internal static class OpcionesJsonHttp
 {
     public static readonly JsonSerializerOptions Instancia =
         new(JsonSerializerDefaults.Web);
