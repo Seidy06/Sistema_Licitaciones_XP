@@ -68,6 +68,104 @@ fábricas de pruebas y correcciones documentales de referencias. Se resolverán
 dentro de las historias de esta iteración cuando correspondan a su alcance o
 quedarán registradas en la documentación final.
 
+### HU-28 — Configurar TDD y pipeline de pruebas unitarias del dominio
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-28 — Configurar TDD y pipeline de pruebas unitarias del dominio | 5 | [#69](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/69) | Criterios cubiertos por pruebas en verde con cobertura medida; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-28 | Seidy | Tiffany | `c0322b9` |
+| VERDE HU-28 | Tiffany | Seidy | `285972e` |
+
+La asignación planificada para la primera sesión era Tiffany Driver/Seidy
+Navigator; la autoría real de los commits muestra el ROJO firmado por Seidy y
+el VERDE por Tiffany. Git conserva la autoría del Driver de cada incremento;
+el rol Navigator se reconstruye a partir del trabajo coordinado de la pareja,
+sin atribuir sesiones sin evidencia.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #69 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Alta, estimación 5 SP, iteración 4 (RELEASE 8) y los dos
+criterios coinciden literalmente.
+
+Observación de trazabilidad: la rama real
+(`iteracion-4/hu-28-cobertura-pruebas`) difiere de la prevista en el Planning
+Game (`iteracion-4/hu-28-pruebas-unitarias-dominio`); se registra sin corregir
+en fase. Los commits usan `refs #69` correctamente.
+
+Inspección previa para no duplicar escenarios: presupuesto/oferta mayores que
+cero, oferta duplicada, oferta sobre presupuesto, estado no publicado,
+vencimiento con `FixedClock`, normalización y código único de proveedor,
+código único de licitación, mejor oferta con desempate (HU-16), clasificación
+de ahorro y transiciones Publicar/Cerrar ya contaban con pruebas unitarias.
+Quedaban sin ninguna prueba unitaria directa: `TipoCambio`,
+`AdministrarTipoCambioService`, `NivelAprobacion`,
+`AdministrarNivelesAprobacionService` y `ConsultarOfertaService`
+(conversión CRC/USD, filtro, orden y paginación).
+
+| Criterio de aceptación de la Issue #69 | Pruebas | Commits |
+| --- | --- | --- |
+| Cada regla de negocio listada cuenta con al menos una prueba unitaria previa o concurrente que la cubre. | Las reglas previas conservaron sus pruebas; las áreas huérfanas quedaron cubiertas con las clases `TipoCambioTests`, `AdministrarTipoCambioServiceTests`, `NivelAprobacionTests`, `AdministrarNivelesAprobacionServiceTests` y `ConsultarOfertaServiceTests` (34 casos nuevos con trait `HU-28`). | ROJO `c0322b9`; VERDE `285972e`. |
+| La cobertura de líneas Domain/Application alcanza al menos 80 %. | Medición con coverlet (`--collect:"XPlat Code Coverage"`): baseline sin las pruebas nuevas Application 52.93 % y Domain 70.90 %; tras el incremento Application 82.68 % y Domain 89.29 %. | Ídem. |
+
+El PR [#80](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/80)
+(`iteracion-4/hu-28-cobertura-pruebas` hacia `main`) está abierto y mergeable,
+con ambos commits publicados y CI en verde (check `Build and Test` en
+`success` para `c0322b9` y `285972e`).
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `c0322b9` — `test(calidad): cubrir criterios de configurar tdd y pipeline de pruebas unitarias del dominio (HU-28)` | Agregó cinco clases de prueba con 34 casos unitarios (trait `HU-28`) sobre las áreas sin cobertura: validación y monedas predeterminadas de `TipoCambio`; guardado/reemplazo activo, consulta nula, orden/paginación y validaciones de `AdministrarTipoCambioService`; validaciones de rango, normalización de nombre y desactivación de `NivelAprobacion`; traslape/conflicto, creación, desactivación, filtro y orden de `AdministrarNivelesAprobacionService`; conversión CRC/USD, mejor oferta por monto y antigüedad, moneda no soportada, USD sin tipo activo, filtro proveedor y paginación de `ConsultarOfertaService`. Los 34 casos pasaron individualmente porque el comportamiento ya estaba implementado —el criterio admite pruebas «previas o concurrentes»—; el ROJO real del ciclo quedó registrado en la métrica del segundo criterio: cobertura Application 52.93 % y Domain 70.90 %, por debajo del umbral de 80 %. Por eso CI terminó en `success` también en esta fase. |
+| VERDE | `285972e` — `feat(calidad): implementar configurar tdd y pipeline de pruebas unitarias del dominio (HU-28)` | Consolidó la infraestructura de pruebas extrayendo el repositorio falso duplicado de tipo de cambio a `RepositorioTipoCambioEnMemoria` compartido en `Common`, simplificando las dos clases de servicio; sin código de producción modificado en todo el ciclo. Filtro focalizado 34/34 correctas; suite completa en verde; CI en `success`. |
+| REFACTOR | Sin commit dedicado | No se identificó refactorización adicional justificada dentro del alcance de la historia; la consolidación de la infraestructura quedó incluida en el VERDE. |
+
+#### Resultado de pruebas (HU-28)
+
+La línea base previa al incremento estaba verde con 233 pruebas en la
+solución (85 unitarias). El ROJO no produjo fallos de prueba porque las reglas
+ya existían; el umbral de cobertura del criterio 2 era el estado rojo medido
+(52.93 % / 70.90 %). Tras el incremento:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 119 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 132 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| **Total ejecutado** | **267** | **0** | **0** |
+
+Cobertura de líneas con coverlet sobre el HEAD:
+
+| Capa | Baseline sin HU-28 | Tras HU-28 | Umbral |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.Domain` | 70.90 % | **89.29 %** | ≥ 80 % |
+| `Licitaciones.Application` | 52.93 % | **82.68 %** | ≥ 80 % |
+
+`dotnet format Licitaciones.sln --verify-no-changes --no-restore` terminó sin
+diferencias.
+
+#### Pendientes y candidatos a Issues separadas
+
+- La discrepancia entre la rama prevista
+  (`iteracion-4/hu-28-pruebas-unitarias-dominio`) y la real
+  (`iteracion-4/hu-28-cobertura-pruebas`) se reporta sin ocultar; no afecta
+  trazabilidad de Issue ni commits.
+- El pipeline de CI todavía no mide cobertura ni aplica el umbral de 80 %
+  automáticamente; integrarlo corresponde a HU-35 (#76).
+- La rotación Driver/Navigator observada invierte la pareja planificada para
+  esta historia (ROJO Seidy/Tiffany, VERDE Tiffany/Seidy); se reconstruye por
+  autoría de commits.
+
+La Issue #69 permanece abierta.
+
 ## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
 
 **Estado: INICIADA.**

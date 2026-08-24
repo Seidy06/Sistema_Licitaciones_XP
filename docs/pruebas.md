@@ -10,7 +10,7 @@ no se agregaron fixtures ni contenedores por historia.
 
 ## Cobertura existente
 
-- `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de ahorro y nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo.
+- `Licitaciones.UnitTests`: reglas de proveedor, servicios de crear, consultar, editar y dar de baja; reglas de crear, publicar, editar y cerrar licitación (estado efectivo, protección de campos, presupuesto vs. ofertas); consulta de licitaciones (listar con filtro, detalle con mejor oferta, clasificación de ahorro y nivel de aprobación); y registro de ofertas con estado, vencimiento, duplicidad, presupuesto y monto positivo. Desde HU-28 también: validación y monedas predeterminadas del tipo de cambio, administración del tipo de cambio activo con orden/paginación, validaciones y desactivación de niveles de aprobación, administración de niveles (traslape, filtro, orden, desactivación) y consulta de ofertas con conversión CRC/USD, filtro, orden, paginación e indicador de mejor oferta.
 - `Licitaciones.IntegrationTests`: migraciones y restricciones en PostgreSQL, persistencia, Unicode, duplicidad concurrente, paginación, edición y concurrencia, baja lógica, MVC, contratos de controlador y recorridos HTTP reales mediante `WebApplicationFactory`; persistencia de crear, publicar y consultar licitación; HU-14 sobre API, FKs, CHECK e índice único de ofertas; HU-15 sobre códigos/mensajes de rechazo e inmutabilidad; HU-16 sobre selección, desempate, ausencia y clasificación de la mejor oferta; HU-17 sobre listado, detalle, proveedor, moneda, fecha e indicador de mejor oferta; HU-18 sobre traslapes de rangos activos, rechazo del segundo rango abierto y resolución del aprobador desde la tabla; y HU-19 sobre reemplazo del tipo de cambio activo, conversión USD sin modificar montos persistidos, fecha del tipo de cambio utilizado y operación sin conexión externa.
 - `Licitaciones.FunctionalTests`: prueba funcional HTTP de la página inicial, la plantilla MVC, el formulario de crear licitación; HU-20 sobre la landing informativa en la raíz `/`: acceso anónimo con las seis secciones explicativas y diseño responsivo (viewport, Bootstrap y rejilla por puntos de ruptura) simulando un agente móvil; HU-21 sobre la navegación global y el acceso a Swagger; y HU-22 sobre modo claro/oscuro persistente: control visible en todas las páginas, persistencia de la preferencia en `localStorage` y respeto del último tema seleccionado al cargar.
 
@@ -437,6 +437,37 @@ seleccionado 38 SP, velocidad observada 38 SP (las diez historias cumplen la
 Definition of Done). Los detalles de fusión, trazabilidad de Issues,
 ciclos TDD, participación y ajustes para la Iteración 4 constan en
 `bitacora-xp.md`.
+
+## Resultado verificado para HU-28 (Iteración 4)
+
+HU-28 corresponde a la Issue [#69](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/69).
+Sus dos criterios se cubren con pruebas unitarias de dominio y aplicación más
+medición de cobertura con coverlet:
+
+| Criterio de aceptación de la Issue #69 | Pruebas | Evidencia |
+| --- | --- | --- |
+| Cada regla de negocio (presupuesto/oferta > 0, oferta duplicada, oferta sobre presupuesto, estado no publicado, vencimiento, normalización de proveedor, código único, mejor oferta y desempate, clasificación de ahorro, nivel de aprobación, conversión CRC/USD, transiciones de estado) cuenta con al menos una prueba unitaria previa o concurrente. | Las reglas previas conservaban pruebas unitarias desde las Iteraciones 1 a 3; las áreas sin ninguna prueba directa (`TipoCambio`, `AdministrarTipoCambioService`, `NivelAprobacion`, `AdministrarNivelesAprobacionService`, `ConsultarOfertaService`) quedaron cubiertas con 34 casos nuevos en cinco clases: `TipoCambioTests`, `AdministrarTipoCambioServiceTests`, `NivelAprobacionTests`, `AdministrarNivelesAprobacionServiceTests` y `ConsultarOfertaServiceTests`. | La conversión CRC/USD se prueba dividiendo montos por el tipo activo (10 000 → 20 USD con tipo 500), exigiendo moneda CRC o USD, rechazando USD sin tipo activo y marcando la mejor oferta por monto y antigüedad. |
+| La cobertura de líneas Domain/Application alcanza al menos 80 %. | Medición con `dotnet test --collect:"XPlat Code Coverage"` sobre `Licitaciones.UnitTests`. | Baseline sin HU-28: Application 52.93 %, Domain 70.90 % (estado rojo del criterio). Tras HU-28: Application **82.68 %**, Domain **89.29 %**. |
+
+La secuencia TDD queda trazada así:
+
+- `c0322b9` — ROJO: agregó los 34 casos unitarios con trait `HU-28`. Los casos
+  pasaron individualmente porque el comportamiento ya estaba implementado (el
+  criterio admite pruebas «previas o concurrentes»); el ROJO quedó registrado
+  en la métrica de cobertura por debajo del umbral. Por eso CI terminó en
+  `success` también en esta fase.
+- `285972e` — VERDE: consolidó la infraestructura extrayendo
+  `RepositorioTipoCambioEnMemoria` compartido y simplificando las clases de
+  servicio; sin código de producción modificado en todo el ciclo.
+
+La ejecución focalizada de las áreas nuevas terminó con **34 correctas, 0
+fallidas y 0 omitidas**, y la suite completa con `dotnet test Licitaciones.sln`
+pasó de **233** a **267 correctas, 0 fallidas y 0 omitidas** (119 unitarias,
+132 de integración, 16 funcionales). El PR
+[#80](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/80)
+(`iteracion-4/hu-28-cobertura-pruebas` hacia `main`) está abierto y mergeable
+con CI en verde en ambos commits; la Issue #69 permanece abierta y no se marca
+como completada desde esta fase.
 
 ## Integración continua
 
