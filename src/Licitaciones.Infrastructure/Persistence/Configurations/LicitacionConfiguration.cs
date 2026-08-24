@@ -28,6 +28,7 @@ public sealed class LicitacionConfiguration : IEntityTypeConfiguration<Licitacio
             .IsUnique()
             .HasFilter("\"DeletedAt\" IS NULL")
             .HasDatabaseName(IndiceUnicoCodigoNormalizado);
+        builder.Property(x => x.Version).IsRowVersion();
         builder.HasOne<EstadoLicitacionCatalogo>()
             .WithMany()
             .HasForeignKey(x => x.Estado)

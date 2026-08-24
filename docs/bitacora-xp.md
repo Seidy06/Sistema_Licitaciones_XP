@@ -166,6 +166,115 @@ diferencias.
 
 La Issue #69 permanece abierta.
 
+### HU-29 — Pruebas de integración contra PostgreSQL real
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-29 — Pruebas de integración contra PostgreSQL real | 5 | [#70](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/70) | Criterios cubiertos por pruebas en verde (filtro HU-29 3/3 y suite completa 270 verdes tras el refactor); la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-29 | Tiffany | Seidy | `8a62387` |
+| VERDE HU-29 | Seidy | Tiffany | `ba17ba0` |
+| REFACTOR HU-29 | Sin commit | Sin commit | Cambios locales pendientes de publicar |
+
+La asignación planificada para esta historia era Seidy Driver/Tiffany
+Navigator; la autoría real de los commits muestra el ROJO firmado por Tiffany
+y el VERDE por Seidy. Git conserva la autoría del Driver de cada incremento;
+el rol Navigator se reconstruye a partir del trabajo coordinado de la pareja,
+sin atribuir sesiones sin evidencia. El refactor aún no tiene commit, por lo
+que sus roles quedan sin registrar hasta que exista esa evidencia.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #70 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Alta, estimación 5 SP, iteración 4 (RELEASE 8) y los tres
+criterios coinciden literalmente.
+
+Observación de trazabilidad: la rama real
+(`iteracion-4/hu-29-pruebas-integracion`) difiere de la prevista en el
+Planning Game (`iteracion-4/hu-29-integracion-postgresql`); se registra sin
+corregir en fase. Los commits usan `refs #70` correctamente.
+
+Inspección previa para no duplicar escenarios ni infraestructura: la fixture
+compartida `PostgreSqlFixture` ya levantaba un contenedor PostgreSQL real
+(`postgres:16-alpine`) y aplicaba migraciones desde la Iteración 2, y las
+restricciones del esquema contaban con cobertura previa (índice único de
+códigos vía repositorio en HU-10, unicidad compuesta de ofertas y CHECKs en
+HU-14, restricción de exclusión de niveles en HU-18). Faltaba formalizar el
+contrato del contenedor como criterio propio, la violación única observada
+directamente por EF Core con su `SqlState` e índice exactos, y la concurrencia
+optimista sobre `Licitaciones`, que carecía de token de fila a diferencia de
+`Proveedores`.
+
+| Criterio de aceptación de la Issue #70 | Pruebas | Commits |
+| --- | --- | --- |
+| El proyecto levanta un contenedor PostgreSQL real vía Testcontainers y aplica las migraciones. | `Contenedor_DebeSerPostgreSqlRealConMigracionesAplicadas`: conectividad, proveedor Npgsql, migraciones aplicadas sin pendientes y servidor versión 16. | ROJO `8a62387`; VERDE `ba17ba0`. |
+| Un código duplicado insertado directamente vía EF Core es rechazado por la base (constraint violation capturada y traducida). | `Insertar_CodigoDuplicadoViaEfCore_DebeRechazarloComoViolacionUnica`: dos contextos consecutivos, `DbUpdateException` con `PostgresException` interna, `SqlState` `23505` e índice `UX_Licitaciones_CodigoNormalizado`. | Ídem. |
+| Dos actualizaciones concurrentes sobre el mismo registro: la segunda lanza `DbUpdateConcurrencyException`. | `DosActualizacionesConcurrentes_SobreMismaLicitacion_LaSegundaDebeFallar`. | Ídem. |
+
+El PR [#81](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/81)
+(`iteracion-4/hu-29-pruebas-integracion` hacia `main`) está abierto y
+mergeable, con ambos commits publicados: CI fallida en el ROJO `8a62387`
+como es esperable y `Build and Test` en `success` sobre el VERDE `ba17ba0`.
+El refactor permanece local, sin push ni ejecución de CI registrada.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `8a62387` — `test(integracion): cubrir criterios de pruebas de integración contra postgresql real (HU-29)` | Agregó `RestriccionesYConcurrenciaPostgreSqlTests` (namespace `Hu29`, trait `HU-29`) con tres casos sobre la fixture compartida. Los dos primeros pasaron porque el comportamiento ya existía (infraestructura Testcontainers e índice único parcial desde iteraciones previas); el tercero falló por comportamiento ausente: `Licitaciones` carecía de token de concurrencia, por lo que el segundo guardado concurrente no lanzaba excepción. CI fallida como es esperable en rojo (`Build and Test` en `failure`). |
+| VERDE | `ba17ba0` — `feat(integracion): implementar pruebas de integración contra postgresql real (HU-29)` | Incorporó la propiedad `Version` en `Licitacion`, su configuración `.IsRowVersion()` en `LicitacionConfiguration` (token `xmin` de PostgreSQL) y la migración `AddLicitacionConcurrencyToken` (columna `xmin` tipo `xid` marcada como rowversion). Sin cambios en controladores, servicios ni reglas de negocio: la concurrencia es una preocupación de persistencia resuelta en Infrastructure. CI en `success`. |
+| REFACTOR | Sin commit — cambios locales | Deduplicó la creación de la licitación de prueba dentro de la clase: extrajo la sobrecarga `NuevaLicitacion(codigo, fechaCierre)` y el caso de concurrencia dejó de repetir los literales «Compra para pruebas HU-29», presupuesto 1000 y la llamada directa a `Licitacion.Crear`. Sin comportamiento nuevo; build sin errores ni advertencias y formato sin diferencias. |
+
+#### Resultado de pruebas (HU-29)
+
+La línea base previa al incremento estaba verde con 267 pruebas en la
+solución (CI `success` sobre el VERDE de HU-28). Durante esta fase se registró
+una incidencia ambiental del entorno de desarrollo: con Smart App Control de
+Windows activo, el primer intento de ejecución no pudo cargar los ensamblados
+recién compilados (`0x800711C7`, bloqueo de Control de aplicaciones que
+afectaba también a las suites previamente verdes); tras reconstruir la
+solución los binarios cargaron con normalidad. Verificación posterior al
+refactor, con Docker Desktop en ejecución y PostgreSQL real iniciado por
+Testcontainers:
+
+1. Ejecución focalizada `dotnet test …IntegrationTests --filter "HU=HU-29"`:
+   3 correctas, 0 fallidas y 0 omitidas.
+2. Suite completa con `dotnet test Licitaciones.sln`:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 119 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 135 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| **Total ejecutado** | **270** | **0** | **0** |
+
+`dotnet format Licitaciones.sln --verify-no-changes --no-restore` terminó sin
+diferencias.
+
+#### Pendientes y candidatos a Issues separadas
+
+- La discrepancia entre la rama prevista
+  (`iteracion-4/hu-29-integracion-postgresql`) y la real
+  (`iteracion-4/hu-29-pruebas-integracion`) se reporta sin ocultar.
+- La rotación Driver/Navigator observada invierte la pareja planificada para
+  esta historia (ROJO Tiffany/Seidy, VERDE Seidy/Tiffany); se reconstruye por
+  autoría de commits.
+- El bloqueo de Smart App Control sobre binarios recién compilados es una
+  incidencia del entorno local (Windows), no del repositorio; si reincide,
+  conviene documentarlo en las instrucciones de entorno como candidato a
+  Issue separada.
+- La aserción de versión del servidor fija la versión mayor 16 acoplada a la
+  imagen del fixture; actualizar `postgres:16-alpine` requerirá ajustar esa
+  aserción junto con la imagen.
+
+La Issue #70 permanece abierta.
+
 ## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
 
 **Estado: INICIADA.**
