@@ -572,6 +572,54 @@ de CI; la implementación levanta aplicación y PostgreSQL con Testcontainers
 dentro del runner (mismo aislamiento, paso de CI más simple). La desviación de
 enfoque consta en la bitácora.
 
+## Resultado verificado para HU-31 (Iteración 4)
+
+HU-31 corresponde a la Issue [#72](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/72).
+Sus tres criterios se cubren con dos suites nuevas: `DockerfileTests`
+(cinco unitarias sobre el contrato del `Dockerfile`) y `SaludHttpTests`
+(una prueba HTTP sobre PostgreSQL real vía Testcontainers):
+
+| Criterio de aceptación de la Issue #72 | Pruebas | Evidencia |
+| --- | --- | --- |
+| El `Dockerfile` usa una etapa `build` con SDK y una etapa `runtime` con ASP.NET runtime únicamente. | `Dockerfile_DebeExistirEnLaRaizDelRepositorio`, `Dockerfile_DebeUsarEtapaBuildConImagenSdk9`, `Dockerfile_DebeSerMultiStageConEtapaFinalRuntimeAspnet9`. | `FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build` y etapa final `FROM mcr.microsoft.com/dotnet/aspnet:9.0`; las pruebas analizan las instrucciones `FROM` del archivo real. |
+| El contenedor final corre con un usuario no root. | `Dockerfile_EtapaFinalDebeEjecutarConUsuarioNoRoot`. | La etapa final declara `USER $APP_UID`, el usuario no privilegiado de la imagen base; la prueba rechaza `root` en la sección final del archivo. |
+| Los health checks exponen un endpoint `/health` verificable por Docker/Kubernetes. | `Dockerfile_DebeDeclararHealthcheckQueVerifiqueHealth` y `SaludHttpTests.HealthEndpoint_DebeResponderHealthy`. | `HEALTHCHECK CMD curl --fail http://localhost:8080/health` en el `Dockerfile`; `AddHealthChecks()` + `MapHealthChecks("/health")` responden 200 con cuerpo `Healthy` (HTTP real contra la API). |
+
+La fase ROJO (`24c13bf`) se confirmó con ejecuciones filtradas: las cinco
+unitarias fallaron porque no existía el `Dockerfile` en la raíz y la prueba
+HTTP falló porque `/health` respondía 404; CI fallida esperable (ejecución
+`32764601886`). Tras el VERDE (`177039c`: `Dockerfile`, `.dockerignore`,
+`AddHealthChecks()` y `MapHealthChecks("/health")`), las mismas ejecuciones
+terminaron 5/5 y 1/1 correctas, con CI en `success` (ejecución
+`32771407873`). Tras el refactor local (extracción de `RaizRepositorio`
+compartida, sin cambios en producción), la suite completa
+`dotnet test Licitaciones.sln` resultó:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 124 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **284** | **0** | **0** |
+
+La secuencia TDD queda trazada así:
+
+- `24c13bf` — ROJO: creó `DockerfileTests` y `SaludHttpTests`; 6 fallidas por
+  comportamiento ausente (sin Dockerfile y sin endpoint de salud).
+- `177039c` — VERDE: Dockerfile multi-stage con usuario no root y
+  `HEALTHCHECK`, `.dockerignore` y endpoint `/health`; CI en `success`.
+- REFACTOR local sin publicar: deduplicó el localizador de raíz del
+  repositorio entre `DockerfileTests` y `DocumentacionApiMarkdownTests`;
+  sin comportamiento nuevo.
+
+El PR [#83](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/83)
+(`iteracion-4/hu-31-dockerfile` hacia `main`) está abierto como draft y
+mergeable. La verificación en ejecución real del contenedor (`docker build` /
+`docker run`) todavía no tiene evidencia registrada; consta como pendiente en
+la bitácora. La Issue #72 permanece abierta y no se marca como completada
+desde esta fase.
+
 ## Integración continua
 
 `.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release, instala los navegadores de Playwright (`pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium`, añadido por HU-30) y ejecuta toda la solución, incluidas las pruebas E2E con Chromium headless. En esta iteración no mide cobertura ni construye imágenes Docker.

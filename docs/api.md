@@ -42,6 +42,16 @@ Las solicitudes son reproducibles con la colección [`docs/api.http`](api.http) 
 | `GET /api/v1/niveles-aprobacion/resolver` | `200 OK` | `404 Not Found`. |
 | `POST /api/v1/tipos-cambio` | `201 Created` | `400 Bad Request`. |
 | `GET /api/v1/tipos-cambio/activo` | `200 OK` | `404 Not Found`. |
+| `GET /health` | `200 OK` con `Healthy`. | No aplica. |
+
+## Comprobación de salud (HU-31)
+
+La API expone `GET /health` mediante `AddHealthChecks()` y
+`MapHealthChecks("/health")`; el cuerpo es la representación textual del estado
+agregado (`Healthy` con 200). No consulta base de datos ni dependencias
+externas, por lo que sirve como prueba de vida para Docker y Kubernetes: el
+`HEALTHCHECK` del `Dockerfile` lo consume cada 30 segundos. El endpoint no forma
+parte del contrato de negocio ni del documento OpenAPI.
 
 ## Listar y consultar
 
