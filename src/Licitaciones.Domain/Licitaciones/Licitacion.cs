@@ -20,6 +20,7 @@ public sealed class Licitacion : IAuditableEntity
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }
     public DateTimeOffset? DeletedAt { get; private set; }
+    public uint Version { get; private set; }
     public IReadOnlyCollection<LicitacionTransicion> Transiciones => _transiciones.AsReadOnly();
 
     public static Licitacion Crear(
