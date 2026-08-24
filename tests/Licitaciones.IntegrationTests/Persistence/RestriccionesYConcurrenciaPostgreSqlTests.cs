@@ -72,11 +72,7 @@ public sealed class RestriccionesYConcurrenciaPostgreSqlTests
         Guid licitacionId;
         await using (var contextoInicial = _database.CrearContexto())
         {
-            var creada = Licitacion.Crear(
-                codigo,
-                "Compra para pruebas HU-29",
-                1000m,
-                fechaCierre);
+            var creada = NuevaLicitacion(codigo, fechaCierre);
             licitacionId = creada.Id;
             contextoInicial.Licitaciones.Add(creada);
             await contextoInicial.SaveChangesAsync();
@@ -108,9 +104,13 @@ public sealed class RestriccionesYConcurrenciaPostgreSqlTests
             () => segundoContexto.SaveChangesAsync());
     }
 
-    private static Licitacion NuevaLicitacion(string codigo) => Licitacion.Crear(
-        codigo,
-        "Compra para pruebas HU-29",
-        1000m,
-        DateTimeOffset.UtcNow.AddDays(1));
+    private static Licitacion NuevaLicitacion(string codigo) =>
+        NuevaLicitacion(codigo, DateTimeOffset.UtcNow.AddDays(1));
+
+    private static Licitacion NuevaLicitacion(string codigo, DateTimeOffset fechaCierre) =>
+        Licitacion.Crear(
+            codigo,
+            "Compra para pruebas HU-29",
+            1000m,
+            fechaCierre);
 }
