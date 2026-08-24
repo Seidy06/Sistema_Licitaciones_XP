@@ -1,5 +1,7 @@
 using Licitaciones.E2ETests.Infraestructura;
 
+using Microsoft.Playwright;
+
 using static Microsoft.Playwright.Assertions;
 
 namespace Licitaciones.E2ETests;
@@ -29,20 +31,14 @@ public sealed class FlujoMinimoE2ETests : IClassFixture<LicitacionesE2EFixture>
     [Trait("HU", "HU-30")]
     public async Task Paso02_Proveedores_RegistrarDesdeFormularioWebDebePersistirYListarlo()
     {
-        await IrAsync("/Proveedores/Create");
-
-        await _e2e.Pagina.FillAsync("#Nombre", _e2e.NombreProveedorPrincipal);
-        await _e2e.Pagina.ClickAsync("button[type=submit]");
-
-        await Expect(_e2e.Pagina.Locator(".alert-success"))
-            .ToContainTextAsync("El proveedor se registró correctamente.");
+        await RegistrarProveedorAsync(_e2e.NombreProveedorPrincipal);
 
         await IrAsync("/Proveedores");
         var fila = _e2e.Pagina.Locator($"tr:has-text('{_e2e.NombreProveedorPrincipal}')");
         await Expect(fila).ToBeVisibleAsync();
         await Expect(fila.Locator("a:has-text('Ver detalle')")).ToBeVisibleAsync();
 
-        var idProveedor = await _e2e.ObtenerProveedorIdPorNombreAsync(_e2e.NombreProveedorPrincipal);
+        var idProveedor = await IdDeProveedorAsync(_e2e.NombreProveedorPrincipal);
         Assert.NotEqual(Guid.Empty, idProveedor);
     }
 
@@ -59,14 +55,12 @@ public sealed class FlujoMinimoE2ETests : IClassFixture<LicitacionesE2EFixture>
         await _e2e.Pagina.FillAsync("#FechaCierre", fechaCierre);
         await _e2e.Pagina.ClickAsync("button[type=submit]");
 
-        await IrAsync($"/Licitaciones?codigo={Uri.EscapeDataString(_e2e.CodigoLicitacion)}");
-
-        var fila = _e2e.Pagina.Locator($"tr:has-text('{_e2e.TituloLicitacion}')");
+        var fila = await FilaDeLaLicitacionDelFlujoAsync();
         await Expect(fila).ToBeVisibleAsync();
         await Expect(fila).ToContainTextAsync("₡10.000,00");
         await Expect(fila).ToContainTextAsync("Borrador");
 
-        var idLicitacion = await _e2e.ObtenerLicitacionIdPorCodigoAsync(_e2e.CodigoLicitacion);
+        var idLicitacion = await IdDeLaLicitacionDelFlujoAsync();
         Assert.NotEqual(Guid.Empty, idLicitacion);
     }
 
@@ -74,15 +68,13 @@ public sealed class FlujoMinimoE2ETests : IClassFixture<LicitacionesE2EFixture>
     [Trait("HU", "HU-30")]
     public async Task Paso04_Licitaciones_PublicarDesdeElListadoWebDebeCambiarEstadoAPublicada()
     {
-        await IrAsync($"/Licitaciones?codigo={Uri.EscapeDataString(_e2e.CodigoLicitacion)}");
-
-        var fila = _e2e.Pagina.Locator($"tr:has-text('{_e2e.TituloLicitacion}')");
+        var fila = await FilaDeLaLicitacionDelFlujoAsync();
         await Expect(fila).ToBeVisibleAsync();
 
         await fila.Locator("[data-accion='publicar']").ClickAsync();
         await Expect(fila).ToContainTextAsync("Publicada");
 
-        await IrAsync($"/Licitaciones?codigo={Uri.EscapeDataString(_e2e.CodigoLicitacion)}");
+        fila = await FilaDeLaLicitacionDelFlujoAsync();
         await Expect(fila).ToContainTextAsync("Publicada");
     }
 
@@ -90,8 +82,8 @@ public sealed class FlujoMinimoE2ETests : IClassFixture<LicitacionesE2EFixture>
     [Trait("HU", "HU-30")]
     public async Task Paso05_Ofertas_RegistrarOfertaValidaDesdeFormularioWebDebeMostrarlaEnElListado()
     {
-        var idLicitacion = await _e2e.ObtenerLicitacionIdPorCodigoAsync(_e2e.CodigoLicitacion);
-        var idProveedor = await _e2e.ObtenerProveedorIdPorNombreAsync(_e2e.NombreProveedorPrincipal);
+        var idLicitacion = await IdDeLaLicitacionDelFlujoAsync();
+        var idProveedor = await IdDeProveedorAsync(_e2e.NombreProveedorPrincipal);
 
         await RegistrarOfertaAsync(idLicitacion, idProveedor, "9000");
 
@@ -109,21 +101,17 @@ public sealed class FlujoMinimoE2ETests : IClassFixture<LicitacionesE2EFixture>
     [Trait("HU", "HU-30")]
     public async Task Paso06_Ofertas_VerificarRechazoDeOfertaDuplicadaYSobrePresupuesto()
     {
-        var idLicitacion = await _e2e.ObtenerLicitacionIdPorCodigoAsync(_e2e.CodigoLicitacion);
-        var idProveedor = await _e2e.ObtenerProveedorIdPorNombreAsync(_e2e.NombreProveedorPrincipal);
+        var idLicitacion = await IdDeLaLicitacionDelFlujoAsync();
+        var idProveedor = await IdDeProveedorAsync(_e2e.NombreProveedorPrincipal);
 
         await RegistrarOfertaAsync(idLicitacion, idProveedor, "9000");
 
         await Expect(_e2e.Pagina.Locator(".alert-danger"))
             .ToContainTextAsync("ya tiene una oferta activa para esta licitacion");
 
-        await IrAsync("/Proveedores/Create");
-        await _e2e.Pagina.FillAsync("#Nombre", _e2e.NombreProveedorSecundario);
-        await _e2e.Pagina.ClickAsync("button[type=submit]");
-        await Expect(_e2e.Pagina.Locator(".alert-success"))
-            .ToContainTextAsync("El proveedor se registró correctamente.");
+        await RegistrarProveedorAsync(_e2e.NombreProveedorSecundario);
         var idProveedorSecundario =
-            await _e2e.ObtenerProveedorIdPorNombreAsync(_e2e.NombreProveedorSecundario);
+            await IdDeProveedorAsync(_e2e.NombreProveedorSecundario);
 
         await RegistrarOfertaAsync(idLicitacion, idProveedorSecundario, "99999");
 
@@ -135,7 +123,7 @@ public sealed class FlujoMinimoE2ETests : IClassFixture<LicitacionesE2EFixture>
     [Trait("HU", "HU-30")]
     public async Task Paso07_Ofertas_ConsultarMejorOfertaDesdeLaInterfazWebDebeMostrarMontoYClasificacion()
     {
-        var idLicitacion = await _e2e.ObtenerLicitacionIdPorCodigoAsync(_e2e.CodigoLicitacion);
+        var idLicitacion = await IdDeLaLicitacionDelFlujoAsync();
 
         await IrAsync($"/Ofertas?licitacionId={idLicitacion}");
 
@@ -149,7 +137,7 @@ public sealed class FlujoMinimoE2ETests : IClassFixture<LicitacionesE2EFixture>
     [Trait("HU", "HU-30")]
     public async Task Paso08_Ofertas_AlternarMonedaEntreCRCyUSDDebeConvertirSinAlterarElValorOficial()
     {
-        var idLicitacion = await _e2e.ObtenerLicitacionIdPorCodigoAsync(_e2e.CodigoLicitacion);
+        var idLicitacion = await IdDeLaLicitacionDelFlujoAsync();
 
         await IrAsync($"/Ofertas?licitacionId={idLicitacion}");
 
@@ -171,6 +159,16 @@ public sealed class FlujoMinimoE2ETests : IClassFixture<LicitacionesE2EFixture>
     private async Task IrAsync(string ruta) =>
         await _e2e.Pagina.GotoAsync($"{_e2e.DireccionBase.TrimEnd('/')}{ruta}");
 
+    private async Task RegistrarProveedorAsync(string nombre)
+    {
+        await IrAsync("/Proveedores/Create");
+        await _e2e.Pagina.FillAsync("#Nombre", nombre);
+        await _e2e.Pagina.ClickAsync("button[type=submit]");
+
+        await Expect(_e2e.Pagina.Locator(".alert-success"))
+            .ToContainTextAsync("El proveedor se registró correctamente.");
+    }
+
     private async Task RegistrarOfertaAsync(
         Guid idLicitacion,
         Guid idProveedor,
@@ -182,4 +180,16 @@ public sealed class FlujoMinimoE2ETests : IClassFixture<LicitacionesE2EFixture>
         await _e2e.Pagina.FillAsync("#Monto", monto);
         await _e2e.Pagina.ClickAsync("button[type=submit]");
     }
+
+    private async Task<ILocator> FilaDeLaLicitacionDelFlujoAsync()
+    {
+        await IrAsync($"/Licitaciones?codigo={Uri.EscapeDataString(_e2e.CodigoLicitacion)}");
+        return _e2e.Pagina.Locator($"tr:has-text('{_e2e.TituloLicitacion}')");
+    }
+
+    private async Task<Guid> IdDeLaLicitacionDelFlujoAsync() =>
+        await _e2e.ObtenerLicitacionIdPorCodigoAsync(_e2e.CodigoLicitacion);
+
+    private async Task<Guid> IdDeProveedorAsync(string nombre) =>
+        await _e2e.ObtenerProveedorIdPorNombreAsync(nombre);
 }
