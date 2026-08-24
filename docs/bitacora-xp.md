@@ -738,6 +738,209 @@ formato verificado:
 Estos puntos se reportan como candidatos a Issues separadas; no se ocultan
 dentro de esta historia. La Issue #56 permanece abierta.
 
+## Cierre de la Iteración 3
+
+Cierre documental registrado el 24 de agosto de 2026 sobre el commit `666f175`
+de `main`, desde la rama `iteracion-3/docs-cierre`, sin modificar código. Las
+fusiones se verificaron con `git log main --merges`; el estado de Issues,
+Pull Requests y GitHub Actions se consultó en la API pública de GitHub durante
+este cierre; la suite completa y el formato se ejecutaron localmente sobre ese
+mismo commit. Las entradas por historia de esta iteración conservan el estado
+de cada fase tal como se registró (Issues abiertas, PRs en draft, refactors
+locales sin publicar); este cierre consolida el estado final verificado sobre
+`main`.
+
+### Verificación de fusión en `main`
+
+Las diez historias seleccionadas están fusionadas en `main` mediante los PR
+#58 a #67, cada uno con CI verde en su commit de fusión:
+
+| PR | Commit de fusión | Historia | SP | Ejecución de CI en `main` | Resultado |
+| --- | --- | --- | ---: | --- | --- |
+| #58 | `73d399a` | HU-18 — Administrar niveles de aprobación | 5 | `32560841685` | success |
+| #59 | `8564387` | HU-19 — Tipo de cambio y conversión CRC/USD | 5 | `32610626534` | success |
+| #60 | `c9e36e5` | HU-20 — Landing page informativa | 3 | `32617145891` | success |
+| #61 | `6abc37c` | HU-21 — Menú de navegación global | 2 | `32646374137` | success |
+| #62 | `39d755a` | HU-22 — Modo claro/oscuro persistente | 2 | `32653636518` | success |
+| #63 | `95ba997` | HU-23 — CRUD completo desde la interfaz web | 8 | `32661616283` | success |
+| #64 | `20d8d9d` | HU-24 — Mensajería de éxito, advertencia y error | 2 | `32669007316` | success |
+| #65 | `09fb478` | HU-25 — Formato monetario y cultural es-CR | 1 | `32675111713` | success |
+| #66 | `df31428` | HU-26 — Exponer API REST con DTOs y versionado | 8 | `32680134397` | success |
+| #67 | `666f175` | HU-27 — Documentación interactiva OpenAPI/Swagger | 2 | `32688275482` | success |
+
+La planificación de la iteración entró previamente mediante el PR #57
+(`6b8e51b`, ejecución `32529040965`, success), sin puntos de historia.
+
+### Trazabilidad Issues ↔ historias ↔ PRs
+
+Cada historia tiene exactamente una Issue asociada, creada durante el Planning
+Game y no retrospectivamente: HU-18→[#47](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/47),
+HU-19→[#48](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/48),
+HU-20→[#49](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/49),
+HU-21→[#50](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/50),
+HU-22→[#51](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/51),
+HU-23→[#52](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/52),
+HU-24→[#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53),
+HU-25→[#54](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/54),
+HU-26→[#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55) y
+HU-27→[#56](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/56).
+
+Ninguna Issue permanece abierta y ninguna se cerró de forma prematura: cada
+cierre ocurrió inmediatamente después de la fusión de su PR (por ejemplo, #47
+se cerró tres minutos después del merge `73d399a`; #56, un minuto después de
+`666f175`). El estado CLOSED no se usó como única evidencia de cumplimiento:
+cada historia se validó además contra sus pruebas con trait propio en verde,
+sus commits rojo/verde/refactor, su documentación por historia y el CI success
+de su fusión, según el detalle de las tablas DoD siguientes.
+
+Observaciones de trazabilidad registradas sin corregir el historial:
+
+1. El commit VERDE de HU-26 (`7db6e80`) dice `refs #56` cuando debe decir
+   `refs #55`.
+2. Cuatro ramas reales difieren de las previstas en el Planning Game:
+   HU-21 (`iteracion-3/hu-21-navegacion` frente a `…navegacion-global`),
+   HU-22 (`…modo-claro-oscuro` frente a `…tema-claro-oscuro`),
+   HU-23 (`…crud-web` frente a `…crud-web-completo`) y
+   HU-26 (`…api-rest` frente a `…api-rest-versionada`). Sin impacto en
+   alcance, criterios ni contenido.
+3. La entrada histórica de HU-21 en esta bitácora afirma «No se registró PR de
+   HU-21»; quedó desactualizada frente al PR #61 fusionado y se corrige por
+   medio de este cierre.
+
+### Definition of Done por historia
+
+La evaluación aplica los criterios verificables de `plan-xp.md`. Las diez
+historias exponen MVC o API, por lo que el criterio de recorridos HTTP reales
+aplica a todas y está cubierto en todas.
+
+| Historia | SP | Cumple DoD | Observación verificada |
+| --- | ---: | --- | --- |
+| HU-18 | 5 | Sí | CRUD web y API de niveles con resolución de aprobador; recorridos HTTP reales y persistencia probada hasta PostgreSQL. |
+| HU-19 | 5 | Sí | Tipo de cambio activo administrable y conversión CRC/USD integrada a ofertas y detalle; reglas en Application/Domain y pruebas hasta PostgreSQL. |
+| HU-20 | 3 | Sí | Landing informativa con contenido del flujo del sistema; verificada por prueba funcional HTTP real. |
+| HU-21 | 2 | Sí | Navegación global con resaltado de página activa y enlace a Swagger; seis casos funcionales HTTP. |
+| HU-22 | 2 | Sí | Tema claro/oscuro persistente en `localStorage` sin parpadeo inicial; cinco casos funcionales HTTP. Salvedad UX menor: el ícono del control no refleja el tema activo. |
+| HU-23 | 8 | Sí | CRUD web completo de los cinco módulos; doce pruebas CRUD por HTTP real con PostgreSQL. |
+| HU-24 | 2 | Sí | Parcial `_Mensajes` renderizado y verificado por tres casos HTTP. Salvedad UX registrada: los mensajes no son visibles tras crear licitación ni tras editar proveedor; los criterios de la Issue quedaron cubiertos por pruebas y el ajuste visual se lleva a la siguiente iteración. |
+| HU-25 | 1 | Sí | Helper `FormatoMonetario` con ₡ y cultura es-CR en los montos de listados; encoder ampliado a símbolos monetarios. Salvedad menor: `NivelesAprobacion/Delete` conserva `ToString("N2")`. |
+| HU-26 | 8 | Sí | API REST `/api/v1` con DTOs, códigos correctos y contrato transversal ProblemDetails (`codigoError`/`correlacionId`) sin stack traces. |
+| HU-27 | 2 | Sí | Swagger UI y documento OpenAPI con endpoints, esquemas y ejemplos en Development; `docs/api.md` referencia la colección reproducible `docs/api.http`. |
+
+El build Release, `dotnet format --verify-no-changes` y la suite completa sin
+errores ni omitidas quedan cubiertos por el CI verde de cada fusión y se
+re-verificaron localmente en este cierre: 233 correctas, 0 fallidas y 0
+omitidas, formato sin diferencias. La documentación por módulo quedó alineada
+en el cierre de cada historia. El último criterio del DoD (pequeña liberación
+etiquetada) se cumple al cerrar la iteración: ver «Pequeña liberación».
+
+### Velocidad planificada frente a observada
+
+- Velocidad planificada de referencia: **36 SP** (`plan-xp.md`).
+- Alcance seleccionado en el Planning Game: **38 SP**, con la diferencia de
+  +2 SP registrada como riesgo de planificación al iniciar.
+- Alcance fusionado en `main`: **38 SP** (las diez historias).
+- Velocidad observada al cierre: **38 SP**, contando las diez historias que
+  cumplen la Definition of Done.
+- Desviación: **+2 SP** frente a la referencia planificada —el riesgo
+  declarado se materializó y absorbió sin recortar alcance— y **±0 SP**
+  frente al alcance seleccionado.
+
+### Ciclos TDD y refactorizaciones
+
+Las diez historias siguieron ciclos rojo–verde–refactor con commits separados
+y evidencia CI: cada ROJO publicó pruebas que fallaron por comportamiento
+ausente (por ejemplo `9611c8d` en HU-26 y `3af0427` en HU-27, con ejecuciones
+fallidas esperables) y cada VERDE quedó en success (por ejemplo `7db6e80` con
+`32677819388` y `b790880` con `32684426351`). Los rojos unitarios de HU-27
+pasaron 1 de 2 porque `docs/api.md` ya documentaba recursos y errores de
+iteraciones previas; la parte faltante (colección reproducible referenciada)
+sí falló, y así quedó registrado en la entrada de la historia.
+
+Refactorizaciones relevantes del cierre de cada ciclo (detalle por historia en
+las secciones anteriores):
+
+- HU-18: renombró `ResolverNivelAprobacion` a `ResolverAsync` y alineó el
+  helper del controlador con la convención `CrearProblema`.
+- HU-19: centralizó el par USD/CRC en constantes del dominio y consolidó
+  `ITipoCambioRepository.ObtenerActivoAsync` como única fuente del activo.
+- HU-22: eliminó la aplicación inicial del tema duplicada entre layout y
+  `site.js`.
+- HU-23: movió `PaginaResultado<T>` de `Contracts.Proveedores` a
+  `Application.Common` como contrato compartido.
+- HU-26: extrajo `ContratoProblemasApi` como única fuente del contrato de
+  errores y reutilizó la fábrica registrada en el manejador global.
+- HU-27: sustituyó la cadena ternaria de 11 ramas del filtro de ejemplos por
+  un diccionario estático tipo→ejemplo.
+
+### Participación Seidy/Tiffany
+
+La iteración acumula 57 commits entre `5f731fb` y `666f175` (incluye las dos
+fusiones documentales de regularización de la Iteración 2, PRs #46 y #28):
+Seidy Oporta firma 28 (22 directos más 6 merges como `Seidy06`) y Tiffany
+Alfaro 29 (22 directos más 7 merges como `tiffanyyulieth08`). La autoría
+alternó en las fases rojo, verde, refactor y documental de cada historia y las
+tablas por historia registran la rotación Driver/Navigator. Git conserva la
+autoría del Driver; el rol Navigator se reconstruye a partir del trabajo
+coordinado de la pareja, sin atribuir sesiones sin evidencia.
+
+### Integración continua
+
+El workflow mantiene restore, `dotnet format --verify-no-changes`, build
+Release y suite completa con PostgreSQL 16 como servicio, en push y
+pull_request hacia `main`. Los once pushes al tronco durante el ciclo
+(planificación más las diez historias) terminaron en success, con las
+ejecuciones listadas en la tabla de fusiones. El workflow sigue sin medir
+cobertura ni construir imágenes Docker: es alcance explícito de la
+Iteración 4.
+
+### Resultado de la demostración
+
+No existe en el repositorio un acta de demostración ni una aprobación firmada
+del cliente, por lo que no se registra retroalimentación externa. Lo
+demostrable y reproducible del incremento es:
+
+- Por HTTP real: administrar niveles de aprobación (web y API), registrar el
+  tipo de cambio activo y ver la conversión CRC/USD aplicada a ofertas y
+  detalle de ofertas, operar el CRUD completo de los cinco módulos desde la
+  interfaz web, consumir la API REST `/api/v1` con DTOs y contrato de errores
+  ProblemDetails, y explorar la documentación interactiva Swagger con esquemas
+  y ejemplos.
+- En experiencia de usuario: landing informativa, navegación global con
+  enlace a Swagger y tema claro/oscuro persistente, con mensajería de
+  resultado y montos en colones con cultura es-CR.
+- Salvedades visibles registradas como ajustes: mensajes invisibles en dos
+  flujos de HU-24 e ícono de tema estático en HU-22.
+
+La suite que respalda esta demostración es la registrada en `pruebas.md`:
+233 pruebas superadas, 0 fallidas y 0 omitidas.
+
+### Retroalimentación y ajustes para la Iteración 4
+
+Sin acta del cliente, los ajustes se derivan exclusivamente de brechas
+verificables en el código fusionado:
+
+1. Hacer visible la mensajería tras crear una licitación y tras editar un
+   proveedor (redirecciones actuales sin parcial `_Mensajes`).
+2. Dotar de productores reales a la variante de advertencia de la mensajería.
+3. Reflejar el tema activo en el ícono del control de tema.
+4. Aplicar el formato ₡ es-CR a los montos de `NivelesAprobacion/Delete`.
+5. Eliminar los residuos de plantilla `WeatherForecastController` y
+   `WeatherForecast` de `Licitaciones.Api`.
+6. Consolidar duplicaciones de pruebas: la fábrica `CrearApiFactory` entre
+   HU-26/HU-27 y la colección `PaginasDelSitio` entre HU-21/HU-22.
+7. Corregir trazabilidad documental: referencia `refs #56` del commit VERDE
+   de HU-26 y nombres de ramas previstas frente a reales en el backlog.
+8. Desarrollar el alcance planificado de la Iteración 4 (HU-28 a HU-37):
+   pruebas complementarias, Docker y Kubernetes, integración continua
+   ampliada, documentación final y etiquetado de la entrega.
+
+### Pequeña liberación
+
+La etiqueta `v0.3.0` no existe todavía (`git tag -l` muestra solo `v0.1.0` y
+`v0.2.0`). Se creará después de fusionar esta rama de cierre documental,
+identificando el incremento HU-18 a HU-27 completas (38 SP observados), sin
+salvedades de exposición pendientes.
+
 ## Corrección posterior a la auditoría final de Iteración 2
 
 Driver: Tiffany. Navigator/responsable: Seidy. La auditoría detectó que HU-11 y
