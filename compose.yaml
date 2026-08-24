@@ -1,5 +1,5 @@
 services:
-  postgres:
+  db:
     image: postgres:16
     container_name: licitaciones-postgres
     restart: unless-stopped
@@ -20,6 +20,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  app:
+    build: .
+    container_name: licitaciones-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__Licitaciones=Host=db;Port=5432;Database=${POSTGRES_DB:-licitaciones_db};Username=${POSTGRES_USER:-licitaciones_user};Password=${POSTGRES_PASSWORD:-licitaciones_password}
+      - Database__ApplyMigrationsOnStartup=true
+    ports:
+      - "${APP_PORT:-8080}:8080"
 
 volumes:
   licitaciones_postgres_data:

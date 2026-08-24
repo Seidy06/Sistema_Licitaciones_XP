@@ -24,12 +24,13 @@ El `.env.example` define base, usuario, contraseña, puerto y `ConnectionStrings
 ## Iniciar y comprobar PostgreSQL
 
 ```powershell
-docker compose up -d postgres
+docker compose up -d db
 docker compose ps
-docker compose logs postgres
+docker compose logs db
 ```
 
-El servicio se llama `postgres`, publica `${POSTGRES_PORT:-5432}:5432` y usa `pg_isready` como comprobación de salud.
+El servicio se llama `db` (imagen `postgres:16`), publica
+`${POSTGRES_PORT:-5432}:5432` y usa `pg_isready` como comprobación de salud.
 
 ## Ejecutar la aplicación
 
@@ -40,7 +41,7 @@ $env:ConnectionStrings__Licitaciones = "Host=localhost;Port=5432;Database=licita
 dotnet run --project src/Licitaciones.Web
 ```
 
-Web ejecuta las migraciones pendientes durante el arranque. Para la API, la base debe estar migrada previamente, por ejemplo iniciando Web una vez:
+Web ejecuta las migraciones pendientes durante el arranque. Para la API, la base debe estar migrada previamente, por ejemplo iniciando Web una vez; dentro del entorno Compose (sección siguiente) el servicio `app` aplica las migraciones automáticamente al arrancar:
 
 ```powershell
 dotnet run --project src/Licitaciones.Api
@@ -62,6 +63,28 @@ El contenedor arranca `Licitaciones.Api.dll`, escucha en `http://+:8080`,
 responde `GET /health` con `Healthy` y se comprueba a sí mismo con
 `HEALTHCHECK CMD curl --fail http://localhost:8080/health`. El proceso corre
 con el usuario no privilegiado `$APP_UID` que provee la imagen base.
+
+## Entorno completo con Compose (HU-32)
+
+Un solo comando levanta PostgreSQL y la API ya construida, de forma
+reproducible desde cero:
+
+```powershell
+Copy-Item .env.example .env
+docker compose up --build
+```
+
+Compose construye la imagen del `Dockerfile` para el servicio `app` (la API),
+espera a que `db` esté saludable mediante `depends_on` con
+`condition: service_healthy`, le inyecta la cadena de conexión hacia el host
+`db` y activa `Database__ApplyMigrationsOnStartup=true` para que las migraciones
+se apliquen automáticamente en el arranque. La API queda disponible en
+`http://localhost:${APP_PORT:-8080}` (verifíquela con `GET /health`).
+
+Los datos persisten en el volumen nombrado `licitaciones_postgres_data`,
+declarado en la sección superior `volumes:` del Compose: tras un reinicio o
+recreación de contenedores (`docker compose stop`, `docker compose down` sin
+`--volumes`) los datos de PostgreSQL se conservan.
 
 ## Detener
 

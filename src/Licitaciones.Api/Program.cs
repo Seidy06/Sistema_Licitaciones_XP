@@ -89,6 +89,13 @@ builder.Services.AddDbContext<LicitacionesDbContext>(options =>
 
 var app = builder.Build();
 
+if (builder.Configuration.GetValue("Database:ApplyMigrationsOnStartup", false))
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<LicitacionesDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
