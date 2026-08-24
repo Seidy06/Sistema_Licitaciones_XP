@@ -1,5 +1,73 @@
 # Bitácora XP
 
+## Iteración 4 — Consolidación de pruebas, despliegue y entrega
+
+**Estado: INICIADA.**
+
+### Objetivo de la pequeña liberación
+
+Consolidar las pruebas y la cobertura del dominio, contenerizar la aplicación
+con Docker y Docker Compose, desplegarla mediante manifiestos de Kubernetes,
+completar el pipeline de integración continua con análisis y auditoría de
+dependencias, cerrar la documentación técnica en `/docs` y etiquetar la
+entrega evaluable final.
+
+### Planning Game y velocidad planificada
+
+Se seleccionan HU-28 a HU-37 en el orden del catálogo. Suman **45 SP**. La
+velocidad planificada de referencia permanece en **36 SP**; los 9 SP
+adicionales se registran como riesgo explícito de alcance, porque el release
+final concentra pruebas, contenedores, Kubernetes, CI completo, documentación
+y etiquetado. No existe todavía velocidad observada de la Iteración 4 y no se
+calculará hasta contar con evidencia de cierre. Ninguna historia está marcada
+como terminada.
+
+El orden y las dependencias son: HU-28 consolida las pruebas unitarias y su
+cobertura; HU-29 formaliza la integración contra PostgreSQL real con la
+infraestructura Testcontainers existente; HU-30 añade pruebas E2E de navegador
+sobre la experiencia web completa de la Iteración 3; HU-31 introduce el
+`Dockerfile` multi-stage; HU-32 orquesta el entorno local y depende de HU-31;
+HU-33 y HU-34 trasladan aplicación y persistencia a Kubernetes en ese orden;
+HU-35 integra todo en el pipeline de CI; HU-36 cierra la documentación técnica;
+HU-37 etiqueta la entrega evaluable. El desarrollo aplicará ciclos TDD
+rojo–verde–refactor, programación en pareja, integración continua y pequeñas
+liberaciones; las Issues #69 a #78 se usan únicamente como tarjetas de
+trazabilidad XP, no como backlog: sus criterios permanecen sin marcar hasta
+que exista evidencia real en pruebas, commits, PR y CI.
+
+### Pareja, trazabilidad y ramas previstas
+
+La primera sesión queda asignada con **Tiffany como Driver/responsable
+principal** y **Seidy como Navigator/revisión** para HU-28. La pareja rota los
+roles en cada historia prevista:
+
+| Orden | HU | Prioridad | SP | Driver | Navigator | Issue | Estado inicial | Rama prevista |
+| ---: | --- | --- | ---: | --- | --- | --- | --- | --- |
+| 1 | HU-28 — Pruebas unitarias del dominio | Alta | 5 | Tiffany | Seidy | [#69](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/69) | OPEN; no iniciada | `iteracion-4/hu-28-pruebas-unitarias-dominio` |
+| 2 | HU-29 — Integración PostgreSQL real | Alta | 5 | Seidy | Tiffany | [#70](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/70) | OPEN; no iniciada | `iteracion-4/hu-29-integracion-postgresql` |
+| 3 | HU-30 — Pruebas E2E de navegador | Alta | 8 | Tiffany | Seidy | [#71](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/71) | OPEN; no iniciada | `iteracion-4/hu-30-pruebas-e2e` |
+| 4 | HU-31 — Dockerfile multi-stage | Alta | 3 | Seidy | Tiffany | [#72](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/72) | OPEN; no iniciada | `iteracion-4/hu-31-dockerfile` |
+| 5 | HU-32 — Docker Compose local | Alta | 3 | Tiffany | Seidy | [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73) | OPEN; no iniciada | `iteracion-4/hu-32-docker-compose` |
+| 6 | HU-33 — Manifiestos K8s de la app | Alta | 5 | Seidy | Tiffany | [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74) | OPEN; no iniciada | `iteracion-4/hu-33-k8s-app` |
+| 7 | HU-34 — Persistencia PostgreSQL en K8s | Alta | 5 | Tiffany | Seidy | [#75](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/75) | OPEN; no iniciada | `iteracion-4/hu-34-k8s-postgresql` |
+| 8 | HU-35 — Pipeline de CI completo | Alta | 5 | Seidy | Tiffany | [#76](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/76) | OPEN; no iniciada | `iteracion-4/hu-35-pipeline-ci` |
+| 9 | HU-36 — Documentación final en /docs | Alta | 5 | Tiffany | Seidy | [#77](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/77) | OPEN; no iniciada | `iteracion-4/hu-36-documentacion-final` |
+| 10 | HU-37 — Etiquetado de entrega final | Alta | 1 | Seidy | Tiffany | [#78](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/78) | OPEN; no iniciada | `iteracion-4/hu-37-tag-entrega` |
+
+Git conservará la autoría del Driver de cada incremento; el rol Navigator se
+reconstruirá a partir del trabajo coordinado de la pareja, sin atribuir
+sesiones sin evidencia.
+
+### Ajustes heredados de la Iteración 3
+
+Los ajustes registrados en el cierre de la Iteración 3 alimentan esta
+iteración: mensajería invisible en dos flujos, variante de advertencia sin
+productores, ícono de tema estático, formato ₡ faltante en
+`NivelesAprobacion/Delete`, residuos `WeatherForecast`, duplicaciones de
+fábricas de pruebas y correcciones documentales de referencias. Se resolverán
+dentro de las historias de esta iteración cuando correspondan a su alcance o
+quedarán registradas en la documentación final.
+
 ## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
 
 **Estado: INICIADA.**

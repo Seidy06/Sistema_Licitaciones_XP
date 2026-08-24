@@ -103,6 +103,40 @@ como terminadas.
 - Docker, Docker Compose y Kubernetes.
 - Integración continua, documentación técnica y etiquetado de la entrega.
 
+La Iteración 4 inicia el 24 de agosto de 2026 con **45 SP seleccionados** y
+mantiene **36 SP como velocidad planificada de referencia**. La diferencia de
+9 SP se registra como riesgo explícito de alcance: es el catálogo completo del
+release final y no se ampliará con trabajo adicional. No existe todavía
+velocidad observada de esta iteración y no se calculará hasta contar con
+evidencia de cierre. Ninguna historia está marcada como terminada.
+
+El orden conserva HU-28 a HU-37 y sus dependencias son: HU-28 consolida las
+pruebas unitarias y su cobertura sobre el dominio ya construido; HU-29
+formaliza la integración contra PostgreSQL real (infraestructura Testcontainers
+existente desde la Iteración 2); HU-30 añade E2E de navegador sobre la
+experiencia web completa de la Iteración 3; HU-31 introduce el `Dockerfile`
+multi-stage; HU-32 orquesta el entorno local y depende de HU-31; HU-33 y
+HU-34 trasladan aplicación y persistencia a Kubernetes (`/k8s`), en ese orden;
+HU-35 integra todo en el pipeline de CI (pruebas, cobertura, formato,
+imagen Docker, validación K8s y auditoría de dependencias); HU-36 cierra la
+documentación técnica; HU-37 etiqueta la entrega evaluable. El desarrollo
+aplicará ciclos TDD rojo–verde–refactor, programación en pareja, integración
+continua y pequeñas liberaciones; las Issues se usan únicamente como
+trazabilidad XP.
+
+| Orden | Historia | Prioridad | SP | Dependencias principales | Driver | Navigator | Issue | Rama prevista |
+| ---: | --- | --- | ---: | --- | --- | --- | --- | --- |
+| 1 | HU-28 — Pruebas unitarias del dominio | Alta | 5 | Reglas de negocio de HU-06 a HU-19. | Tiffany | Seidy | [#69](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/69) | `iteracion-4/hu-28-pruebas-unitarias-dominio` |
+| 2 | HU-29 — Integración PostgreSQL real | Alta | 5 | Fixture Testcontainers de la Iteración 2. | Seidy | Tiffany | [#70](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/70) | `iteracion-4/hu-29-integracion-postgresql` |
+| 3 | HU-30 — Pruebas E2E de navegador | Alta | 8 | Experiencia web completa de la Iteración 3; HU-31/HU-32 para ejecución en CI. | Tiffany | Seidy | [#71](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/71) | `iteracion-4/hu-30-pruebas-e2e` |
+| 4 | HU-31 — Dockerfile multi-stage | Alta | 3 | Aplicación .NET 9 consolidada. | Seidy | Tiffany | [#72](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/72) | `iteracion-4/hu-31-dockerfile` |
+| 5 | HU-32 — Docker Compose local | Alta | 3 | HU-31. | Tiffany | Seidy | [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73) | `iteracion-4/hu-32-docker-compose` |
+| 6 | HU-33 — Manifiestos K8s de la app | Alta | 5 | Imagen de HU-31. | Seidy | Tiffany | [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74) | `iteracion-4/hu-33-k8s-app` |
+| 7 | HU-34 — Persistencia PostgreSQL en K8s | Alta | 5 | HU-33. | Tiffany | Seidy | [#75](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/75) | `iteracion-4/hu-34-k8s-postgresql` |
+| 8 | HU-35 — Pipeline de CI completo | Alta | 5 | HU-28 a HU-34. | Seidy | Tiffany | [#76](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/76) | `iteracion-4/hu-35-pipeline-ci` |
+| 9 | HU-36 — Documentación final en /docs | Alta | 5 | Resultados de HU-28 a HU-35. | Tiffany | Seidy | [#77](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/77) | `iteracion-4/hu-36-documentacion-final` |
+| 10 | HU-37 — Etiquetado de entrega final | Alta | 1 | Todo lo anterior. | Seidy | Tiffany | [#78](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/78) | `iteracion-4/hu-37-tag-entrega` |
+
 ## Trazabilidad de la auditoría de la Iteración 1
 
 La auditoría de la Iteración 1 se realizó con una numeración anterior para las

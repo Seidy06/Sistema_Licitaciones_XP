@@ -402,6 +402,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** configurar el proyecto de pruebas unitarias (xUnit) y aplicar el ciclo rojo-verde-refactorización para las reglas de negocio
 - **Para:** garantizar corrección y evidencia disciplinada de TDD según XP
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#69](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/69) — Iteración 4, estado inicial OPEN, rama prevista `iteracion-4/hu-28-pruebas-unitarias-dominio`.
 - **Criterios de aceptación:**
   - Given cada regla de negocio (presupuesto/oferta > 0, oferta duplicada, oferta sobre presupuesto, estado no publicado, vencimiento, normalización de proveedor, código único, mejor oferta y desempate, clasificación de ahorro, nivel de aprobación, conversión CRC/USD, transiciones de estado), When se implementa, Then existe al menos una prueba unitaria previa o concurrente que la cubre.
   - Given la capa Domain/Application, When se mide cobertura, Then alcanza al menos 80% de líneas.
@@ -412,6 +413,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** ejecutar pruebas de integración contra una instancia real de PostgreSQL en contenedor (Testcontainers)
 - **Para:** validar migraciones, índices únicos, llaves foráneas, restricciones y concurrencia con el motor real (no SQLite ni mocks)
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#70](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/70) — Iteración 4, estado inicial OPEN, rama prevista `iteracion-4/hu-29-integracion-postgresql`.
 - **Criterios de aceptación:**
   - Given el proyecto `Tests.Integration`, When se ejecuta, Then levanta un contenedor PostgreSQL real vía Testcontainers y aplica las migraciones.
   - Given un intento de insertar un código de licitación duplicado directamente vía EF Core, When se ejecuta, Then la base de datos rechaza la operación (constraint violation capturada y traducida).
@@ -423,6 +425,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** automatizar pruebas E2E con Playwright/Selenium cubriendo landing page, CRUD de proveedores/licitaciones/ofertas, modo claro/oscuro, conversión CRC/USD y mensajes de validación
 - **Para:** verificar el flujo funcional mínimo completo desde el navegador
 - **Prioridad:** Alta | **Estimación:** 8 SP
+- **Issue GitHub:** [#71](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/71) — Iteración 4, estado inicial OPEN, rama prevista `iteracion-4/hu-30-pruebas-e2e`.
 - **Criterios de aceptación:**
   - Given el flujo funcional mínimo descrito en el proyecto (registrar proveedor → crear licitación → publicar → registrar oferta → verificar rechazos → consultar mejor oferta → alternar CRC/USD), When se ejecuta como prueba E2E, Then todos los pasos pasan de forma automatizada.
   - Given el pipeline de CI, When se ejecutan las pruebas E2E, Then corren contra la aplicación levantada en modo headless.
@@ -437,6 +440,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** un `Dockerfile` multi-stage compatible con .NET 9 que compile y ejecute la aplicación con un usuario no privilegiado
 - **Para:** obtener una imagen reproducible y segura
 - **Prioridad:** Alta | **Estimación:** 3 SP
+- **Issue GitHub:** [#72](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/72) — Iteración 4, estado inicial OPEN, rama prevista `iteracion-4/hu-31-dockerfile`.
 - **Criterios de aceptación:**
   - Given el `Dockerfile`, When se construye, Then usa una etapa `build` con SDK y una etapa `runtime` con ASP.NET runtime únicamente.
   - Given el contenedor final, When se ejecuta, Then corre con un usuario no root (cuando la imagen base lo permita).
@@ -448,6 +452,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** un `docker-compose.yml` con el servicio de aplicación y PostgreSQL, volumen persistente, variables de entorno y health checks
 - **Para:** levantar el entorno completo con `docker compose up --build` de forma reproducible
 - **Prioridad:** Alta | **Estimación:** 3 SP
+- **Issue GitHub:** [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73) — Iteración 4, estado inicial OPEN, rama prevista `iteracion-4/hu-32-docker-compose`.
 - **Criterios de aceptación:**
   - Given `docker compose up --build`, When se ejecuta desde cero, Then la aplicación y PostgreSQL inician correctamente y la app aplica migraciones automáticamente o mediante un job de inicialización.
   - Given un reinicio de contenedores, When ocurre, Then los datos persisten gracias al volumen configurado para PostgreSQL.
@@ -463,6 +468,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** un `Deployment`, `Service`, `ConfigMap` y `Secret` para la aplicación
 - **Para:** desplegarla en un clúster de Kubernetes con configuración segura
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74) — Iteración 4, estado inicial OPEN, rama prevista `iteracion-4/hu-33-k8s-app`.
 - **Criterios de aceptación:**
   - Given el `Deployment`, When se aplica, Then define `startupProbe`, `readinessProbe` y `livenessProbe`, además de `resources.requests/limits`.
   - Given credenciales de base de datos, When se referencian, Then provienen de un `Secret`, nunca hardcodeadas en el manifiesto.
@@ -474,6 +480,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** un `StatefulSet` (o mecanismo equivalente) para PostgreSQL con `PersistentVolumeClaim`
 - **Para:** garantizar persistencia de datos entre reinicios de pods en el clúster
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#75](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/75) — Iteración 4, estado inicial OPEN, rama prevista `iteracion-4/hu-34-k8s-postgresql`.
 - **Criterios de aceptación:**
   - Given el `StatefulSet` de PostgreSQL, When un pod se reinicia, Then los datos se conservan gracias al `PersistentVolumeClaim`.
   - Given las migraciones, When se ejecutan en el clúster, Then se aplican de forma controlada (Job/InitContainer), no automáticamente en cada arranque de réplica.
@@ -489,6 +496,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** un workflow de GitHub Actions que restaure dependencias, compile, ejecute pruebas con cobertura, valide formato/análisis estático, construya la imagen Docker, valide manifiestos de Kubernetes y revise dependencias vulnerables
 - **Para:** bloquear la integración de cambios que rompan la calidad o el despliegue (integración continua exigida por XP)
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#76](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/76) — Iteración 4, estado inicial OPEN, rama prevista `iteracion-4/hu-35-pipeline-ci`.
 - **Criterios de aceptación:**
   - Given un push o pull request, When se dispara el workflow, Then ejecuta en orden: restore → build → test (con cobertura) → análisis estático/formato → build de imagen Docker → validación de manifiestos K8s → auditoría de dependencias.
   - Given cualquier paso fallido, When ocurre, Then el workflow falla y bloquea el merge (branch protection).
@@ -503,6 +511,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** completar `/docs/README.md`, `integracion-modulos.md`, `arquitectura-general.md`, `modelo-datos.md` (con diagramas Mermaid), `pruebas.md`, `bitacora-xp.md` y `uso-ia.md`
 - **Para:** cumplir con la documentación mínima requerida y declarar el uso responsable de herramientas de IA
 - **Prioridad:** Alta | **Estimación:** 5 SP
+- **Issue GitHub:** [#77](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/77) — Iteración 4, estado inicial OPEN, rama prevista `iteracion-4/hu-36-documentacion-final`.
 - **Criterios de aceptación:**
   - Given `/docs/README.md`, When se abre, Then funciona como índice de navegación de toda la documentación.
   - Given `arquitectura-general.md` y `modelo-datos.md`, When se abren, Then incluyen diagramas Mermaid o imágenes en `/docs/assets`.
@@ -515,6 +524,7 @@ alterar los identificadores originales y se relaciona actualmente con HU-06.
 - **Quiero:** etiquetar la entrega evaluable con `v1.0.0` o `entrega-final`
 - **Para:** identificar de forma inequívoca la versión a evaluar
 - **Prioridad:** Alta | **Estimación:** 1 SP
+- **Issue GitHub:** [#78](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/78) — Iteración 4, estado inicial OPEN, rama prevista `iteracion-4/hu-37-tag-entrega`.
 - **Criterios de aceptación:**
   - Given el repositorio, When se lista los tags, Then existe `v1.0.0` (o `entrega-final`) apuntando al commit final funcional.
   - Given el historial de commits, When se revisa, Then muestra distribución equilibrada entre ambos integrantes de la pareja, con mensajes descriptivos vinculados a historias.
