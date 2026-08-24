@@ -23,6 +23,7 @@ using Licitaciones.Infrastructure.Persistence;
 using Licitaciones.Infrastructure.Time;
 
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
+builder.Services.AddHealthChecks();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -128,6 +130,12 @@ app.UseExceptionHandler(new ExceptionHandlerOptions
 });
 
 app.UseAuthorization();
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = async (contexto, reporte) =>
+        await contexto.Response.WriteAsync(reporte.Status.ToString())
+});
 
 app.MapControllers();
 

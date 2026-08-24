@@ -1,0 +1,10 @@
+.git/
+.env*
+*.md
+compose.yaml
+Dockerfile
+.dockerignore
+docs/
+tests/
+**/bin/
+**/obj/

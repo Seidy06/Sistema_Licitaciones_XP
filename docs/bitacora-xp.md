@@ -46,7 +46,7 @@ roles en cada historia prevista:
 | 1 | HU-28 — Pruebas unitarias del dominio | Alta | 5 | Tiffany | Seidy | [#69](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/69) | OPEN; no iniciada | `iteracion-4/hu-28-pruebas-unitarias-dominio` |
 | 2 | HU-29 — Integración PostgreSQL real | Alta | 5 | Seidy | Tiffany | [#70](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/70) | OPEN; no iniciada | `iteracion-4/hu-29-integracion-postgresql` |
 | 3 | HU-30 — Pruebas E2E de navegador | Alta | 8 | Tiffany | Seidy | [#71](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/71) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR en commit local sin publicar | `iteracion-4/hu-30-pruebas-e2e` |
-| 4 | HU-31 — Dockerfile multi-stage | Alta | 3 | Seidy | Tiffany | [#72](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/72) | OPEN; no iniciada | `iteracion-4/hu-31-dockerfile` |
+| 4 | HU-31 — Dockerfile multi-stage | Alta | 3 | Seidy | Tiffany | [#72](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/72) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR local sin publicar | `iteracion-4/hu-31-dockerfile` |
 | 5 | HU-32 — Docker Compose local | Alta | 3 | Tiffany | Seidy | [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73) | OPEN; no iniciada | `iteracion-4/hu-32-docker-compose` |
 | 6 | HU-33 — Manifiestos K8s de la app | Alta | 5 | Seidy | Tiffany | [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74) | OPEN; no iniciada | `iteracion-4/hu-33-k8s-app` |
 | 7 | HU-34 — Persistencia PostgreSQL en K8s | Alta | 5 | Tiffany | Seidy | [#75](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/75) | OPEN; no iniciada | `iteracion-4/hu-34-k8s-postgresql` |
@@ -380,6 +380,98 @@ diferencias.
   por los cinco pasos restantes.
 
 La Issue #71 permanece abierta.
+
+### HU-31 — Contenerizar la aplicación con Dockerfile multi-stage
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-31 — Contenerizar la aplicación con Dockerfile multi-stage | 3 | [#72](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/72) | Criterios cubiertos por pruebas en verde (6 focalizadas y suite completa 284 verdes tras el refactor local); la construcción y ejecución real del contenedor aún no tienen evidencia registrada; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-31 | Tiffany | Seidy | `24c13bf` |
+| VERDE HU-31 | Seidy | Tiffany | `177039c` |
+| REFACTOR HU-31 | Seidy | Tiffany | cambios locales sin commit todavía |
+
+La pareja planificada era Seidy Driver/Tiffany Navigator; la autoría real de
+los commits muestra el ROJO firmado por Tiffany y el VERDE por Seidy. El
+refactor aún no tiene commit, por lo que no existe autoría registrada que
+atribuir. Git conserva la autoría del Driver de cada incremento publicado; el
+rol Navigator se reconstruye a partir del trabajo coordinado de la pareja.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #72 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Alta, estimación 3 SP, iteración 4 (RELEASE 9), pareja,
+rama prevista y los tres criterios coinciden literalmente. La rama real
+coincide con la prevista en el Planning Game
+(`iteracion-4/hu-31-dockerfile`) y los commits usan `refs #72` correctamente.
+
+Inspección previa para no duplicar escenarios: ninguna suite previa cubría el
+`Dockerfile` (inexistente) ni un endpoint de salud; las pruebas HTTP previas
+no tocaban rutas de infraestructura. Las nuevas pruebas no reemplazan ninguna
+anterior.
+
+| Criterio de aceptación de la Issue #72 | Pruebas | Commits |
+| --- | --- | --- |
+| El `Dockerfile` usa una etapa `build` con SDK y una etapa `runtime` con ASP.NET runtime únicamente. | `Dockerfile_DebeExistirEnLaRaizDelRepositorio`, `Dockerfile_DebeUsarEtapaBuildConImagenSdk9`, `Dockerfile_DebeSerMultiStageConEtapaFinalRuntimeAspnet9` (`Licitaciones.UnitTests/Despliegue/DockerfileTests`). | ROJO `24c13bf`; VERDE `177039c`. |
+| El contenedor final corre con un usuario no root. | `Dockerfile_EtapaFinalDebeEjecutarConUsuarioNoRoot`: analiza la sección final del archivo y rechaza `USER root`; el VERDE declara `USER $APP_UID`. | Ídem. |
+| Los health checks exponen un endpoint `/health` verificable por Docker/Kubernetes. | `Dockerfile_DebeDeclararHealthcheckQueVerifiqueHealth` (presencia de `HEALTHCHECK` sobre `/health` en la etapa final) y `SaludHttpTests.HealthEndpoint_DebeResponderHealthy` (HTTP real contra la API con PostgreSQL de Testcontainers). | Ídem. |
+
+El PR [#83](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/83)
+(`iteracion-4/hu-31-dockerfile` hacia `main`) está abierto como draft y
+mergeable, con los dos commits publicados: CI fallida en el ROJO `24c13bf`
+como es esperable (ejecución `32764601886`) y `Build and Test` en `success`
+sobre el VERDE `177039c` (ejecución `32771407873`). El refactor permanece en
+el árbol de trabajo local, sin commit, push ni ejecución de CI registrada.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `24c13bf` — `test(docker): cubrir criterios de contenerizar la aplicación con dockerfile multi-stage (HU-31)` | Creó `DockerfileTests` (cinco unitarias: existencia, etapa `build` con SDK 9, etapa final runtime ASP.NET 9, usuario no root y `HEALTHCHECK` sobre `/health`) y `SaludHttpTests` (HTTP `/health`). Ejecuciones filtradas: 5 fallidas porque no existía `Dockerfile` en la raíz y 1 fallida por 404 en `/health`; todas por comportamiento ausente. CI fallida esperable (ejecución `32764601886`). |
+| VERDE | `177039c` — `build(docker): implementar contenerizar la aplicación con dockerfile multi-stage (HU-31)` | Añadió `Dockerfile` multi-stage (`sdk:9.0 AS build` → `aspnet:9.0`, `WORKDIR /app`, `EXPOSE 8080`, `USER $APP_UID`, `HEALTHCHECK CMD curl --fail http://localhost:8080/health`), `.dockerignore` que excluye `tests/`, `docs/`, `.git/` y artefactos, y en `Program.cs` de la API `AddHealthChecks()` más `MapHealthChecks("/health")` escribiendo el estado textual. Ejecuciones filtradas 5/5 y 1/1 correctas; suite completa verde; CI en `success` (ejecución `32771407873`). |
+| REFACTOR | cambios locales sin commit | Extrajo `RaizRepositorio.Obtener()` a `Licitaciones.UnitTests/Common` y deduplicó el localizador de raíz del repositorio entre `DockerfileTests` (HU-31) y `DocumentacionApiMarkdownTests` (HU-27); sin cambios en producción ni comportamiento nuevo. Suite completa 284 verdes tras el cambio; sin push ni CI todavía. |
+
+#### Resultado de pruebas (HU-31)
+
+La línea base previa al incremento estaba verde con 278 pruebas (CI `success`
+tras HU-30). Verificación posterior al refactor, con Docker Desktop en
+ejecución para los contenedores de integración:
+
+1. Ejecuciones focalizadas:
+   `dotnet test tests\Licitaciones.UnitTests --configuration Release --no-build --filter "FullyQualifiedName~DockerfileTests"`:
+   5 correctas;
+   `dotnet test tests\Licitaciones.IntegrationTests --configuration Release --no-build --filter "FullyQualifiedName~SaludHttpTests"`:
+   1 correcta.
+2. Suite completa con `dotnet test Licitaciones.sln`:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 124 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **284** | **0** | **0** |
+
+#### Pendientes y candidatos a Issues separadas
+
+- La construcción y ejecución reales del contenedor (`docker build` /
+  `docker run`) no tienen evidencia registrada: las pruebas cubren el contrato
+  del archivo y el endpoint `/health` en proceso, pero no el runtime del
+  contenedor. Queda como candidata a verificación propia o evidencia de HU-32.
+- El commit del refactor permanece pendiente en el árbol de trabajo, sin push
+  ni CI.
+- La rotación Driver/Navigator observada difiere parcialmente de la pareja
+  planificada según la autoría real de commits.
+- CI todavía no construye imágenes Docker; ese paso corresponde al alcance de
+  HU-35.
+
+La Issue #72 permanece abierta.
 
 ## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
 
