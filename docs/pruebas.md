@@ -620,6 +620,57 @@ mergeable. La verificación en ejecución real del contenedor (`docker build` /
 la bitácora. La Issue #72 permanece abierta y no se marca como completada
 desde esta fase.
 
+## Resultado verificado para HU-32 (Iteración 4)
+
+HU-32 corresponde a la Issue [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73).
+Sus tres criterios se cubren con dos suites nuevas: `ComposeFileTests`
+(seis unitarias sobre el contrato del `compose.yaml`) y
+`DocumentacionDockerMarkdownTests` (una unitaria sobre `docs/docker.md`):
+
+| Criterio de aceptación de la Issue #73 | Pruebas | Evidencia |
+| --- | --- | --- |
+| `docker compose up --build` levanta desde cero la aplicación junto con PostgreSQL y aplica migraciones automáticamente o mediante job de inicialización. | `Compose_DebeDefinirLosServiciosAplicacionYBaseDeDatos`, `Compose_AppDebeDefinirBuildParaConstruirseDesdeCero`, `Compose_AppDebeDependerDeDbSaludable`, `Compose_LaAplicacionDebeContemplarMigracionesAutomaticasOJobDeInicializacion`. | El Compose declara `app` (`build: .`, puerto `${APP_PORT:-8080}:8080`) y `db`; `app` espera con `depends_on` y `condition: service_healthy`, recibe la cadena hacia el host `db` y `Database__ApplyMigrationsOnStartup=true`; `Program.cs` de la API ejecuta `MigrateAsync` al arranque cuando esa bandera está activa. |
+| Tras un reinicio, los datos persisten gracias a un volumen nombrado. | `Compose_DbDebeUsarImagenPostgres16ConVariablesEntornoYHealthcheck`, `Compose_VolumenNombradoDebeGarantizarPersistenciaTrasReinicio`. | `db` usa imagen `postgres:16`, credenciales `${POSTGRES_USER/PASSWORD/DB}` del `.env` y healthcheck `pg_isready`; monta `licitaciones_postgres_data:/var/lib/postgresql/data`, declarado en la sección superior `volumes:` (la prueba rechaza montajes dinámicos `$`). |
+| La documentación de Docker describe cómo levantar el entorno completo local de forma reproducible. | `DocumentacionDockerMarkdownTests.DockerMd_DebeDocumentarInstruccionesReproduciblesDeUso`. | `docs/docker.md` documenta `Copy-Item .env.example .env` + `docker compose up --build`, la construcción desde el `Dockerfile`, la espera de salud de `db`, las migraciones automáticas, la verificación por `GET /health` y el apagado con `docker compose stop`/`down`. |
+
+La fase ROJO (`efc15e7`) se confirmó con ejecución filtrada: las siete
+pruebas fallaron porque el `compose.yaml` solo definía el servicio `postgres`
+—sin `app`, sin sección `build`, sin `depends_on`, sin mecanismo de
+migraciones y con el servicio de datos fuera del contrato exigido— y
+`docs/docker.md` no documentaba `up --build`; CI fallida esperable (ejecución
+`32782114673`). Tras el VERDE (`a657d28`: renombrado a `db`, servicio `app`,
+migraciones al arranque en la API, `APP_PORT` en `.env.example` y sección
+nueva en `docs/docker.md`; más el ajuste ambiental `12eb4e7`), el filtro
+`HU=HU-32` terminó 7/7 correcto, con CI en `success` (ejecución
+`32784449582`). Tras el refactor (`51ea07d`: extracción por líneas
+`SeccionSuperior` y helper compartido `Lineas` en `ComposeFileTests`, sin
+cambios en producción), la suite completa `dotnet test Licitaciones.sln`
+resultó:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 131 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **291** | **0** | **0** |
+
+La secuencia TDD queda trazada así:
+
+- `efc15e7` — ROJO: creó `ComposeFileTests` y
+  `DocumentacionDockerMarkdownTests`; 7 fallidas por comportamiento ausente.
+- `a657d28` — VERDE: servicios `db` y `app` orquestados con migraciones
+  automáticas; CI en `success` (+ `12eb4e7` ajuste ambiental).
+- `51ea07d` — REFACTOR: unificó la extracción de secciones YAML en
+  `ComposeFileTests` sin comportamiento nuevo (local, sin push).
+
+El PR [#84](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/84)
+(`iteracion-4/hu-32-docker-compose` hacia `main`) está abierto como draft y
+mergeable. La ejecución real del entorno completo (`docker compose up
+--build` contra Docker Desktop) todavía no tiene evidencia registrada; consta
+como pendiente en la bitácora. La Issue #73 permanece abierta y no se marca
+como completada desde esta fase.
+
 ## Integración continua
 
 `.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release, instala los navegadores de Playwright (`pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium`, añadido por HU-30) y ejecuta toda la solución, incluidas las pruebas E2E con Chromium headless. En esta iteración no mide cobertura ni construye imágenes Docker.
