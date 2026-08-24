@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
 
+using Licitaciones.UnitTests.Common;
+
 namespace Licitaciones.UnitTests.Documentacion;
 
 public sealed class DocumentacionApiMarkdownTests
@@ -55,7 +57,7 @@ public sealed class DocumentacionApiMarkdownTests
     public void ApiMd_DebeReferenciarColeccionReproducibleExistenteYCubrirRecursos()
     {
         var contenido = LeerDocumentacionApi();
-        var raiz = ObtenerRaizRepositorio();
+        var raiz = RaizRepositorio.Obtener();
 
         var coincidencias = Regex.Matches(
             contenido,
@@ -95,7 +97,7 @@ public sealed class DocumentacionApiMarkdownTests
     private static string LeerDocumentacionApi()
     {
         var ruta = Path.Combine(
-            ObtenerRaizRepositorio(),
+            RaizRepositorio.Obtener(),
             "docs",
             "api.md");
 
@@ -104,23 +106,6 @@ public sealed class DocumentacionApiMarkdownTests
             $"Debe existir la documentación de la API en {ruta}.");
 
         return File.ReadAllText(ruta);
-    }
-
-    private static string ObtenerRaizRepositorio()
-    {
-        var directorio = AppContext.BaseDirectory;
-
-        while (directorio is not null
-               && !File.Exists(Path.Combine(directorio, "docs", "historias-usuario.md")))
-        {
-            directorio = Path.GetDirectoryName(directorio.TrimEnd(
-                Path.DirectorySeparatorChar,
-                Path.AltDirectorySeparatorChar));
-        }
-
-        Assert.NotNull(directorio);
-
-        return directorio!;
     }
 
     private static int ContarBloques(string contenido, string cerca)

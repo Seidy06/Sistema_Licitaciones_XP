@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
 
+using Licitaciones.UnitTests.Common;
+
 namespace Licitaciones.UnitTests.Despliegue;
 
 public sealed class DockerfileTests
@@ -94,7 +96,7 @@ public sealed class DockerfileTests
     private static string LeerDockerfile()
     {
         var ruta = Path.Combine(
-            ObtenerRaizRepositorio(),
+            RaizRepositorio.Obtener(),
             "Dockerfile");
 
         Assert.True(
@@ -138,22 +140,5 @@ public sealed class DockerfileTests
         return string.Join(
             Environment.NewLine,
             lineas[indiceUltimoFrom..]);
-    }
-
-    private static string ObtenerRaizRepositorio()
-    {
-        var directorio = AppContext.BaseDirectory;
-
-        while (directorio is not null
-               && !File.Exists(Path.Combine(directorio, "docs", "historias-usuario.md")))
-        {
-            directorio = Path.GetDirectoryName(directorio.TrimEnd(
-                Path.DirectorySeparatorChar,
-                Path.AltDirectorySeparatorChar));
-        }
-
-        Assert.NotNull(directorio);
-
-        return directorio!;
     }
 }
