@@ -48,7 +48,7 @@ roles en cada historia prevista:
 | 3 | HU-30 — Pruebas E2E de navegador | Alta | 8 | Tiffany | Seidy | [#71](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/71) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR en commit local sin publicar | `iteracion-4/hu-30-pruebas-e2e` |
 | 4 | HU-31 — Dockerfile multi-stage | Alta | 3 | Seidy | Tiffany | [#72](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/72) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR local sin publicar | `iteracion-4/hu-31-dockerfile` |
 | 5 | HU-32 — Docker Compose local | Alta | 3 | Tiffany | Seidy | [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR commiteado localmente sin publicar | `iteracion-4/hu-32-docker-compose` |
-| 6 | HU-33 — Manifiestos K8s de la app | Alta | 5 | Seidy | Tiffany | [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74) | OPEN; no iniciada | `iteracion-4/hu-33-k8s-app` |
+| 6 | HU-33 — Manifiestos K8s de la app | Alta | 5 | Seidy | Tiffany | [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR evaluado sin cambios; rama real difiere de la prevista | `iteracion-4/hu-33-k8s-app` |
 | 7 | HU-34 — Persistencia PostgreSQL en K8s | Alta | 5 | Tiffany | Seidy | [#75](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/75) | OPEN; no iniciada | `iteracion-4/hu-34-k8s-postgresql` |
 | 8 | HU-35 — Pipeline de CI completo | Alta | 5 | Seidy | Tiffany | [#76](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/76) | OPEN; no iniciada | `iteracion-4/hu-35-pipeline-ci` |
 | 9 | HU-36 — Documentación final en /docs | Alta | 5 | Tiffany | Seidy | [#77](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/77) | OPEN; no iniciada | `iteracion-4/hu-36-documentacion-final` |
@@ -568,6 +568,105 @@ diferencias.
   con `dotnet run`, coherente con el alcance del `Dockerfile` de HU-31.
 
 La Issue #73 permanece abierta.
+
+### HU-33 — Manifiestos de despliegue de la aplicación
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-33 — Manifiestos de despliegue de la aplicación | 5 | [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74) | Criterios cubiertos por pruebas en verde (6 focalizadas y suite completa 297 verdes tras evaluar el refactor); la aplicación de los manifiestos en un clúster real aún no tiene evidencia registrada; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-33 | Tiffany | Seidy | `f573872` |
+| VERDE HU-33 | Seidy | Tiffany | `f775f63` |
+| REFACTOR HU-33 | Seidy | Tiffany | evaluado sin cambios que commitear |
+
+La pareja planificada era Seidy Driver/Tiffany Navigator; la autoría real invirtió
+los roles (ROJO firmado por Tiffany y VERDE por Seidy). Git conserva la autoría
+del Driver de cada incremento publicado; el rol Navigator se reconstruye a partir
+del trabajo coordinado de la pareja.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #74 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Alta, estimación 5 SP, iteración 4 (RELEASE 10 — Kubernetes),
+pareja y los tres criterios coinciden literalmente. La rama real
+(`iteracion-4/hu-33-k8s-aplicacion`) difiere del nombre previsto en el Planning
+Game (`iteracion-4/hu-33-k8s-app`), con la misma intención; la desviación queda
+registrada como observación de trazabilidad. El VERDE usó el prefijo `feat(k8s)`
+en lugar del patrón `build(...)` de HU-31/HU-32, también anotado como observación
+menor.
+
+Inspección previa para no duplicar escenarios: `Licitaciones.UnitTests/Despliegue`
+solo contenía `DockerfileTests` (HU-31) y `ComposeFileTests` (HU-32); nada cubría
+manifiestos de Kubernetes. La carpeta `/k8s` existía únicamente con `.gitkeep`.
+
+| Criterio de aceptación de la Issue #74 | Pruebas | Commits |
+| --- | --- | --- |
+| El `Deployment` define `startupProbe`, `readinessProbe` y `livenessProbe`, además de `resources.requests/limits`. | `Deployment_DebeDefinirStartupReadinessYLivenessProbes` y `Deployment_DebeDefinirResourcesConRequestsYLimits` (`KubernetesManifestsTests`). | ROJO `f573872`; VERDE `f775f63`. |
+| Las credenciales provienen de un `Secret`, nunca hardcodeadas. | `Deployment_DebeObtenerLasCredencialesDesdeUnSecret` (`secretKeyRef`) y `LosManifiestos_NoDebenContenerContrasenasHardcodeadas` (los cuatro manifiestos). | Ídem. |
+| El `Service` expone el puerto de la aplicación dentro del clúster. | `Service_DebeExponerElPuertoDeLaAplicacionDentroDelCluster` (`kind: Service` con `targetPort: 8080`). | Ídem. |
+
+Adicionalmente `CarpetaK8s_DebeContenerLosCuatroManifiestosDeLaAplicacion`
+cubre el alcance declarado en la historia (Deployment, Service, ConfigMap y
+Secret según las notas técnicas).
+
+El PR [#85](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/85)
+(`iteracion-4/hu-33-k8s-aplicacion` hacia `main`) está abierto como draft, con
+los dos commits publicados: CI fallida en el ROJO `f573872` como es esperable
+(ejecución `32789338916`) y `Build and Test` en `success` sobre el VERDE
+`f775f63` (ejecución `32790252288`). El refactor no produjo cambios que
+commitear (ver evidencia TDD).
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `f573872` — `test(k8s): cubrir criterios de manifiestos de despliegue de la aplicación (HU-33)` | Creó `KubernetesManifestsTests` (seis unitarias de contrato sobre los manifiestos, siguiendo el patrón de `DockerfileTests` y `ComposeFileTests`). Ejecución filtrada: 6 fallidas porque los YAML no existían (`/k8s` solo tenía `.gitkeep`), es decir, por comportamiento ausente. CI fallida esperable (ejecución `32789338916`). |
+| VERDE | `f775f63` — `feat(k8s): implementar manifiestos de despliegue de la aplicación (HU-33)` | Añadió `deployment.yaml` (probes `httpGet /health:8080` — startup con `periodSeconds: 5` y `failureThreshold: 30`, readiness cada 10 s, liveness cada 30 s; `resources` con requests cpu `100m`/memory `128Mi` y limits cpu `500m`/memory `256Mi`; `ConnectionStrings__Licitaciones` vía `secretKeyRef` del Secret `licitaciones-secret` y `Database__ApplyMigrationsOnStartup` vía `configMapKeyRef`), `service.yaml` (ClusterIP, `port`/`targetPort` 8080), `configmap.yaml` (flag de migraciones en `false` hasta HU-34) y `secret.yaml` (`stringData` con marcadores `REEMPLAZAR_*`, sin credenciales reales versionadas). Filtro local 6/6 correctas; CI en `success` (ejecución `32790252288`). |
+| REFACTOR | sin cambios | Evaluación sobre la suite ya verde: los manifiestos son mínimos y convencionales (se descartaron anclas YAML por legibilidad y portabilidad con `kubectl apply`), las pruebas ya reutilizan `RaizRepositorio.Obtener()` común desde el refactor de HU-31 y unificar los helpers `Leer*` entre suites habría sido generalización especulativa. Se comprobó una sospecha de caracteres corruptos en los comentarios de `configmap.yaml` y `secret.yaml`: era solo el renderizado de la consola PowerShell; la lectura directa UTF-8 confirmó el contenido correcto, sin defecto que corregir. Sin commit asociado. |
+
+#### Resultado de pruebas (HU-33)
+
+La línea base previa al incremento estaba verde con 291 pruebas (CI `success`
+tras HU-32). Verificación tras evaluar el refactor:
+
+1. Ejecución focalizada:
+   `dotnet test tests\Licitaciones.UnitTests --configuration Release --no-build --filter "FullyQualifiedName~KubernetesManifestsTests"`:
+   6 correctas.
+2. Suite completa con `dotnet test Licitaciones.sln`:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 137 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **297** | **0** | **0** |
+
+#### Pendientes y candidatos a Issues separadas
+
+- No existe evidencia registrada de aplicar los manifiestos en un clúster real
+  (`kubectl apply -f k8s/` contra kind/minikube): las pruebas validan el
+  contrato declarativo de los archivos. Queda como verificación futura o
+  candidata a Issue separada.
+- La rama real difiere de la prevista en el Planning Game
+  (`iteracion-4/hu-33-k8s-aplicacion` frente a `iteracion-4/hu-33-k8s-app`).
+- El prefijo del commit VERDE (`feat(k8s)`) difiere del patrón `build(...)`
+  usado en HU-31/HU-32.
+- La validación de manifiestos dentro del pipeline corresponde a HU-35.
+- La estrategia de migraciones dentro del clúster (Job o InitContainer) y la
+  persistencia de PostgreSQL corresponden a HU-34: el ConfigMap deja
+  explícito `Database__ApplyMigrationsOnStartup=false`.
+- `secret.yaml` se versiona solo con marcadores `REEMPLAZAR_*`: las
+  credenciales reales nunca entran al repositorio, alineado con el `.env`
+  no versionado.
+
+La Issue #74 permanece abierta.
 
 ## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
 
