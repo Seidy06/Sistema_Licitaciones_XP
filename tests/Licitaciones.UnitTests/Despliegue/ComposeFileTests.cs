@@ -56,9 +56,7 @@ public sealed class ComposeFileTests
     {
         var contenido = LeerCompose();
 
-        var mecanismo = contenido
-            .Split('\n')
-            .Select(linea => linea.TrimEnd('\r'))
+        var mecanismo = Lineas(contenido)
             .Where(linea => !linea.TrimStart().StartsWith('#'))
             .Any(linea => PatronMigraciones.IsMatch(linea));
 
@@ -127,12 +125,7 @@ public sealed class ComposeFileTests
             "Los datos deben persistir en un volumen nombrado, no en un montaje "
             + "dinámico ni de host.");
 
-        var seccionVolumenes = Regex.Match(
-                contenido,
-                @"^volumes:\s*$\n(?<cuerpo>(?:^[ \t].*\n?)*)",
-                RegexOptions.Multiline)
-            .Groups["cuerpo"]
-            .Value;
+        var seccionVolumenes = SeccionSuperior(contenido, "volumes");
 
         Assert.True(
             Regex.IsMatch(
@@ -178,10 +171,7 @@ public sealed class ComposeFileTests
 
     private static string? SeccionDeServicio(string contenido, string servicio)
     {
-        var lineas = contenido
-            .Split('\n')
-            .Select(linea => linea.TrimEnd('\r'))
-            .ToArray();
+        var lineas = Lineas(contenido).ToArray();
 
         var patronInicio = new Regex($@"^  {Regex.Escape(servicio)}:\s*$");
         var inicio = Array.FindIndex(
@@ -200,5 +190,35 @@ public sealed class ComposeFileTests
         }
 
         return string.Join("\n", lineas[inicio..fin]);
+    }
+
+    private static string? SeccionSuperior(string contenido, string clave)
+    {
+        var lineas = Lineas(contenido).ToArray();
+
+        var patronInicio = new Regex($@"^{Regex.Escape(clave)}:\s*$");
+        var inicio = Array.FindIndex(lineas, linea => patronInicio.IsMatch(linea));
+
+        if (inicio < 0)
+        {
+            return null;
+        }
+
+        var fin = inicio + 1;
+        while (
+            fin < lineas.Length
+            && (lineas[fin].StartsWith(' ') || lineas[fin].StartsWith('\t')))
+        {
+            fin++;
+        }
+
+        return string.Join("\n", lineas[inicio..fin]);
+    }
+
+    private static IEnumerable<string> Lineas(string contenido)
+    {
+        return contenido
+            .Split('\n')
+            .Select(linea => linea.TrimEnd('\r'));
     }
 }
