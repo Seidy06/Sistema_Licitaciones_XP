@@ -403,10 +403,40 @@ La secuencia TDD queda trazada así:
   filtro por un diccionario estático tipo→ejemplo y renombró métodos ambiguos;
   sin comportamiento nuevo ni CI registrado.
 
-El PR [#67](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/67)
-(`iteracion-3/hu-27-swagger` hacia `main`) está abierto como draft. El refactor
-permanece local, sin push ni CI registrado. La Issue #56 permanece abierta y no
-se marca como completada desde esta fase.
+Actualización al cierre de la Iteración 3: el PR
+[#67](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/67)
+(`iteracion-3/hu-27-swagger` hacia `main`) quedó fusionado como `666f175` con
+CI `success`, después de publicarse también el refactor `14a8421`; la Issue
+#56 se cerró un minuto después del merge.
+
+## Resultado verificado para el cierre de la Iteración 3
+
+Cierre documental del 24 de agosto de 2026 sobre el commit `666f175` de
+`main`, sin modificar código. Las diez historias de la iteración (HU-18 a
+HU-27) están fusionadas mediante los PR #58 a #67 y sus Issues (#47 a #56)
+quedaron cerradas inmediatamente después de cada fusión; las ejecuciones de CI
+de los diez commits de fusión terminaron en `success` (consultadas en la API
+pública de GitHub).
+
+La suite completa local sobre ese commit:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 85 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 132 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| **Total ejecutado** | **233** | **0** | **0** |
+
+`dotnet format Licitaciones.sln --verify-no-changes --no-restore` terminó sin
+diferencias. La progresión de la suite durante la iteración fue: 175 (cierre
+Iteración 2) → 187 (HU-18) → 191 (HU-19) → 193 (HU-20) → 199 (HU-21) → 204
+(HU-22) → 216 (HU-23) → 219 (HU-24) → 222 (HU-25) → 227 (HU-26) → 233 (HU-27).
+
+Velocidad registrada al cierre: planificada de referencia 36 SP, alcance
+seleccionado 38 SP, velocidad observada 38 SP (las diez historias cumplen la
+Definition of Done). Los detalles de fusión, trazabilidad de Issues,
+ciclos TDD, participación y ajustes para la Iteración 4 constan en
+`bitacora-xp.md`.
 
 ## Integración continua
 
