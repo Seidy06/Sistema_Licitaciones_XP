@@ -35,14 +35,15 @@ public sealed class ProveedorConsultaHttpTests
     }
 
     [Fact]
-    [Trait("HU", "HU-09")]
+    [Trait("HU", "HU-26")]
     public async Task GetPorId_Inexistente_DebeResponder404()
     {
         await using var context = _database.CrearContexto();
         var respuesta = await CrearController(context)
             .ObtenerPorId(Guid.NewGuid(), CancellationToken.None);
 
-        Assert.IsType<NotFoundResult>(respuesta.Result);
+        var noEncontrado = Assert.IsType<NotFoundObjectResult>(respuesta.Result);
+        Assert.IsType<ProblemDetails>(noEncontrado.Value);
     }
 
     [Fact]

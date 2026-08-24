@@ -1,3 +1,6 @@
+using System.Text.Json;
+
+using Licitaciones.Api.Infraestructura;
 using Licitaciones.Application.Aprobaciones;
 using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Cerrar;
@@ -18,6 +21,9 @@ using Licitaciones.Domain.Common;
 using Licitaciones.Infrastructure.Persistence;
 using Licitaciones.Infrastructure.Time;
 
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +31,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
+builder.Services.AddSingleton<ProblemDetailsFactory, FabricaProblemDetailsApi>();
 builder.Services.AddScoped<AdministrarNivelesAprobacionService>();
 builder.Services.AddScoped<ResolverNivelAprobacionService>();
 builder.Services.AddScoped<INivelAprobacionRepository, NivelAprobacionRepository>();
@@ -61,12 +68,48 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseExceptionHandler();
+app.UseExceptionHandler(new ExceptionHandlerOptions
+{
+    ExceptionHandler = async contexto =>
+    {
+        var excepcion = contexto.Features.Get<IExceptionHandlerFeature>()?.Error;
+        var esReglaNegocio = excepcion is DomainException;
+        var estado = esReglaNegocio
+            ? StatusCodes.Status422UnprocessableEntity
+            : StatusCodes.Status500InternalServerError;
+
+        contexto.Response.StatusCode = estado;
+        contexto.Response.ContentType = RespuestaProblema.TipoContenido;
+
+        var problema = new ProblemDetails
+        {
+            Status = estado,
+            Title = esReglaNegocio ? "Solicitud no procesable" : "Error interno del servidor",
+            Detail = esReglaNegocio
+                ? "La solicitud no pudo procesarse por una regla del negocio."
+                : "Ocurrió un error interno inesperado. Intente nuevamente más tarde.",
+            Type = $"https://httpstatuses.com/{estado}",
+            Instance = contexto.Request.Path
+        };
+        problema.Extensions["codigoError"] =
+            esReglaNegocio ? "regla_negocio_no_procesable" : "error_interno";
+        problema.Extensions["correlacionId"] = contexto.TraceIdentifier;
+
+        await contexto.Response.WriteAsync(
+            JsonSerializer.Serialize(problema, OpcionesJsonHttp.Instancia));
+    }
+});
 
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+
+internal static partial class OpcionesJsonHttp
+{
+    public static readonly JsonSerializerOptions Instancia =
+        new(JsonSerializerDefaults.Web);
+}
 
 public partial class Program;

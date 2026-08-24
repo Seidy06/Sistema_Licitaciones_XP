@@ -1,4 +1,5 @@
 using Licitaciones.Api.Contracts.TiposCambio;
+using Licitaciones.Api.Infraestructura;
 using Licitaciones.Application.TiposCambio;
 using Licitaciones.Domain.Common;
 
@@ -22,7 +23,13 @@ public sealed class TiposCambioController : ControllerBase
         CancellationToken cancellationToken)
     {
         var tipoCambio = await _administrar.ObtenerActivoAsync(cancellationToken);
-        return tipoCambio is null ? NotFound() : Ok(tipoCambio);
+        return tipoCambio is null
+            ? CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Tipo de cambio no encontrado",
+                "No existe un tipo de cambio activo.",
+                "tipo_cambio_no_encontrado")
+            : Ok(tipoCambio);
     }
 
     [HttpPost]
@@ -42,19 +49,14 @@ public sealed class TiposCambioController : ControllerBase
         }
         catch (DomainException exception)
         {
-            return BadRequest(CrearProblema(
+            return CrearProblema(
                 StatusCodes.Status400BadRequest,
                 "Tipo de cambio inválido",
-                exception.Message));
+                exception.Message,
+                "tipo_cambio_invalido");
         }
     }
 
-    private ProblemDetails CrearProblema(int status, string title, string detail) => new()
-    {
-        Status = status,
-        Title = title,
-        Detail = detail,
-        Type = $"https://httpstatuses.com/{status}",
-        Instance = HttpContext.Request.Path
-    };
+    private ObjectResult CrearProblema(int estado, string titulo, string detalle, string codigoError) =>
+        RespuestaProblema.Crear(HttpContext, estado, titulo, detalle, codigoError);
 }
