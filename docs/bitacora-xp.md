@@ -47,7 +47,7 @@ roles en cada historia prevista:
 | 2 | HU-29 — Integración PostgreSQL real | Alta | 5 | Seidy | Tiffany | [#70](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/70) | OPEN; no iniciada | `iteracion-4/hu-29-integracion-postgresql` |
 | 3 | HU-30 — Pruebas E2E de navegador | Alta | 8 | Tiffany | Seidy | [#71](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/71) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR en commit local sin publicar | `iteracion-4/hu-30-pruebas-e2e` |
 | 4 | HU-31 — Dockerfile multi-stage | Alta | 3 | Seidy | Tiffany | [#72](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/72) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR local sin publicar | `iteracion-4/hu-31-dockerfile` |
-| 5 | HU-32 — Docker Compose local | Alta | 3 | Tiffany | Seidy | [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73) | OPEN; no iniciada | `iteracion-4/hu-32-docker-compose` |
+| 5 | HU-32 — Docker Compose local | Alta | 3 | Tiffany | Seidy | [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR commiteado localmente sin publicar | `iteracion-4/hu-32-docker-compose` |
 | 6 | HU-33 — Manifiestos K8s de la app | Alta | 5 | Seidy | Tiffany | [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74) | OPEN; no iniciada | `iteracion-4/hu-33-k8s-app` |
 | 7 | HU-34 — Persistencia PostgreSQL en K8s | Alta | 5 | Tiffany | Seidy | [#75](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/75) | OPEN; no iniciada | `iteracion-4/hu-34-k8s-postgresql` |
 | 8 | HU-35 — Pipeline de CI completo | Alta | 5 | Seidy | Tiffany | [#76](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/76) | OPEN; no iniciada | `iteracion-4/hu-35-pipeline-ci` |
@@ -472,6 +472,102 @@ ejecución para los contenedores de integración:
   HU-35.
 
 La Issue #72 permanece abierta.
+
+### HU-32 — Orquestar entorno local con Docker Compose
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-32 — Orquestar entorno local con Docker Compose | 3 | [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73) | Criterios cubiertos por pruebas en verde (7 focalizadas y suite completa 291 verdes tras el refactor); la ejecución real del entorno completo (`docker compose up --build`) aún no tiene evidencia registrada; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-32 | Seidy | Tiffany | `efc15e7` |
+| VERDE HU-32 | Tiffany | Seidy | `a657d28` (+ ajuste ambiental `12eb4e7`) |
+| REFACTOR HU-32 | Seidy | Tiffany | `51ea07d` (local sin push) |
+
+La pareja planificada era Tiffany Driver/Seidy Navigator; la autoría real de
+los commits muestra el ROJO y el REFACTOR firmados por Seidy y el VERDE por
+Tiffany. Git conserva la autoría del Driver de cada incremento publicado; el
+rol Navigator se reconstruye a partir del trabajo coordinado de la pareja.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #73 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Alta, estimación 3 SP, iteración 4 (RELEASE 9), pareja,
+rama prevista y los tres criterios coinciden literalmente. La rama real
+coincide con la prevista en el Planning Game
+(`iteracion-4/hu-32-docker-compose`) y los commits usan `refs #73`
+correctamente.
+
+Inspección previa para no duplicar escenarios: ninguna suite previa cubría el
+`compose.yaml` ni `docs/docker.md`; el `compose.yaml` preexistente definía
+únicamente el servicio `postgres` para desarrollo local. Las nuevas pruebas
+no reemplazan ninguna anterior.
+
+| Criterio de aceptación de la Issue #73 | Pruebas | Commits |
+| --- | --- | --- |
+| `docker compose up --build` levanta desde cero la aplicación junto con PostgreSQL y aplica migraciones automáticamente o mediante job de inicialización. | `Compose_DebeDefinirLosServiciosAplicacionYBaseDeDatos`, `Compose_AppDebeDefinirBuildParaConstruirseDesdeCero`, `Compose_AppDebeDependerDeDbSaludable` y `Compose_LaAplicacionDebeContemplarMigracionesAutomaticasOJobDeInicializacion`: el Compose declara servicios `app` y `db`, `app` usa `build: .`, espera a `db` con `depends_on` y `condition: service_healthy`, inyecta la cadena hacia el host `db` y activa `Database__ApplyMigrationsOnStartup=true`; el VERDE añadió el bloque condicional de `MigrateAsync` al arranque en `Program.cs` de la API. | ROJO `efc15e7`; VERDE `a657d28`. |
+| Tras un reinicio, los datos persisten gracias a un volumen nombrado. | `Compose_DbDebeUsarImagenPostgres16ConVariablesEntornoYHealthcheck` y `Compose_VolumenNombradoDebeGarantizarPersistenciaTrasReinicio`: `db` usa imagen `postgres:16`, credenciales `${POSTGRES_*}` del `.env`, healthcheck `pg_isready` y monta un volumen nombrado en `/var/lib/postgresql/data` declarado en la sección superior `volumes:`. | Ídem. |
+| La documentación de Docker describe cómo levantar el entorno completo local de forma reproducible. | `DocumentacionDockerMarkdownTests.DockerMd_DebeDocumentarInstruccionesReproduciblesDeUso`: exige instrucciones con `docker compose up --build`, `.env`, volumen, `app` y `postgres`, además del apagado con `docker compose stop`/`down`. | Ídem (+ documentación de esta fase). |
+
+El PR [#84](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/84)
+(`iteracion-4/hu-32-docker-compose` hacia `main`) está abierto como draft y
+mergeable, con los tres commits publicados: CI fallida en el ROJO `efc15e7`
+como es esperable (ejecución `32782114673`) y `Build and Test` en `success`
+sobre el VERDE `a657d28` con el ajuste ambiental `12eb4e7` (ejecución
+`32784449582`). El REFACTOR `51ea07d` y esta documentación permanecen en el
+árbol local (rama `ahead 1`), sin push ni ejecución de CI registrada.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `efc15e7` — `test(docker): cubrir criterios de orquestar entorno local con docker compose (HU-32)` | Creó `ComposeFileTests` (seis unitarias sobre el contrato del Compose, con servicios nombrados `app` y `db` según las notas técnicas de la Issue) y `DocumentacionDockerMarkdownTests` (unitaria sobre `docs/docker.md`). Ejecución filtrada: 7 fallidas porque el `compose.yaml` solo definía `postgres` —sin servicio `app`, sin sección `build`, sin `depends_on`, sin migraciones y con el servicio de datos fuera del contrato exigido— y la documentación carecía de `up --build`; todas por comportamiento ausente. CI fallida esperable (ejecución `32782114673`). |
+| VERDE | `a657d28` — `build(docker): implementar orquestar entorno local con docker compose (HU-32)` | Renombró el servicio `postgres` a `db`, añadió `app` (`build: .`, `depends_on` con `condition: service_healthy`, cadena de conexión hacia el host `db`, `Database__ApplyMigrationsOnStartup=true`, puerto `${APP_PORT:-8080}:8080`), incorporó `APP_PORT` a `.env.example`, añadió el bloque de migraciones al arranque en `Program.cs` de la API y la sección «Entorno completo con Compose (HU-32)» en `docs/docker.md`. Filtro HU-32 7/7 correcto; CI en `success` (ejecución `32784449582`). El commit adicional `12eb4e7` varía una línea de `Licitaciones.Web` para mitigar un bloqueo de Smart App Control del entorno. |
+| REFACTOR | `51ea07d` — `refactor(docker): simplificar implementacion de HU-32` | En `ComposeFileTests` unificó la extracción de secciones YAML: sustituyó la regex multilinea de `volumes:` por el escaneo por líneas `SeccionSuperior` y extrajo el helper compartido `Lineas`; sin cambios en producción ni comportamiento nuevo. Evaluó y descartó extraer un helper común del bloque de migraciones al arranque entre Web y API por su asimetría intencional de valores por omisión. Suite completa 291 verdes tras el cambio; commit local sin push ni CI todavía. |
+
+#### Resultado de pruebas (HU-32)
+
+La línea base previa al incremento estaba verde con 284 pruebas (CI `success`
+tras HU-31). Verificación posterior al refactor, con Docker Desktop en
+ejecución para los contenedores de integración:
+
+1. Ejecución focalizada:
+   `dotnet test tests\Licitaciones.UnitTests --configuration Release --filter "HU=HU-32"`:
+   7 correctas.
+2. Suite completa con `dotnet test Licitaciones.sln`:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 131 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **291** | **0** | **0** |
+
+`dotnet format Licitaciones.sln --verify-no-changes --no-restore` terminó sin
+diferencias.
+
+#### Pendientes y candidatos a Issues separadas
+
+- La ejecución real del entorno completo (`docker compose up --build` contra
+  Docker Desktop) no tiene evidencia registrada: las pruebas cubren el
+  contrato del archivo y la documentación, no el runtime orquestado.
+- Unificar el bloque de migraciones al arranque duplicado entre Web y API
+  (con valores por omisión intencionalmente distintos) queda como candidato a
+  Issue separada si el mecanismo evoluciona.
+- El push del REFACTOR `51ea07d` y de esta documentación, con su CI,
+  permanece pendiente.
+- La rotación Driver/Navigator observada difiere parcialmente de la pareja
+  planificada según la autoría real de commits.
+- Compose orquesta únicamente la API; `Licitaciones.Web` sigue ejecutándose
+  con `dotnet run`, coherente con el alcance del `Dockerfile` de HU-31.
+
+La Issue #73 permanece abierta.
 
 ## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
 

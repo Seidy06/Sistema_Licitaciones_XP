@@ -1,14 +1,18 @@
 # Docker en el estado actual
 
-Docker Compose contiene únicamente PostgreSQL 16. El volumen `licitaciones_postgres_data` conserva los datos.
+Docker Compose orquesta dos servicios: `db` (PostgreSQL 16, cuyo volumen
+nombrado `licitaciones_postgres_data` conserva los datos) y `app` (la API,
+construida desde el `Dockerfile`). Desde HU-32 el comando
+`docker compose up --build` levanta el entorno completo desde cero y el
+servicio `app` aplica las migraciones de base de datos al arrancar.
 
-Desde HU-31 el repositorio incluye un `Dockerfile` multi-stage para la API: la
-etapa `build` compila con `mcr.microsoft.com/dotnet/sdk:9.0` y la etapa final
+Desde HU-31 el repositorio incluye ese `Dockerfile` multi-stage para la API:
+la etapa `build` compila con `mcr.microsoft.com/dotnet/sdk:9.0` y la etapa final
 ejecuta únicamente con `mcr.microsoft.com/dotnet/aspnet:9.0`, corre como
 usuario no root (`USER $APP_UID`) e incluye un `HEALTHCHECK` que consulta
 `/health` cada 30 segundos. La aplicación MVC (`Licitaciones.Web`) sigue
-ejecutándose con `dotnet run` en el equipo local. Compose todavía no orquesta
-Web ni API; esa orquestación corresponde a HU-32.
+ejecutándose con `dotnet run` en el equipo local; Compose todavía no la
+orquesta.
 
 ## Preparación
 
@@ -19,7 +23,10 @@ Copy-Item .env.example .env
 docker compose config
 ```
 
-El `.env.example` define base, usuario, contraseña, puerto y `ConnectionStrings__Licitaciones`. Compose consume las cuatro variables de PostgreSQL; la cadena de conexión se utiliza al ejecutar Web o API desde la misma terminal.
+El `.env.example` define base, usuario, contraseña, puerto de PostgreSQL,
+`APP_PORT` para publicar la API y `ConnectionStrings__Licitaciones`. Compose
+consume las cuatro variables de PostgreSQL y `APP_PORT`; la cadena de conexión
+se utiliza al ejecutar Web o API desde la misma terminal.
 
 ## Iniciar y comprobar PostgreSQL
 
