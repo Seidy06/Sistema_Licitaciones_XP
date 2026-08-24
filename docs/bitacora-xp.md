@@ -43,7 +43,7 @@ roles en cada historia prevista:
 | 7 | HU-24 | Media | 2 | Tiffany | Seidy | [#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53) | OPEN; ROJO y VERDE en rama con CI verde; refactor local sin commit | `iteracion-3/hu-24-mensajeria` |
 | 8 | HU-25 | Baja | 1 | Seidy | Tiffany | [#54](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/54) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); refactor en commit local sin publicar | `iteracion-3/hu-25-formato-es-cr` |
 | 9 | HU-26 | Alta | 8 | Tiffany | Seidy | [#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); refactor local sin commit. Rama real difiere de la prevista | `iteracion-3/hu-26-api-rest` |
-| 10 | HU-27 | Media | 2 | Seidy | Tiffany | [#56](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/56) | OPEN; no iniciada | `iteracion-3/hu-27-swagger` |
+| 10 | HU-27 | Media | 2 | Seidy | Tiffany | [#56](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/56) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR en commit local sin publicar | `iteracion-3/hu-27-swagger` |
 
 Las Issues son exclusivamente tarjetas de trazabilidad XP. Sus criterios
 permanecen sin marcar hasta que exista evidencia real en pruebas, código,
@@ -659,6 +659,84 @@ errores y formato verificado.
 
 Estos puntos se reportan como candidatos a Issues separadas; no se ocultan
 dentro de esta historia. La Issue #55 permanece abierta.
+
+### HU-27 — Documentación interactiva OpenAPI/Swagger
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-27 — Documentación interactiva OpenAPI/Swagger | 2 | [#56](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/56) | Criterios cubiertos por pruebas en verde; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-27 | Seidy | Tiffany | `3af0427` |
+| VERDE HU-27 | Tiffany | Seidy | `b790880` |
+| REFACTOR HU-27 | Seidy | Tiffany | Commit local `14a8421` sin publicar |
+
+Los roles conservan la asignación planificada (Seidy Driver, Tiffany Navigator)
+y se reconstruyen a partir de la autoría alternada de los commits; Git conserva
+la autoría del Driver, no evidencia independiente del rol Navigator.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #56 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Media, estimación 2 SP y los dos criterios coinciden. A
+diferencia de HU-26, la rama real coincide con la prevista
+(`iteracion-3/hu-27-swagger`) y los commits usan `refs #56` correctamente.
+
+| Criterio de aceptación de la Issue #56 | Pruebas | Commits |
+| --- | --- | --- |
+| `/swagger` muestra la documentación generada con todos los endpoints, esquemas de request/response y ejemplos. | Las cuatro pruebas de `DocumentacionSwaggerHttpTests`: interfaz servida en `/swagger`, documento con las 14 rutas del dominio, esquemas (`ProveedorDto`, `LicitacionDto`, `OfertaDto`, `TipoCambioDto`, `ProblemDetails`, `ValidationProblemDetails`) con cuerpo de solicitud JSON y ejemplos por esquema. | ROJO `3af0427`; VERDE `b790880`; REFACTOR `14a8421` local. |
+| `/docs/api.md` documenta endpoints, contratos de request/response, ejemplos y errores, y referencia una colección reproducible que existe. | Las dos pruebas de `DocumentacionApiMarkdownTests`: contenido de `api.md` (recursos, errores con `ProblemDetails`/`codigoError`/`correlacionId`, bloques `json`/`http`) y existencia más cobertura de recursos de la colección referenciada (`docs/api.http`). | Ídem. |
+
+El PR [#67](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/67)
+(`iteracion-3/hu-27-swagger` hacia `main`) está abierto como draft. Los commits
+`3af0427` y `b790880` están publicados en la rama remota; el refactor
+`14a8421` permanece local y todavía no forma parte del PR ni tiene ejecución
+de CI registrada. El ROJO falló en CI como es esperable (ejecución
+`32682545858`); tras el VERDE la ejecución `32684426351` terminó en `success`.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `3af0427` — `test(api): cubrir criterios de documentación interactiva openapi/swagger (HU-27)` | Agregó seis pruebas con trait `HU-27`: cuatro HTTP reales en `DocumentacionSwaggerHttpTests` (namespace `Hu27`) que exigen Swagger UI servida en `/swagger`, documento OpenAPI con las 14 rutas del dominio, esquemas request/response y ejemplos; dos unitarias en `DocumentacionApiMarkdownTests` sobre `docs/api.md`. Resultado observado: 4 HTTP fallidas (404: sin Swagger UI ni swagger.json) y 1 de 2 unitarias fallida porque la colección reproducible no existía ni estaba referenciada; la prueba de contenido pasó legítimamente porque `api.md` ya documentaba recursos y errores desde iteraciones previas. CI fallido como es esperable en rojo (ejecución `32682545858`). |
+| VERDE | `b790880` — `feat(api): implementar documentación interactiva openapi/swagger (HU-27)` | Incorporó Swashbuckle 7.2.0 (`SwaggerGen`, `SwaggerUI`, `Swagger`), `GenerateDocumentationFile` con `NoWarn CS1591`, registro `AddSwaggerGen` (documento v1, comentarios XML vía rutaXml, `SchemaFilter<EjemplosEsquemasFiltro>`) y middleware `UseSwagger`/`UseSwaggerUI` solo en Development. `EjemplosEsquemasFiltro` aporta ejemplos para 11 esquemas (4 DTO de respuesta y 7 contratos de solicitud). `docs/api.md` ganó la sección «Documentación interactiva (HU-27)» y nació la colección reproducible `docs/api.http` cubriendo los cinco recursos. Filtro HU-27 con 6 correctas; suite completa en 233 verdes; CI en `success` (ejecución `32684426351`). |
+| REFACTOR | `14a8421` — `refactor(api): simplificar implementacion de HU-27` (local, sin push) | Sustituyó la cadena ternaria de 11 ramas de `EjemplosEsquemasFiltro.Apply` por un diccionario estático `EjemplosPorTipo` (`Type` → fábrica de ejemplo) y alineó nombres ambiguos con sus contratos (`EjemploNivelAprobacion` → `EjemploGuardarNivelAprobacion`, `EjemploTipoCambioSolicitud` → `EjemploGuardarTipoCambio`). Descartó extraer el bloque `AddSwaggerGen` de `Program.cs` por ser abstracción especulativa frente al estilo inline existente. Sin comportamiento nuevo: suite en 233 verdes y formato sin diferencias. Sin push ni CI registrado. |
+
+#### Resultado de pruebas (HU-27)
+
+La línea base previa al incremento estaba verde con 227 pruebas. En el ROJO,
+las 4 pruebas HTTP nuevas fallaron por comportamiento ausente y 1 unitaria
+falló por la colección faltante. Tras el VERDE, el filtro HU-27 terminó con 6
+correctas, 0 fallidas y 0 omitidas, y la suite completa
+`dotnet test Licitaciones.sln` quedó en 233 correctas, 0 fallidas y 0 omitidas.
+El refactor local mantuvo la suite en 233 verdes, con build sin errores y
+formato verificado:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 85 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 132 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| **Total ejecutado** | **233** | **0** | **0** |
+
+#### Pendientes y candidatos a Issues separadas
+
+- La fábrica `CrearApiFactory` está duplicada entre `ContratoApiRestHttpTests`
+  (HU-26) y `DocumentacionSwaggerHttpTests` (HU-27); consolidarla tocaría
+  pruebas de otra historia.
+- El commit de refactor `14a8421` permanece local: ni el PR #67 ni CI lo
+  incluyen todavía.
+- Los ajustes de documentación de esta fase (deduplicación en `api.md`,
+  encabezado de uso y demostración de error en `api.http`) permanecen locales,
+  sin commit.
+
+Estos puntos se reportan como candidatos a Issues separadas; no se ocultan
+dentro de esta historia. La Issue #56 permanece abierta.
 
 ## Corrección posterior a la auditoría final de Iteración 2
 

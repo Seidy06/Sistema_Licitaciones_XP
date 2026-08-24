@@ -40,10 +40,20 @@ El contrato se aplica en un único punto por capa:
 Las respuestas exitosas conservan los códigos 200/201/204 según la operación,
 y los listados aceptan paginación, filtrado y ordenamiento vía query params.
 
+## Documentación interactiva (HU-27)
+
+En Development la API expone Swagger UI en `/swagger` y su documento OpenAPI
+en `/swagger/v1/swagger.json`, generados con Swashbuckle a partir de los
+controladores y contratos existentes. El documento incluye comentarios XML
+(`GenerateDocumentationFile`) y ejemplos por esquema mediante
+`EjemplosEsquemasFiltro` (DTOs de respuesta y contratos de solicitud). Las
+solicitudes también son reproducibles con la colección `docs/api.http`. En
+otros entornos la documentación interactiva no está disponible.
+
 ## Operación
 
 La API registra `AddProblemDetails()` y el manejador de excepciones. En
-Development publica el documento OpenAPI generado por `MapOpenApi()`. No hay
-Swagger UI, autenticación ni autorización por roles. El proceso de API no
-ejecuta migraciones: requiere una cadena `ConnectionStrings:Licitaciones`
-válida y una base ya migrada.
+Development publica además el documento OpenAPI y la interfaz descritos arriba.
+No hay autenticación ni autorización por roles. El proceso de API no ejecuta
+migraciones: requiere una cadena `ConnectionStrings:Licitaciones` válida y una
+base ya migrada.

@@ -371,6 +371,43 @@ El PR [#66](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/66)
 refactor permanece local, sin push ni CI registrado. La Issue #55 permanece
 abierta y no se marca como completada desde esta fase.
 
+## Resultado verificado para HU-27 (Iteración 3)
+
+HU-27 corresponde a la Issue [#56](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/56).
+Los dos criterios se cubren con una clase de integración HTTP sobre Swagger y
+el documento OpenAPI, más una clase unitaria sobre `docs/api.md`:
+
+| Criterio de aceptación de la Issue #56 | Pruebas | Evidencia |
+| --- | --- | --- |
+| `/swagger` muestra la documentación generada con todos los endpoints, esquemas de request/response y ejemplos. | `SwaggerUi_DebeServirInterfazEnRutaSwagger`, `DocumentoOpenApi_DebeExponerTodosLosEndpointsDelDominio`, `DocumentoOpenApi_DebeIncluirEsquemasRequestResponse` y `DocumentoOpenApi_DebeIncluirEjemplos` en `DocumentacionSwaggerHttpTests`. | El documento expone las 14 rutas del dominio; los esquemas incluyen `ProveedorDto`, `LicitacionDto`, `OfertaDto`, `TipoCambioDto`, `ProblemDetails` y `ValidationProblemDetails`; las operaciones POST/PUT declaran cuerpo `application/json` y cada esquema lleva ejemplo mediante `EjemplosEsquemasFiltro`. |
+| `/docs/api.md` documenta endpoints, contratos, ejemplos y errores, y referencia una colección reproducible que existe. | `ApiMd_DebeDocumentarEndpointsContratosErroresYEjemplos` y `ApiMd_DebeReferenciarColeccionReproducibleExistenteYCubrirRecursos` en `DocumentacionApiMarkdownTests`. | La prueba valida recursos, errores con `ProblemDetails`/`codigoError`/`correlacionId` y bloques `json`/`http`; resuelve el archivo `.http` referenciado y verifica que cubra los cinco recursos del dominio (`docs/api.http`). |
+
+La ejecución focalizada con
+`dotnet test tests\Licitaciones.IntegrationTests\Licitaciones.IntegrationTests.csproj --filter "HU=HU-27"`
+terminó en ROJO con **4 fallidas y 0 correctas** (Swagger UI y swagger.json
+ausentes respondían 404) y tras el VERDE con **4 correctas**. La clase
+unitaria pasó de 1 fallida (colección faltante) a 2 correctas. La suite
+completa ejecutada con `dotnet test Licitaciones.sln` pasó de **227** a
+**233 correctas, 0 fallidas y 0 omitidas**, y se mantuvo en 233 después del
+refactor.
+
+La secuencia TDD queda trazada así:
+
+- `3af0427` — ROJO: agregó las seis pruebas de documentación interactiva; CI
+  fallido como es esperable en rojo (ejecución `32682545858`).
+- `b790880` — VERDE: Swashbuckle 7.2.0 con UI en Development, comentarios XML,
+  ejemplos por esquema vía `EjemplosEsquemasFiltro`, sección HU-27 en
+  `docs/api.md` y colección `docs/api.http`; CI en verde (ejecución
+  `32684426351`).
+- `14a8421` — REFACTOR local sin publicar: sustituyó la cadena ternaria del
+  filtro por un diccionario estático tipo→ejemplo y renombró métodos ambiguos;
+  sin comportamiento nuevo ni CI registrado.
+
+El PR [#67](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/67)
+(`iteracion-3/hu-27-swagger` hacia `main`) está abierto como draft. El refactor
+permanece local, sin push ni CI registrado. La Issue #56 permanece abierta y no
+se marca como completada desde esta fase.
+
 ## Integración continua
 
 `.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release y ejecuta toda la solución. En esta iteración no mide cobertura ni construye imágenes Docker.
