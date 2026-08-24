@@ -3,6 +3,12 @@
 @licitacionId = d5d2f6a1-3c47-4a58-9b21-0f6e8d2c4b10
 @ofertaId = 9a3d94d0-5e61-4f7b-8c22-1a2b3c4d5e6f
 
+###
+# Colección reproducible de solicitudes de la API REST (HU-27).
+# Ejecutar con la extensión REST Client de VS Code, el cliente HTTP de
+# JetBrains/Rider o importarla en Postman/Insomnia. Ajuste @host si la API
+# corre en otro puerto (dotnet run --project src/Licitaciones.Api).
+
 ### Listar proveedores activos
 GET {{host}}/api/v1/proveedores?pagina=1&tamanoPagina=10&nombre=central&ordenarPor=Nombre&descendente=false
 
@@ -15,6 +21,14 @@ Content-Type: application/json
 
 {
   "nombre": "Empresa Central S.A."
+}
+
+### Error controlado: nombre inválido (400 ProblemDetails)
+POST {{host}}/api/v1/proveedores
+Content-Type: application/json
+
+{
+  "nombre": "   "
 }
 
 ### Editar proveedor
