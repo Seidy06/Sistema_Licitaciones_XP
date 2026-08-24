@@ -13,6 +13,14 @@
 
 La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedores`. La Iteración 2 agrega licitaciones bajo `/api/v1/licitaciones`. Los ejemplos de identificadores, fechas y versiones son ilustrativos. El proyecto conserva además `GET /WeatherForecast`, generado por la plantilla; es un endpoint de muestra y no forma parte del dominio de licitaciones.
 
+La API de negocio de la Iteración 1 expone proveedores bajo `/api/v1/proveedores`. La Iteración 2 agrega licitaciones bajo `/api/v1/licitaciones`. Los ejemplos de identificadores, fechas y versiones son ilustrativos. El proyecto conserva además `GET /WeatherForecast`, generado por la plantilla; es un endpoint de muestra y no forma parte del dominio de licitaciones.
+
+## Documentación interactiva (HU-27)
+
+La API genera su documentación con `Swashbuckle.AspNetCore`. En Development, Swagger UI está disponible en [`/swagger/index.html`](http://localhost:5033/swagger/index.html) y el documento OpenAPI en `/swagger/v1/swagger.json`; incluye todos los endpoints, esquemas de request/response (`ProveedorDto`, `LicitacionDto`, `OfertaDto`, `TipoCambioDto`, `ProblemDetails`, `ValidationProblemDetails`) y ejemplos por esquema. La generación del archivo XML de comentarios está habilitada con `GenerateDocumentationFile`.
+
+Las solicitudes son reproducibles con la colección [`docs/api.http`](api.http) (formato `.http`, compatible con Visual Studio Code REST Client, Rider, JetBrains HTTP client e importable desde Postman/Insomnia). Cubre los cinco recursos del dominio con sus casos exitosos y de error.
+
 ## Resumen
 
 | Método y ruta | Resultado exitoso | Errores controlados |
@@ -96,7 +104,7 @@ proveedores dados de baja. `GET /api/v1/proveedores/historico/{id}` permite
 consultar su detalle e incluye `deletedAt`. Estas rutas son explícitas para no
 debilitar el filtro global aplicado al resto de las consultas.
 
-La aplicación registra OpenAPI y publica el documento solo en Development con `MapOpenApi()`. No existe Swagger UI en esta iteración.
+La aplicación registra OpenAPI con `AddOpenApi()`/`MapOpenApi()` (`/openapi/v1.json`) y, en Development, Swagger UI con Swashbuckle en `/swagger` (HU-27).
 
 ## Licitaciones (HU-13 y HU-16)
 

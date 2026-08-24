@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 
 using Licitaciones.Api.Infraestructura;
@@ -25,12 +26,33 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Licitaciones API",
+        Version = "v1",
+        Description = "API REST del sistema de licitaciones: proveedores, "
+            + "licitaciones, ofertas, niveles de aprobación y tipos de cambio."
+    });
+
+    var rutaXml = Path.Combine(
+        AppContext.BaseDirectory,
+        $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
+    if (File.Exists(rutaXml))
+    {
+        options.IncludeXmlComments(rutaXml);
+    }
+
+    options.SchemaFilter<EjemplosEsquemasFiltro>();
+});
 builder.Services.AddSingleton<ProblemDetailsFactory, FabricaProblemDetailsApi>();
 builder.Services.AddScoped<AdministrarNivelesAprobacionService>();
 builder.Services.AddScoped<ResolverNivelAprobacionService>();
@@ -66,6 +88,9 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Licitaciones API v1"));
 }
 
 app.UseExceptionHandler(new ExceptionHandlerOptions

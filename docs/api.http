@@ -1,0 +1,122 @@
+@host = http://localhost:5033
+@proveedorId = 7d9413f2-2bde-4bc9-af45-39a66f8fcce5
+@licitacionId = d5d2f6a1-3c47-4a58-9b21-0f6e8d2c4b10
+@ofertaId = 9a3d94d0-5e61-4f7b-8c22-1a2b3c4d5e6f
+
+### Listar proveedores activos
+GET {{host}}/api/v1/proveedores?pagina=1&tamanoPagina=10&nombre=central&ordenarPor=Nombre&descendente=false
+
+### Consultar proveedor por id
+GET {{host}}/api/v1/proveedores/{{proveedorId}}
+
+### Registrar proveedor
+POST {{host}}/api/v1/proveedores
+Content-Type: application/json
+
+{
+  "nombre": "Empresa Central S.A."
+}
+
+### Editar proveedor
+PUT {{host}}/api/v1/proveedores/{{proveedorId}}
+Content-Type: application/json
+
+{
+  "nombre": "Empresa Central Actualizada",
+  "version": 1
+}
+
+### Dar de baja proveedor
+DELETE {{host}}/api/v1/proveedores/{{proveedorId}}
+
+### Listar histórico de proveedores
+GET {{host}}/api/v1/proveedores/historico?pagina=1&tamanoPagina=10
+
+### Consultar histórico de proveedor por id
+GET {{host}}/api/v1/proveedores/historico/{{proveedorId}}
+
+### Listar licitaciones
+GET {{host}}/api/v1/licitaciones?estadoFiltro=Publicada&pagina=1&tamanoPagina=10
+
+### Consultar licitación por id
+GET {{host}}/api/v1/licitaciones/{{licitacionId}}
+
+### Crear licitación
+POST {{host}}/api/v1/licitaciones
+Content-Type: application/json
+
+{
+  "codigo": "COMP-2026-001",
+  "titulo": "Compra de material informático",
+  "presupuesto": 10000.00,
+  "fechaCierre": "2026-08-25T12:00:00+00:00"
+}
+
+### Editar licitación
+PUT {{host}}/api/v1/licitaciones/{{licitacionId}}
+Content-Type: application/json
+
+{
+  "titulo": "Compra de material informático renovada",
+  "presupuesto": 12000.00,
+  "fechaCierre": "2026-08-28T12:00:00+00:00",
+  "version": 1
+}
+
+### Publicar licitación
+POST {{host}}/api/v1/licitaciones/{{licitacionId}}/publicar
+
+### Cerrar licitación
+POST {{host}}/api/v1/licitaciones/{{licitacionId}}/cerrar
+
+### Listar ofertas de una licitación en colones
+GET {{host}}/api/v1/ofertas?licitacionId={{licitacionId}}&moneda=CRC
+
+### Consultar oferta por id
+GET {{host}}/api/v1/ofertas/{{ofertaId}}
+
+### Registrar oferta
+POST {{host}}/api/v1/ofertas
+Content-Type: application/json
+
+{
+  "licitacionId": "{{licitacionId}}",
+  "proveedorId": "{{proveedorId}}",
+  "monto": 8000.00
+}
+
+### Intentar editar una oferta registrada (protegida)
+PUT {{host}}/api/v1/ofertas/{{ofertaId}}
+Content-Type: application/json
+
+{
+  "monto": 7500.00
+}
+
+### Intentar eliminar una oferta registrada (protegida)
+DELETE {{host}}/api/v1/ofertas/{{ofertaId}}
+
+### Crear nivel de aprobación
+POST {{host}}/api/v1/niveles-aprobacion
+Content-Type: application/json
+
+{
+  "nombre": "Compras Menores",
+  "montoMinimo": 0,
+  "montoMaximo": 1000000
+}
+
+### Resolver nivel de aprobación por monto
+GET {{host}}/api/v1/niveles-aprobacion/resolver?monto=7500000
+
+### Guardar tipo de cambio USD→CRC
+POST {{host}}/api/v1/tipos-cambio
+Content-Type: application/json
+
+{
+  "valor": 512,
+  "fecha": "2026-08-22"
+}
+
+### Consultar tipo de cambio activo
+GET {{host}}/api/v1/tipos-cambio/activo
