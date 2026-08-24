@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: licitaciones-config
+data:
+  # La estrategia de migraciones dentro del clúster (Job/InitContainer) se
+  # define en HU-34; por ahora la API arranca sin migrar automáticamente.
+  Database__ApplyMigrationsOnStartup: "false"
