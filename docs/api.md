@@ -328,3 +328,28 @@ el mismo formato, o `404 Not Found` si no existe ninguno. La conversión de
 ofertas en USD (`?moneda=USD`) consume este mismo registro administrado
 localmente, sin llamadas a servicios externos. No existen todavía edición,
 historial ni desactivación explícita por API.
+
+## Contrato de errores (HU-26)
+
+Toda respuesta 4xx y 5xx de la API usa `application/problem+json` con título,
+estado, detalle seguro, `type`, `instance` (ruta solicitada) y las extensiones
+`codigoError` e `correlacionId`; nunca incluye stack traces, rutas internas ni
+secretos. Ejemplo:
+
+```json
+{
+  "type": "https://httpstatuses.com/422",
+  "title": "Oferta rechazada",
+  "status": 422,
+  "detail": "El monto de la oferta no puede superar el presupuesto de la licitacion.",
+  "instance": "/api/v1/ofertas",
+  "codigoError": "oferta_no_procesable",
+  "correlacionId": "0HNO1EJRQ4B5D"
+}
+```
+
+Mapeo general: errores de datos inválidos retornan `400`; recurso inexistente
+`404`; conflictos de duplicidad o concurrencia `409`; reglas de negocio no
+procesables `422`; y una excepción no prevista produce un `500` controlado con
+código `error_interno`. El `correlacionId` corresponde al `TraceIdentifier` de
+la solicitud y sirve para seguimiento en bitácoras del cliente.

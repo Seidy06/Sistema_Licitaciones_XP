@@ -42,7 +42,7 @@ roles en cada historia prevista:
 | 6 | HU-23 | Alta | 8 | Seidy | Tiffany | [#52](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/52) | OPEN; criterios verificados localmente; PR abierto | `iteracion-3/hu-23-crud-web` |
 | 7 | HU-24 | Media | 2 | Tiffany | Seidy | [#53](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/53) | OPEN; ROJO y VERDE en rama con CI verde; refactor local sin commit | `iteracion-3/hu-24-mensajeria` |
 | 8 | HU-25 | Baja | 1 | Seidy | Tiffany | [#54](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/54) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); refactor en commit local sin publicar | `iteracion-3/hu-25-formato-es-cr` |
-| 9 | HU-26 | Alta | 8 | Tiffany | Seidy | [#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55) | OPEN; no iniciada | `iteracion-3/hu-26-api-rest-versionada` |
+| 9 | HU-26 | Alta | 8 | Tiffany | Seidy | [#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); refactor local sin commit. Rama real difiere de la prevista | `iteracion-3/hu-26-api-rest` |
 | 10 | HU-27 | Media | 2 | Seidy | Tiffany | [#56](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/56) | OPEN; no iniciada | `iteracion-3/hu-27-swagger` |
 
 Las Issues son exclusivamente tarjetas de trazabilidad XP. Sus criterios
@@ -583,6 +583,82 @@ refactor mantuvo la suite en 222 verdes, con formato verificado.
 
 Estos puntos se reportan como candidatos a Issues separadas; no se ocultan
 dentro de esta historia. La Issue #54 permanece abierta.
+
+### HU-26 — Exponer API REST con DTOs y versionado
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-26 — Exponer API REST con DTOs y versionado | 8 | [#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55) | Criterios cubiertos por pruebas en verde; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-26 | Tiffany | Seidy | `9611c8d` |
+| VERDE HU-26 | Seidy | Tiffany | `7db6e80` |
+| REFACTOR HU-26 | Tiffany | Seidy | Cambios locales sin commit |
+
+Los roles conservan la asignación planificada (Tiffany Driver, Seidy Navigator)
+y se reconstruyen a partir de la autoría alternada de los commits; Git conserva
+la autoría del Driver, no evidencia independiente del rol Navigator.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #55 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Alta, estimación 8 SP y los cinco criterios coinciden. Dos
+desviaciones de trazabilidad se detectaron y se reportan sin corregirlas en
+esta fase: la rama real (`iteracion-3/hu-26-api-rest`) difiere de la prevista
+(`iteracion-3/hu-26-api-rest-versionada`) y el commit VERDE quedó referenciado
+como `refs #56` en lugar de `refs #55`.
+
+| Criterio de aceptación de la Issue #55 | Pruebas | Commits |
+| --- | --- | --- |
+| Cualquier endpoint retorna DTOs específicos, nunca entidades EF Core. | Suite HTTP previa por módulo (HU-10/14/15/16/17) con `[ProducesResponseType]` tipado y aserciones sobre DTO. | Evidencia previa; sin commits nuevos de HU-26 para este criterio. |
+| La ruta base incluye versión (`/api/v1/...`). | Rutas `/api/v1/{modulo}` verificadas en los cinco controladores API. | Ídem. |
+| CRUD retorna códigos HTTP correctos (200, 201, 204, 400, 404, 409, 422 y 500 controlado). | Pruebas previas por módulo más las cinco de `ContratoApiRestHttpTests`; `GetPorId_Inexistente_DebeResponder404` retiquetada a `HU-26` con aserción reforzada. | ROJO `9611c8d`; VERDE `7db6e80`; REFACTOR local sin commit. |
+| Cualquier error usa ProblemDetails (título, estado, detalle seguro, código de error, correlación), sin stack traces ni rutas internas. | `Error_BadRequest_…`, `Error_Conflicto_Duplicado_…`, `Error_NoEncontrado_…`, `Error_Negocio_PresupuestoSuperado_…` e `Error_Interno_NoControlado_…` en `ContratoApiRestHttpTests`. | ROJO `9611c8d`; VERDE `7db6e80`; REFACTOR local sin commit. |
+| Listados con paginación, filtrado y ordenamiento vía query params. | Pruebas previas de proveedores, licitaciones y ofertas; HU-26 no duplicó escenarios de listado. | Evidencia previa; sin commits nuevos de HU-26 para este criterio. |
+
+El PR [#66](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/66)
+(`iteracion-3/hu-26-api-rest` hacia `main`) está abierto como draft. Los
+commits `9611c8d` y `7db6e80` están publicados en la rama remota; el refactor
+permanece local y todavía no forma parte del PR. No se atribuye un resultado
+de CI al refactor local.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `9611c8d` — `test(api): cubrir criterios de exponer api rest con dtos y versionado (HU-26)` | Agregó `ContratoApiRestHttpTests` (namespace `Hu26`, trait `HU-26`) con cinco pruebas HTTP reales que fijan el contrato transversal de errores: 400 por nombre inválido, 409 por proveedor duplicado, 404 de recurso inexistente, 422 por oferta sobre presupuesto y 500 provocado saboteando `ConsultarProveedorService`. Todas exigen `application/problem+json` con título, estado, detalle seguro, `codigoError` y `correlacionId`; el caso interno además rechaza stack traces y rutas del proyecto. Fallaron por comportamiento ausente: faltaban las dos extensiones del contrato, el 404 respondía sin cuerpo y el 500 sin detalle. CI fallido como es esperable en rojo (ejecución `32676486243`). |
+| VERDE | `7db6e80` — `feat(api): implementar exponer api rest con dtos y versionado (HU-26)` | Registró `FabricaProblemDetailsApi` como `ProblemDetailsFactory` personalizado, centralizó las respuestas de error de controladores en `RespuestaProblema` y añadió un manejador global que mapea `DomainException` a 422 con código `regla_negocio_no_procesable` y lo no previsto a un 500 controlado con código `error_interno`. Retiquetó la prueba existente `GetPorId_Inexistente_DebeResponder404` de `HU-09` a `HU-26` reforzando su aserción al nuevo cuerpo. Filtro HU-26 con 6 correctas; suite completa en 227 verdes; CI en `success` (ejecución `32677819388`). |
+| REFACTOR | Sin commit — cambios locales | Extrajo `ContratoProblemasApi` como única fuente de las claves `codigoError`/`correlacionId` y de la aplicación de extensiones, delegaron en ella `FabricaProblemDetailsApi` y `RespuestaProblema`, y el manejador de `Program.cs` pasó a construir el problema mediante la fábrica registrada (`ProblemDetailsFactory.CreateProblemDetails`) eliminando la construcción manual duplicada; además retiró el modificador `partial` innecesario de `OpcionesJsonHttp`. Sin comportamiento nuevo: filtro HU-26 con 6 correctas, suite completa en 227 verdes y `dotnet format --verify-no-changes` sin diferencias. Los cinco wrappers privados `CrearProblema` de una línea se conservaron porque sustituirlos por un método de extensión tocaría unas veinte llamadas por una ganancia marginal. |
+
+#### Resultado de pruebas (HU-26)
+
+La línea base previa al incremento estaba verde con 222 pruebas. Tras el ROJO,
+la ejecución focalizada terminó con 5 fallidas y 0 correctas. Después del
+VERDE, el filtro HU-26 terminó con 6 correctas, 0 fallidas y 0 omitidas, y la
+suite completa `dotnet test Licitaciones.sln` con 227 correctas, 0 fallidas y
+0 omitidas. El refactor local mantuvo la suite en 227 verdes, con build sin
+errores y formato verificado.
+
+#### Pendientes y candidatos a Issues separadas
+
+- El mensaje del commit VERDE `7db6e80` dice `refs #56` cuando debe decir
+  `refs #55`; requiere corrección de trazabilidad.
+- La rama prevista era `iteracion-3/hu-26-api-rest-versionada` y la real es
+  `iteracion-3/hu-26-api-rest`; la Issue y el backlog deben alinearse.
+- `WeatherForecastController` y `WeatherForecast` son residuos de plantilla en
+  `Licitaciones.Api`; su eliminación es candidata a limpieza separada.
+- Los cinco controladores mantienen un wrapper privado `CrearProblema` de una
+  línea sobre `RespuestaProblema.Crear`; convertirlo en método de extensión de
+  `ControllerBase` tocaría unas veinte llamadas y se dejó fuera por ganancia
+  marginal.
+
+Estos puntos se reportan como candidatos a Issues separadas; no se ocultan
+dentro de esta historia. La Issue #55 permanece abierta.
 
 ## Corrección posterior a la auditoría final de Iteración 2
 

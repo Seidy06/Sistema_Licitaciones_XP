@@ -330,6 +330,47 @@ como es esperable (ejecución `32669889839`) y el verde terminó en `success`
 pruebas (literal ₡ e import de `Domain.Aprobaciones`), permanece local sin CI
 registrada, y el código de producción se evaluó sin cambios.
 
+## Resultado verificado para HU-26 (Iteración 3)
+
+HU-26 corresponde a la Issue [#55](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/55).
+Los cinco criterios se cubren con las pruebas HTTP previas de los módulos
+(DTOs, rutas `/api/v1`, listados con paginación/filtrado/orden) más una clase
+nueva para el contrato transversal de errores:
+
+| Criterio de aceptación de la Issue #55 | Pruebas | Evidencia |
+| --- | --- | --- |
+| Cualquier endpoint retorna DTOs específicos, nunca entidades EF Core. | `ProveedorConsultaHttpTests`, `ConsultarLicitacionHttpTests`, `CrearOfertaHttpTests` y el resto de la suite HTTP previa. | Los controladores declaran `[ProducesResponseType]` tipado y las aserciones existentes validan los contratos. |
+| La ruta base incluye versión (`/api/v1/...`). | Rutas verificadas en los cinco controladores API. | `api/v1/proveedores`, `licitaciones`, `ofertas`, `niveles-aprobacion` y `tipos-cambio`. |
+| CRUD retorna códigos HTTP correctos (200, 201, 204, 400, 404, 409, 422 y 500 controlado). | Pruebas previas por módulo más `Error_BadRequest_…`, `Error_Conflicto_Duplicado_…`, `Error_NoEncontrado_…`, `Error_Negocio_PresupuestoSuperado_…` e `Error_Interno_NoControlado_…` en `ContratoApiRestHttpTests`. | Cada prueba fija el código esperado; `GetPorId_Inexistente_DebeResponder404` quedó retiquetada a `HU-26` con aserción reforzada sobre `ProblemDetails`. |
+| Cualquier error usa ProblemDetails con detalle seguro y correlación, sin stack traces ni rutas internas. | Las mismas cinco pruebas de `ContratoApiRestHttpTests`. | Verifican `application/problem+json`, título, estado, detalle seguro y las extensiones `codigoError` y `correlacionId`; el caso interno además rechaza stack traces y rutas del proyecto. |
+| Listados con paginación, filtrado y ordenamiento vía query params. | Pruebas previas de proveedores, licitaciones y ofertas. | Sin duplicación: HU-26 no agregó escenarios de listado nuevos. |
+
+La ejecución focalizada con
+`dotnet test tests\Licitaciones.IntegrationTests\Licitaciones.IntegrationTests.csproj --filter "HU=HU-26"`
+terminó en ROJO con **5 fallidas y 0 correctas** (contrato ausente: sin
+`codigoError`, sin `correlacionId` y 404 sin cuerpo) y tras el VERDE con **6
+correctas, 0 fallidas y 0 omitidas**. La suite completa ejecutada con
+`dotnet test Licitaciones.sln` pasó de **222** a **227 correctas, 0 fallidas y
+0 omitidas**, y se mantuvo en 227 después del refactor.
+
+La secuencia TDD queda trazada así:
+
+- `9611c8d` — ROJO: agregó las cinco pruebas del contrato de errores; CI
+  fallido como es esperable en rojo.
+- `7db6e80` — VERDE: fábrica `FabricaProblemDetailsApi` registrada como
+  `ProblemDetailsFactory`, constructor centralizado `RespuestaProblema` y
+  manejador global que mapea `DomainException` a 422 y lo no previsto a un 500
+  controlado; CI en verde.
+- REFACTOR local sin commit: extrajo `ContratoProblemasApi` como única fuente
+  de las claves y extensiones del contrato, delegó en ella la fábrica y
+  `RespuestaProblema`, y reutilizó la fábrica dentro del manejador de
+  excepciones de `Program.cs`, eliminando la construcción manual duplicada.
+
+El PR [#66](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/66)
+(`iteracion-3/hu-26-api-rest` hacia `main`) está abierto como draft. El
+refactor permanece local, sin push ni CI registrado. La Issue #55 permanece
+abierta y no se marca como completada desde esta fase.
+
 ## Integración continua
 
 `.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release y ejecuta toda la solución. En esta iteración no mide cobertura ni construye imágenes Docker.
