@@ -1,3 +1,9 @@
+using Licitaciones.Api.Contracts.Aprobaciones;
+using Licitaciones.Api.Contracts.Licitaciones;
+using Licitaciones.Api.Contracts.Ofertas;
+using Licitaciones.Api.Contracts.Proveedores;
+using Licitaciones.Api.Contracts.TiposCambio;
+
 using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Ofertas;
 using Licitaciones.Application.Proveedores;
@@ -13,16 +19,30 @@ namespace Licitaciones.Api.Infraestructura;
 
 public sealed class EjemplosEsquemasFiltro : ISchemaFilter
 {
+    private static readonly Dictionary<Type, Func<OpenApiObject>> EjemplosPorTipo = new()
+    {
+        [typeof(ProveedorDto)] = EjemploProveedor,
+        [typeof(LicitacionDto)] = EjemploLicitacion,
+        [typeof(OfertaDto)] = EjemploOferta,
+        [typeof(TipoCambioDto)] = EjemploTipoCambio,
+        [typeof(CrearProveedorRequest)] = EjemploCrearProveedor,
+        [typeof(EditarProveedorRequest)] = EjemploEditarProveedor,
+        [typeof(CrearLicitacionRequest)] = EjemploCrearLicitacion,
+        [typeof(EditarLicitacionRequest)] = EjemploEditarLicitacion,
+        [typeof(CrearOfertaRequest)] = EjemploCrearOferta,
+        [typeof(GuardarNivelAprobacionRequest)] = EjemploGuardarNivelAprobacion,
+        [typeof(GuardarTipoCambioRequest)] = EjemploGuardarTipoCambio
+    };
+
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
         ArgumentNullException.ThrowIfNull(schema);
         ArgumentNullException.ThrowIfNull(context);
 
-        schema.Example = context.Type == typeof(ProveedorDto) ? EjemploProveedor()
-            : context.Type == typeof(LicitacionDto) ? EjemploLicitacion()
-            : context.Type == typeof(OfertaDto) ? EjemploOferta()
-            : context.Type == typeof(TipoCambioDto) ? EjemploTipoCambio()
-            : null;
+        if (context.Type is { } tipo && EjemplosPorTipo.TryGetValue(tipo, out var ejemplo))
+        {
+            schema.Example = ejemplo();
+        }
     }
 
     private static OpenApiObject EjemploProveedor() => new()
@@ -65,5 +85,51 @@ public sealed class EjemplosEsquemasFiltro : ISchemaFilter
         ["valor"] = new OpenApiDouble(512.00),
         ["fecha"] = new OpenApiString("2026-08-22"),
         ["activo"] = new OpenApiBoolean(true)
+    };
+
+    private static OpenApiObject EjemploCrearProveedor() => new()
+    {
+        ["nombre"] = new OpenApiString("Empresa Central S.A.")
+    };
+
+    private static OpenApiObject EjemploEditarProveedor() => new()
+    {
+        ["nombre"] = new OpenApiString("Empresa Central S.A. Actualizada"),
+        ["version"] = new OpenApiInteger(1)
+    };
+
+    private static OpenApiObject EjemploCrearLicitacion() => new()
+    {
+        ["codigo"] = new OpenApiString("COMP-2026-001"),
+        ["titulo"] = new OpenApiString("Compra de material informático"),
+        ["presupuesto"] = new OpenApiDouble(10000.00),
+        ["fechaCierre"] = new OpenApiString("2026-08-25T12:00:00+00:00")
+    };
+
+    private static OpenApiObject EjemploEditarLicitacion() => new()
+    {
+        ["titulo"] = new OpenApiString("Compra de material informático renovada"),
+        ["presupuesto"] = new OpenApiDouble(12000.00),
+        ["fechaCierre"] = new OpenApiString("2026-09-01T12:00:00+00:00")
+    };
+
+    private static OpenApiObject EjemploCrearOferta() => new()
+    {
+        ["licitacionId"] = new OpenApiString("d5d2f6a1-3c47-4a58-9b21-0f6e8d2c4b10"),
+        ["proveedorId"] = new OpenApiString("7d9413f2-2bde-4bc9-af45-39a66f8fcce5"),
+        ["monto"] = new OpenApiDouble(8000.00)
+    };
+
+    private static OpenApiObject EjemploGuardarNivelAprobacion() => new()
+    {
+        ["nombre"] = new OpenApiString("Compras Menores"),
+        ["montoMinimo"] = new OpenApiDouble(0),
+        ["montoMaximo"] = new OpenApiDouble(1000000)
+    };
+
+    private static OpenApiObject EjemploGuardarTipoCambio() => new()
+    {
+        ["valor"] = new OpenApiDouble(512.00),
+        ["fecha"] = new OpenApiString("2026-08-22")
     };
 }
