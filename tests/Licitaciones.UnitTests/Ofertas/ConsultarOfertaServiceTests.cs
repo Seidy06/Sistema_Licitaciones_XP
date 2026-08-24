@@ -3,6 +3,7 @@ using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.TiposCambio;
 using Licitaciones.Domain.Common;
 using Licitaciones.Domain.TiposCambio;
+using Licitaciones.UnitTests.Common;
 
 namespace Licitaciones.UnitTests.Ofertas;
 
@@ -172,10 +173,13 @@ public sealed class ConsultarOfertaServiceTests
 
     private static ConsultarOfertaService CrearService(
         IReadOnlyList<OfertaConsultaRegistro> ofertas,
-        TipoCambio? tipoCambioActivo = null) =>
-        new(
+        TipoCambio? tipoCambioActivo = null)
+    {
+        TipoCambio[] tipos = tipoCambioActivo is null ? [] : [tipoCambioActivo];
+        return new(
             new RepositorioConsultaFalso(ofertas),
-            new RepositorioTipoCambioFalso(tipoCambioActivo));
+            new RepositorioTipoCambioEnMemoria(tipos));
+    }
 
     private sealed class RepositorioConsultaFalso : IOfertaConsultaRepository
     {
@@ -193,26 +197,5 @@ public sealed class ConsultarOfertaServiceTests
             Guid id,
             CancellationToken cancellationToken = default) =>
             Task.FromResult(_ofertas.FirstOrDefault(x => x.Id == id));
-    }
-
-    private sealed class RepositorioTipoCambioFalso : ITipoCambioRepository
-    {
-        private readonly TipoCambio? _activo;
-
-        public RepositorioTipoCambioFalso(TipoCambio? activo) =>
-            _activo = activo;
-
-        public Task<TipoCambio?> ObtenerActivoAsync(
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(_activo);
-
-        public Task ReemplazarActivoAsync(
-            TipoCambio tipoCambio,
-            CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException();
-
-        public Task<IReadOnlyList<TipoCambio>> ListarTodosAsync(
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult<IReadOnlyList<TipoCambio>>([]);
     }
 }

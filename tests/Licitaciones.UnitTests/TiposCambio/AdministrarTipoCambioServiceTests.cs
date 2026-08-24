@@ -2,6 +2,7 @@ using Licitaciones.Application.Common;
 using Licitaciones.Application.TiposCambio;
 using Licitaciones.Domain.Common;
 using Licitaciones.Domain.TiposCambio;
+using Licitaciones.UnitTests.Common;
 
 namespace Licitaciones.UnitTests.TiposCambio;
 
@@ -14,7 +15,7 @@ public sealed class AdministrarTipoCambioServiceTests
     [Trait("HU", "HU-28")]
     public async Task GuardarAsync_DebeReemplazarElActivoYRetornarDto()
     {
-        var repositorio = new RepositorioFalso();
+        var repositorio = new RepositorioTipoCambioEnMemoria();
         var service = new AdministrarTipoCambioService(repositorio);
 
         var dto = await service.GuardarAsync(512.35m, Fecha);
@@ -32,7 +33,7 @@ public sealed class AdministrarTipoCambioServiceTests
     [Trait("HU", "HU-28")]
     public async Task ObtenerActivoAsync_SinTipoActivo_DebeRetornarNull()
     {
-        var service = new AdministrarTipoCambioService(new RepositorioFalso());
+        var service = new AdministrarTipoCambioService(new RepositorioTipoCambioEnMemoria());
 
         var dto = await service.ObtenerActivoAsync();
 
@@ -43,11 +44,11 @@ public sealed class AdministrarTipoCambioServiceTests
     [Trait("HU", "HU-28")]
     public async Task ListarAsync_DebeAplicarOrdenPorValorDescendenteYPaginacion()
     {
-        var repositorio = new RepositorioFalso();
+        var repositorio = new RepositorioTipoCambioEnMemoria();
         await repositorio.PrepararAsync(
-            CrearTipo(500m, Fecha.AddDays(-2)),
-            CrearTipo(600m, Fecha.AddDays(-1)),
-            CrearTipo(550m, Fecha));
+            TipoCambio.Crear(500m, Fecha.AddDays(-2)),
+            TipoCambio.Crear(600m, Fecha.AddDays(-1)),
+            TipoCambio.Crear(550m, Fecha));
         var service = new AdministrarTipoCambioService(repositorio);
 
         var pagina = await service.ListarAsync(
@@ -70,7 +71,8 @@ public sealed class AdministrarTipoCambioServiceTests
         int pagina,
         int tamanoPagina)
     {
-        var service = new AdministrarTipoCambioService(new RepositorioFalso());
+        var service = new AdministrarTipoCambioService(
+            new RepositorioTipoCambioEnMemoria());
 
         await Assert.ThrowsAsync<DomainException>(() =>
             service.ListarAsync(pagina: pagina, tamanoPagina: tamanoPagina));
@@ -80,41 +82,10 @@ public sealed class AdministrarTipoCambioServiceTests
     [Trait("HU", "HU-28")]
     public async Task ListarAsync_ConCampoOrdenInvalido_DebeRechazarlo()
     {
-        var service = new AdministrarTipoCambioService(new RepositorioFalso());
+        var service = new AdministrarTipoCambioService(
+            new RepositorioTipoCambioEnMemoria());
 
         await Assert.ThrowsAsync<DomainException>(() =>
             service.ListarAsync(ordenarPor: "moneda"));
-    }
-
-    private static TipoCambio CrearTipo(decimal valor, DateOnly fecha) =>
-        TipoCambio.Crear(valor, fecha);
-
-    private sealed class RepositorioFalso : ITipoCambioRepository
-    {
-        public List<TipoCambio> Reemplazados { get; } = [];
-
-        private IReadOnlyList<TipoCambio> Tipos { get; set; } = [];
-
-        public Task PrepararAsync(params TipoCambio[] tipos)
-        {
-            Tipos = tipos;
-            return Task.CompletedTask;
-        }
-
-        public Task<TipoCambio?> ObtenerActivoAsync(
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult<TipoCambio?>(null);
-
-        public Task ReemplazarActivoAsync(
-            TipoCambio tipoCambio,
-            CancellationToken cancellationToken = default)
-        {
-            Reemplazados.Add(tipoCambio);
-            return Task.CompletedTask;
-        }
-
-        public Task<IReadOnlyList<TipoCambio>> ListarTodosAsync(
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(Tipos);
     }
 }
