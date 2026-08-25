@@ -50,7 +50,7 @@ roles en cada historia prevista:
 | 5 | HU-32 — Docker Compose local | Alta | 3 | Tiffany | Seidy | [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR commiteado localmente sin publicar | `iteracion-4/hu-32-docker-compose` |
 | 6 | HU-33 — Manifiestos K8s de la app | Alta | 5 | Seidy | Tiffany | [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR evaluado sin cambios; rama real difiere de la prevista | `iteracion-4/hu-33-k8s-app` |
 | 7 | HU-34 — Persistencia PostgreSQL en K8s | Alta | 5 | Tiffany | Seidy | [#75](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/75) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR local sin publicar | `iteracion-4/hu-34-k8s-postgresql` |
-| 8 | HU-35 — Pipeline de CI completo | Alta | 5 | Seidy | Tiffany | [#76](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/76) | OPEN; no iniciada | `iteracion-4/hu-35-pipeline-ci` |
+| 8 | HU-35 — Pipeline de CI completo | Alta | 5 | Seidy | Tiffany | [#76](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/76) | OPEN; ROJO y VERDE publicados con CI vía pull_request (rojo esperable, verde en success); REFACTOR local sin commit todavía; rama coincide con la prevista | `iteracion-4/hu-35-pipeline-ci` |
 | 9 | HU-36 — Documentación final en /docs | Alta | 5 | Tiffany | Seidy | [#77](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/77) | OPEN; no iniciada | `iteracion-4/hu-36-documentacion-final` |
 | 10 | HU-37 — Etiquetado de entrega final | Alta | 1 | Seidy | Tiffany | [#78](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/78) | OPEN; no iniciada | `iteracion-4/hu-37-tag-entrega` |
 
@@ -764,6 +764,91 @@ diferencias.
   a HU-35.
 
 La Issue #75 permanece abierta.
+
+### HU-35 — Pipeline de CI con build, pruebas, análisis y Docker
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-35 — Pipeline de CI con build, pruebas, análisis y Docker | 5 | [#76](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/76) | Criterios cubiertos por pruebas en verde (6 focalizadas y suite completa 308 verdes tras evaluar el refactor); el workflow ejecuta la cadena completa y sus runs reales ya existen (rojo esperable y verde en success); la protección de rama en GitHub es configuración pendiente de evidenciar al fusionar; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-35 | Tiffany | Seidy | `6f4c05e` |
+| VERDE HU-35 | Seidy | Tiffany | `013b4ea` |
+| REFACTOR HU-35 | Seidy | Tiffany | cambios locales sin commit todavía |
+
+La pareja planificada era Seidy Driver/Tiffany Navigator; la autoría real invirtió
+los roles (ROJO firmado por Tiffany y VERDE por Seidy). A diferencia de las
+historias anteriores, la rama real (`iteracion-4/hu-35-pipeline-ci`) coincide
+exactamente con la prevista en el Planning Game.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #76 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Alta, estimación 5 SP, iteración 4 (RELEASE 11 — Integración
+Continua), pareja, rama prevista y los dos criterios coinciden literalmente.
+Inspección previa para no duplicar escenarios: ninguna suite existente cubría
+workflows de CI; `.github/workflows/ci.yml` preexistente ya disparaba en push y
+pull_request sobre main y ejecutaba restore, verificación de formato, build,
+instalación de Playwright y pruebas sin cobertura — sin pasos de Docker,
+validación K8s ni auditoría.
+
+| Criterio de aceptación de la Issue #76 | Pruebas | Commits |
+| --- | --- | --- |
+| El workflow se dispara en push/pull_request y ejecuta en orden restore → build → test con cobertura → análisis estático/formato → build Docker → validación manifiestos K8s → auditoría. | `ElPipeline_DebeEjecutarRestoreBuildYPruebasConCoberturaEnOrden`, `ElPipeline_DebeVerificarElFormatoConDotnetFormat`, `ElPipeline_DebeConstruirLaImagenDockerDespuesDeLasPruebas`, `ElPipeline_DebeValidarLosManifiestosDeKubernetes` y `ElPipeline_DebeAuditarDependenciasVulnerablesAlFinal` (`PipelineCiTests`). | ROJO `6f4c05e`; VERDE `013b4ea`. |
+| Cualquier paso fallido rompe el workflow y bloquea el merge. | `ElPipeline_NoDebeTolerarFallosEnNingunPaso` (prohíbe `continue-on-error: true`, `\|\| true` y `exit 0`; el trigger pull_request habilita el check requerido). La branch protection es configuración de GitHub, no de archivos. | Ídem. |
+
+El PR [#87](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/87)
+(`iteracion-4/hu-35-pipeline-ci` hacia `main`) está abierto como draft, con
+los dos commits publicados: CI fallida en el ROJO `6f4c05e` como es esperable
+(ejecución `32798336954`, disparada por el evento pull_request) y `Build and
+Test` en success sobre el VERDE `013b4ea` (ejecución `32799666335`).
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `6f4c05e` — `test(pipeline): cubrir criterios de pipeline de ci con build, pruebas, análisis y docker (HU-35)` | Creó `PipelineCiTests` (seis unitarias de contrato sobre `.github/workflows/ci.yml`). Ejecución filtrada: rojo mixto documentado — 4 fallidas por comportamiento ausente (sin cobertura en test, sin build Docker, sin validación K8s, sin auditoría de dependencias) y 2 superadas legítimamente como línea base (el paso de formato existía desde iteraciones previas y ningún paso toleraba fallos). CI fallida esperable (ejecución `32798336954`). |
+| VERDE | `013b4ea` — `ci(pipeline): implementar pipeline de ci con build, pruebas, análisis y docker (HU-35)` | Extendió el workflow: `dotnet test` con `--collect:"XPlat Code Coverage"` y `--results-directory ./cobertura`; `docker build -f Dockerfile -t licitaciones-api:ci .` sin publicar; instalación de kubeconform y validación `kubeconform -strict -summary k8s/`; auditoría final `dotnet list package --vulnerable`; conserva orden restore → formato → build → test → Docker → K8s → auditoría del criterio. Filtro local 6/6 correctas; CI en success (ejecución `32799666335`). |
+| REFACTOR | sin commit todavía | Evaluación sobre la suite ya verde: extrajo la constante compartida `PatronDockerBuild` (regex duplicada entre las pruebas de Docker y K8s), unificó `PatronCobertura` en un único patrón que cubre las formas con comillas y sin comillas, y renombró `ElPipeline_DebeIncluirAnalisisEstaticoOVisionadoDeFormato` a `ElPipeline_DebeVerificarElFormatoConDotnetFormat` por precisión. Incidente honesto registrado: la primera simplificación del patrón de cobertura rompió la prueba de orden (excluía comillas y el YAML usa `--collect:"XPlat Code Coverage"`); la re-ejecución inmediata lo detectó y quedó corregido antes de continuar — evidencia del valor de correr pruebas tras cada cambio del refactor. El workflow no se tocó: es mínimo y convencional, y modificarlo arriesgaría comportamiento nuevo. Sin commit asociado aún. |
+
+#### Resultado de pruebas (HU-35)
+
+La línea base previa al incremento estaba verde con 302 pruebas (CI success
+tras HU-34). Verificación tras evaluar el refactor:
+
+1. Ejecución focalizada:
+   `dotnet test tests\Licitaciones.UnitTests --configuration Release --filter "FullyQualifiedName~PipelineCiTests"`:
+   6 correctas.
+2. Suite completa con `dotnet test Licitaciones.sln`:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 148 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **308** | **0** | **0** |
+
+#### Pendientes y candidatos a Issues separadas
+
+- La branch protection de `main` (check requerido que materialice el bloqueo
+  de merge del criterio 2) es configuración de GitHub: queda pendiente de
+  configurar y evidenciar al momento de fusionar este PR.
+- La cobertura se recolecta pero no se publica como artefacto ni aplica un
+  umbral mínimo automatizado; corresponde a una posible Issue separada.
+- La nota técnica "publicar a registry solo en tags de release" no se
+  implementó: el criterio solo exige construir la imagen, y así se hizo.
+- kubeconform se descarga con `latest`: fijar versión mejoraría la
+  reproducibilidad del pipeline (candidato).
+- Los pasos nuevos (Docker/K8s/auditoría) corren en CI pero su fallo real aún
+  no se ha ejercitado; las pruebas lo garantizan a nivel de contrato.
+
+La Issue #76 permanece abierta.
 
 ## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
 
