@@ -850,6 +850,92 @@ tras HU-34). Verificación tras evaluar el refactor:
 
 La Issue #76 permanece abierta.
 
+### HU-36 — Documentación técnica completa en /docs
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-36 - Documentación técnica completa en /docs | 5 | [#77](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/77) | Criterios cubiertos por pruebas en verde (4 focalizadas y suite completa 312 verdes tras el refactor); el índice de `docs/`, los diagramas Mermaid, el registro por iteración de la bitácora y la declaración explícita de herramienta de IA quedan verificados por contrato; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-36 | Seidy | Tiffany | `a4274a4` |
+| VERDE HU-36 | Tiffany | Seidy | `0814b6b` |
+| REFACTOR HU-36 | Seidy | Tiffany | `9106afd` |
+
+La pareja planificada era Tiffany Driver/Seidy Navigator; la autoría real invirtió
+los roles (ROJO y REFACTOR firmados por Seidy, VERDE por Tiffany). La rama real
+(`iteracion-4/hu-36-documentacion`) difiere de la prevista
+(`iteracion-4/hu-36-documentacion-final`) en el sufijo `-final`; se registra como
+observación sin corregirla en fase.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #77 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Alta, estimación 5 SP, iteración 4 (RELEASE 12 — Documentación
+y Cierre), pareja, notas técnicas y los cuatro criterios coinciden literalmente.
+Inspección previa para no duplicar escenarios: solo existían pruebas
+documentales de HU-27 (`api.md`), HU-32 (`docker.md`) y HU-34 (`kubernetes.md`);
+ninguna cubría el índice general, los diagramas, la estructura de la bitácora ni
+la declaración de uso de IA. Al ser una historia meta-documental, tres de sus
+cuatro criterios ya se satisfacían por el mantenimiento continuo de las historias
+previas; el ROJO lo evidenció con un rojo mixto documentado en lugar de fabricar
+fallos artificiales.
+
+| Criterio de aceptación de la Issue #77 | Pruebas | Commits |
+| --- | --- | --- |
+| `/docs/README.md` funciona como índice de navegación de toda la documentación. | `Readme_DebeFuncionarComoIndiceDeNavegacionDeTodaLaDocumentacion`: enumera dinámicamente cada `.md` bajo `docs/` (raíz y `modulos/`) y exige su enlace en README, además de rechazar enlaces rotos. | ROJO `a4274a4`. |
+| `arquitectura-general.md` y `modelo-datos.md` incluyen diagramas Mermaid o imágenes existentes en `/docs/assets`. | `ArquitecturaGeneralYModeloDeDatos_DebenIncluirDiagramasMermaidOImagenesDeAssets`. | Ídem. |
+| `bitacora-xp.md` registra resultados, velocidad, retroalimentación, ciclos TDD, refactorizaciones y pequeñas liberaciones por iteración. | `Bitacora_DebeRegistrarPorIteracionResultadosVelocidadRetroalimentacionCiclosRefactorYLiberaciones`: exige las secciones Iteración 1..4 y siete marcadores por bloque. | Ídem. |
+| `uso-ia.md` declara herramienta, finalidad, módulos asistidos, ejemplos y validaciones del equipo. | `UsoIa_DebeDeclararHerramientaFinalidadModulosEjemplosYValidacionesDelEquipo`. | ROJO `a4274a4`; VERDE `0814b6b`. |
+
+El PR [#88](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/88)
+(`iteracion-4/hu-36-documentacion` hacia `main`) está abierto como draft, con CI
+fallida esperable sobre el ROJO `a4274a4` (`Build and Test`, ejecución
+`97667579357`) y success sobre el VERDE `0814b6b` (ejecución `97674068541`),
+ambos consultados en la API pública de GitHub; el commit del REFACTOR `9106afd`
+es local y aún no tiene ejecución de CI asociada.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `a4274a4` — `test(proyecto): cubrir criterios de documentación técnica completa en /docs (HU-36)` | Creó `DocumentacionGeneralMarkdownTests` (cuatro unitarias de contrato sobre `/docs`). Ejecución filtrada: rojo mixto documentado — 1 fallida porque `uso-ia.md` declaraba «Se utilizó IA» de forma genérica sin nombrar la herramienta en su sección de alcance, y 3 superadas legítimamente como línea base (README ya enlazaba todo el árbol `.md` sin enlaces rotos; arquitectura-general y modelo-datos ya incluían diagramas Mermaid reales; la bitácora tenía secciones Iteración 1..4 con los siete marcadores exigidos por bloque, verificado por conteo antes de fijar aserciones). Corrección propia durante la fase: una interpolación con comillas anidadas rompía la compilación y se extrajo a variable antes de declarar el rojo. CI fallida esperable (ejecución `97667579357`). |
+| VERDE | `0814b6b` — `feat(proyecto): implementar documentación técnica completa en /docs (HU-36)` | Añadió una oración en la sección de alcance de `uso-ia.md` («La herramienta utilizada fue **OpenAI Codex**… siempre bajo decisión y validación humana del equipo»), el cambio mínimo que vuelve verde la prueba sin ampliar criterios. Filtro local 4/4 correctas; CI en success (ejecución `97674068541`). |
+| REFACTOR | `9106afd` — `refactor(proyecto): simplificar implementacion de HU-36` | Extrajo las constantes `HerramientasIaConocidas` y `PatronDeclaracionHerramienta` deduplicando la alternancia de herramientas dentro del regex de la prueba de uso-ia, preservando la semántica bidireccional exacta del patrón original. Descartó extraer un helper `LeerDocumento` compartido entre clases documentales por especulativo y renombrar el encabezado «Alcance declarado en la Iteración 1» por ser cambio de contenido fuera de los criterios (reportado como candidato). Suite completa 312 verdes y formato sin diferencias. Commit local al momento de documentar, sin push ni CI. |
+
+#### Resultado de pruebas (HU-36)
+
+La línea base previa al incremento estaba verde con 308 pruebas (CI success tras
+HU-35). Verificación tras el incremento y el refactor:
+
+1. Ejecución focalizada:
+   `dotnet test tests\Licitaciones.UnitTests --configuration Release --filter "HU=HU-36"`:
+   4 correctas.
+2. Suite completa con `dotnet test Licitaciones.sln`:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 152 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **312** | **0** | **0** |
+
+#### Pendientes y candidatos a Issues separadas
+
+- El encabezado «Alcance declarado en la Iteración 1» de `uso-ia.md` subestima el
+  alcance real del apoyo de IA (este archivo documenta intervenciones de las
+  iteraciones 1 a 4); renombrarlo es un cambio de contenido fuera de los
+  criterios de esta historia.
+- La discrepancia del nombre de rama (real sin el sufijo `-final` previsto) queda
+  registrada como observación de trazabilidad.
+
+La Issue #77 permanece abierta.
+
 ## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
 
 **Estado: INICIADA.**
