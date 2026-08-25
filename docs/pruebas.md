@@ -812,6 +812,56 @@ branch protection que materialice el bloqueo de merge queda como configuración
 pendiente al momento de fusionar. La Issue #76 permanece abierta y no se marca
 como completada desde esta fase.
 
+## Resultado verificado para HU-36 (Iteración 4)
+
+HU-36 corresponde a la Issue [#77](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/77).
+Sus cuatro criterios se cubren con la suite `DocumentacionGeneralMarkdownTests`
+(cuatro unitarias de contrato sobre `/docs`, sin duplicar escenarios previos:
+solo existían pruebas documentales de `api.md` HU-27, `docker.md` HU-32 y
+`kubernetes.md` HU-34):
+
+| Criterio de aceptación de la Issue #77 | Prueba | Evidencia |
+| --- | --- | --- |
+| `/docs/README.md` funciona como índice de navegación de toda la documentación. | `Readme_DebeFuncionarComoIndiceDeNavegacionDeTodaLaDocumentacion`. | Verificación dinámica bidireccional: cada `.md` bajo `docs/` (raíz y `modulos/`) debe aparecer enlazado en README y todo enlace `.md` del índice debe resolver a un archivo existente. |
+| `arquitectura-general.md` y `modelo-datos.md` incluyen diagramas Mermaid o imágenes en `/docs/assets`. | `ArquitecturaGeneralYModeloDeDatos_DebenIncluirDiagramasMermaidOImagenesDeAssets`. | Acepta bloque ```mermaid``` con cuerpo no vacío o imagen referenciada cuyo archivo exista; hoy ambos documentos cumplen con Mermaid real (flowchart LR y erDiagram). |
+| `bitacora-xp.md` registra resultados, velocidad, retroalimentación, ciclos TDD, refactorizaciones y pequeñas liberaciones por iteración. | `Bitacora_DebeRegistrarPorIteracionResultadosVelocidadRetroalimentacionCiclosRefactorYLiberaciones`. | Exige secciones `## Iteración 1..4` y, en cada bloque, los marcadores resultado, velocidad, retroalimentación/ajustes, rojo, verde, refactor y liberación. |
+| `uso-ia.md` declara herramienta, finalidad, módulos asistidos, ejemplos y validaciones realizadas por el equipo. | `UsoIa_DebeDeclararHerramientaFinalidadModulosEjemplosYValidacionesDelEquipo`. | Exige sección de alcance/finalidad que nombre explícitamente la herramienta (patrón bidireccional «herramienta/utilizada ↔ Codex/Claude/Copilot/ChatGPT/opencode») más las secciones de módulos, ejemplos y validaciones. |
+
+La fase ROJO (`a4274a4`) se confirmó con ejecución filtrada: rojo mixto
+documentado — 1 fallida por comportamiento ausente (`uso-ia.md` decía solo «Se
+utilizó IA» sin nombrar la herramienta en su declaración de alcance) y 3
+superadas legítimamente como línea base (los otros tres criterios ya se
+satisfacían por el mantenimiento documental continuo de las historias previas);
+CI fallida esperable (ejecución `97667579357`). Tras el VERDE (`0814b6b`: una
+oración que declara «La herramienta utilizada fue **OpenAI Codex**») la misma
+ejecución terminó 4/4 correcta, con CI en success (ejecución `97674068541`). El
+refactor (`9106afd`) extrajo las constantes `HerramientasIaConocidas` y
+`PatronDeclaracionHerramienta` sin cambiar la semántica de ninguna aserción. La
+suite completa `dotnet test Licitaciones.sln` resultó:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 152 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **312** | **0** | **0** |
+
+La secuencia TDD queda trazada así:
+
+- `a4274a4` — ROJO: creó `DocumentacionGeneralMarkdownTests`; rojo mixto
+  documentado (1 por comportamiento ausente, 3 guardias de línea base).
+- `0814b6b` — VERDE: declaración explícita de herramienta en `uso-ia.md`; CI en
+  success.
+- `9106afd` — REFACTOR: deduplicación de constantes regex en las pruebas, sin
+  cambios de comportamiento ni de contenido documental.
+
+El PR [#88](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/88)
+(`iteracion-4/hu-36-documentacion` hacia `main`) está abierto como draft; el
+commit `9106afd` es local al momento de documentar y aún no tiene ejecución de
+CI asociada. La Issue #77 permanece abierta y no se marca como completada desde
+esta fase.
+
 ## Integración continua
 
 `.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release, instala los navegadores de Playwright (`pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium`, añadido por HU-30) y ejecuta toda la solución, incluidas las pruebas E2E con Chromium headless. Desde HU-35 (Iteración 4) el test recolecta cobertura (`--collect:"XPlat Code Coverage"`, resultados en `./cobertura`) y el pipeline añade, en orden, `docker build -f Dockerfile -t licitaciones-api:ci .` sin publicar, validación de manifiestos con `kubeconform -strict -summary k8s/` y auditoría final `dotnet list package --vulnerable`; ningún paso tolera fallos.
