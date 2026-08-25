@@ -2,7 +2,7 @@
 
 ## Alcance declarado en la Iteración 1
 
-Se utilizó IA como apoyo de programación en pareja y documentación para revisar la estructura de la solución, contrastar los flujos de proveedores entre capas, proponer casos de prueba, ejecutar verificaciones y mantener los documentos técnicos alineados con el repositorio.
+Se utilizó IA como apoyo de programación en pareja y documentación para revisar la estructura de la solución, contrastar los flujos de proveedores entre capas, proponer casos de prueba, ejecutar verificaciones y mantener los documentos técnicos alineados con el repositorio. La herramienta utilizada fue **OpenAI Codex**; cada intervención registrada en este documento corresponde a esa herramienta, siempre bajo decisión y validación humana del equipo.
 
 ## Módulos asistidos
 
