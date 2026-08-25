@@ -767,9 +767,54 @@ conservación de datos tras `kubectl delete pod postgres-0`) todavía no tiene
 ejecución registrada; consta como pendiente en la bitácora. La Issue #75
 permanece abierta y no se marca como completada desde esta fase.
 
+## Resultado verificado para HU-35 (Iteración 4)
+
+HU-35 corresponde a la Issue [#76](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/76).
+Sus dos criterios se cubren con la suite `PipelineCiTests` (seis unitarias de
+contrato sobre `.github/workflows/ci.yml`, sin duplicar escenarios previos:
+ninguna suite existente cubría workflows):
+
+| Criterio de aceptación de la Issue #76 | Pruebas | Evidencia |
+| --- | --- | --- |
+| El workflow se dispara en push/pull_request y ejecuta en orden restore → build → test con cobertura → análisis estático/formato → build Docker → validación manifiestos K8s → auditoría. | `ElPipeline_DebeEjecutarRestoreBuildYPruebasConCoberturaEnOrden`, `ElPipeline_DebeVerificarElFormatoConDotnetFormat`, `ElPipeline_DebeConstruirLaImagenDockerDespuesDeLasPruebas`, `ElPipeline_DebeValidarLosManifiestosDeKubernetes`, `ElPipeline_DebeAuditarDependenciasVulnerablesAlFinal`. | Triggers push y pull_request sobre main; orden verificado por posiciones; `--collect:"XPlat Code Coverage"` con resultados en `./cobertura`; `dotnet format --verify-no-changes`; `docker build -f Dockerfile -t licitaciones-api:ci .` sin publicar; `kubeconform -strict -summary k8s/`; `dotnet list package --vulnerable` al final. |
+| Cualquier paso fallido rompe el workflow y bloquea el merge (branch protection). | `ElPipeline_NoDebeTolerarFallosEnNingunPaso`. | Ningún `continue-on-error: true`, `\|\| true` ni `exit 0`; el trigger pull_request habilita el check del PR. La branch protection es configuración de GitHub, pendiente de evidenciar al fusionar. |
+
+La fase ROJO (`6f4c05e`) se confirmó con ejecución filtrada: rojo mixto
+documentado — 4 fallidas por comportamiento ausente (cobertura, Docker,
+validación K8s, auditoría) y 2 superadas legítimamente como línea base
+(formato preexistente; ausencia de tolerancia a fallos); CI fallida esperable
+(ejecución `32798336954`). Tras el VERDE (`013b4ea`) la misma ejecución terminó
+6/6 correcta, con CI en success (ejecución `32799666335`). El refactor se
+evaluó con mejoras acotadas en las pruebas (`PatronDockerBuild` compartida,
+patrón de cobertura unificado, renombre por precisión) sin tocar el workflow;
+durante esa fase una simplificación inicial del patrón rompió temporalmente la
+prueba de orden y fue detectada y corregida por re-ejecución inmediata. La
+suite completa `dotnet test Licitaciones.sln` resultó:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 148 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **308** | **0** | **0** |
+
+La secuencia TDD queda trazada así:
+
+- `6f4c05e` — ROJO: creó `PipelineCiTests`; rojo mixto documentado (4 por
+  comportamiento ausente, 2 guardias de línea base).
+- `013b4ea` — VERDE: cadena completa en el workflow; CI en success.
+- REFACTOR evaluado con mejoras locales en las pruebas, sin commit todavía.
+
+El PR [#87](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/87)
+(`iteracion-4/hu-35-pipeline-ci` hacia `main`) está abierto como draft. La
+branch protection que materialice el bloqueo de merge queda como configuración
+pendiente al momento de fusionar. La Issue #76 permanece abierta y no se marca
+como completada desde esta fase.
+
 ## Integración continua
 
-`.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release, instala los navegadores de Playwright (`pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium`, añadido por HU-30) y ejecuta toda la solución, incluidas las pruebas E2E con Chromium headless. En esta iteración no mide cobertura ni construye imágenes Docker.
+`.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release, instala los navegadores de Playwright (`pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium`, añadido por HU-30) y ejecuta toda la solución, incluidas las pruebas E2E con Chromium headless. Desde HU-35 (Iteración 4) el test recolecta cobertura (`--collect:"XPlat Code Coverage"`, resultados en `./cobertura`) y el pipeline añade, en orden, `docker build -f Dockerfile -t licitaciones-api:ci .` sin publicar, validación de manifiestos con `kubeconform -strict -summary k8s/` y auditoría final `dotnet list package --vulnerable`; ningún paso tolera fallos.
 
 Estado verificado en la API pública de GitHub al cierre de la Iteración 2 (20
 de agosto de 2026): los ocho commits de fusión del incremento terminaron en
