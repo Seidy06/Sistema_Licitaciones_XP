@@ -27,7 +27,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(HtmlEncoder.Create(
     UnicodeRanges.BasicLatin,
@@ -74,7 +73,6 @@ if (builder.Configuration.GetValue("Database:ApplyMigrationsOnStartup", true))
     await dbContext.Database.MigrateAsync();
 }
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

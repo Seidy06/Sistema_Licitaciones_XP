@@ -13,6 +13,9 @@ using Npgsql;
 
 namespace Licitaciones.Infrastructure.Persistence;
 
+/// <summary>
+/// Repositorio de ofertas con operaciones CRUD, consulta y eliminación.
+/// </summary>
 public sealed class OfertaRepository :
     IOfertaRepository,
     IEditarOfertaRepository,
@@ -21,18 +24,30 @@ public sealed class OfertaRepository :
 {
     private readonly LicitacionesDbContext _context;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del repositorio de ofertas.
+    /// </summary>
     public OfertaRepository(LicitacionesDbContext context) => _context = context;
 
+    /// <summary>
+    /// Obtiene una licitación activa por su identificador.
+    /// </summary>
     public Task<Licitacion?> ObtenerLicitacionPorIdAsync(
         Guid id, CancellationToken cancellationToken = default) =>
         _context.Licitaciones.FirstOrDefaultAsync(
             x => x.Id == id && x.DeletedAt == null, cancellationToken);
 
+    /// <summary>
+    /// Obtiene un proveedor activo por su identificador.
+    /// </summary>
     public Task<Proveedor?> ObtenerProveedorPorIdAsync(
         Guid id, CancellationToken cancellationToken = default) =>
         _context.Proveedores.FirstOrDefaultAsync(
             x => x.Id == id && x.DeletedAt == null, cancellationToken);
 
+    /// <summary>
+    /// Verifica si ya existe una oferta para la licitación y proveedor indicados.
+    /// </summary>
     public Task<bool> ExisteOfertaAsync(
         Guid licitacionId, Guid proveedorId,
         CancellationToken cancellationToken = default) =>
@@ -40,6 +55,9 @@ public sealed class OfertaRepository :
             x => x.LicitacionId == licitacionId && x.ProveedorId == proveedorId,
             cancellationToken);
 
+    /// <summary>
+    /// Obtiene la licitación asociada a una oferta por su identificador.
+    /// </summary>
     public Task<Licitacion?> ObtenerLicitacionPorOfertaIdAsync(
         Guid ofertaId,
         CancellationToken cancellationToken = default) =>
@@ -52,6 +70,9 @@ public sealed class OfertaRepository :
                 (_, licitacion) => licitacion)
             .FirstOrDefaultAsync(cancellationToken);
 
+    /// <summary>
+    /// Lista todas las ofertas de una licitación ordenadas por monto y fecha.
+    /// </summary>
     public async Task<IReadOnlyList<OfertaConsultaRegistro>> ListarAsync(
         Guid licitacionId,
         CancellationToken cancellationToken = default) =>
@@ -62,6 +83,9 @@ public sealed class OfertaRepository :
                     .ThenBy(oferta => oferta.FechaRegistro))
             .ToListAsync(cancellationToken);
 
+    /// <summary>
+    /// Lista todas las ofertas de un proveedor ordenadas por fecha de registro.
+    /// </summary>
     public async Task<IReadOnlyList<OfertaConsultaRegistro>> ListarPorProveedorIdAsync(
         Guid proveedorId,
         CancellationToken cancellationToken = default) =>
@@ -71,6 +95,9 @@ public sealed class OfertaRepository :
                     .OrderBy(oferta => oferta.FechaRegistro))
             .ToListAsync(cancellationToken);
 
+    /// <summary>
+    /// Obtiene un registro de consulta de oferta por su identificador.
+    /// </summary>
     public Task<OfertaConsultaRegistro?> ObtenerPorIdAsync(
         Guid id,
         CancellationToken cancellationToken = default) =>
@@ -78,10 +105,16 @@ public sealed class OfertaRepository :
                 _context.Ofertas.Where(oferta => oferta.Id == id))
             .FirstOrDefaultAsync(cancellationToken);
 
+    /// <summary>
+    /// Agrega una nueva oferta al contexto de cambios.
+    /// </summary>
     public async Task AgregarAsync(
         Oferta oferta, CancellationToken cancellationToken = default) =>
         await _context.Ofertas.AddAsync(oferta, cancellationToken);
 
+    /// <summary>
+    /// Obtiene la entidad de oferta por su identificador.
+    /// </summary>
     public Task<Oferta?> ObtenerEntidadPorIdAsync(
         Guid id, CancellationToken cancellationToken = default) =>
         _context.Ofertas.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -117,6 +150,9 @@ public sealed class OfertaRepository :
                 oferta.Monto,
                 oferta.FechaRegistro));
 
+    /// <summary>
+    /// Persiste todos los cambios pendientes en el contexto.
+    /// </summary>
     public async Task GuardarCambiosAsync(
         CancellationToken cancellationToken = default)
     {

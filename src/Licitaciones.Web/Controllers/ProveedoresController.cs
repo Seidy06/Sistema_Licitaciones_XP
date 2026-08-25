@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Licitaciones.Web.Controllers;
 
+/// <summary>
+/// Controlador MVC para la gestión de proveedores: consulta, creación, edición, baja e historial.
+/// </summary>
 public sealed class ProveedoresController : Controller
 {
     private readonly CrearProveedorService _crearService;
@@ -20,6 +23,9 @@ public sealed class ProveedoresController : Controller
     private readonly DarBajaProveedorService? _darBajaService;
     private readonly ConsultarOfertaService _consultarOfertaService;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del controlador de proveedores con sus dependencias.
+    /// </summary>
     public ProveedoresController(
         CrearProveedorService crearService,
         ConsultarProveedorService consultarService,
@@ -34,6 +40,9 @@ public sealed class ProveedoresController : Controller
         _consultarOfertaService = consultarOfertaService!;
     }
 
+    /// <summary>
+    /// Muestra la confirmación de eliminación de un proveedor por su identificador.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Delete(
         Guid id,
@@ -52,6 +61,9 @@ public sealed class ProveedoresController : Controller
         });
     }
 
+    /// <summary>
+    /// Confirma la baja de un proveedor y redirige al listado.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(
@@ -70,6 +82,9 @@ public sealed class ProveedoresController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    /// <summary>
+    /// Muestra el formulario de edición con los datos actuales del proveedor.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
     {
@@ -87,6 +102,9 @@ public sealed class ProveedoresController : Controller
         });
     }
 
+    /// <summary>
+    /// Procesa la actualización de un proveedor existente.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
@@ -135,6 +153,9 @@ public sealed class ProveedoresController : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
+    /// <summary>
+    /// Muestra el listado paginado de proveedores activos con filtros de búsqueda.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index(
         int pagina = 1,
@@ -164,6 +185,9 @@ public sealed class ProveedoresController : Controller
         return View(model);
     }
 
+    /// <summary>
+    /// Muestra el historial de proveedores dados de baja con paginación y filtros.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> History(
         int pagina = 1,
@@ -196,6 +220,9 @@ public sealed class ProveedoresController : Controller
         return View(model);
     }
 
+    /// <summary>
+    /// Muestra el detalle histórico de un proveedor dado de baja.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> HistoryDetails(
         Guid id,
@@ -217,6 +244,9 @@ public sealed class ProveedoresController : Controller
             proveedor.DeletedAt));
     }
 
+    /// <summary>
+    /// Muestra el detalle completo de un proveedor activo por su identificador.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Details(
         Guid id,
@@ -235,12 +265,18 @@ public sealed class ProveedoresController : Controller
             proveedor.UpdatedAt));
     }
 
+    /// <summary>
+    /// Muestra el formulario para registrar un nuevo proveedor.
+    /// </summary>
     [HttpGet]
     public IActionResult Create()
     {
         return View(new CrearProveedorViewModel());
     }
 
+    /// <summary>
+    /// Procesa el registro de un nuevo proveedor con los datos del formulario.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
@@ -279,6 +315,9 @@ public sealed class ProveedoresController : Controller
         return RedirectToAction(nameof(Create));
     }
 
+    /// <summary>
+    /// Muestra todas las ofertas asociadas a un proveedor específico.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Ofertas(
         Guid id, CancellationToken cancellationToken = default)

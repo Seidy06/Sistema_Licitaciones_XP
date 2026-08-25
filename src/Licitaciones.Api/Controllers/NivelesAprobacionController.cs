@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Licitaciones.Api.Controllers;
 
+/// <summary>
+/// API REST para gestionar niveles de aprobación de licitaciones.
+/// </summary>
 [ApiController]
 [Route("api/v1/niveles-aprobacion")]
 public sealed class NivelesAprobacionController : ControllerBase
@@ -24,6 +27,9 @@ public sealed class NivelesAprobacionController : ControllerBase
         _resolver = resolver;
     }
 
+    /// <summary>
+    /// Lista niveles de aprobación con paginación y filtros.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType<PaginaResultado<NivelAprobacionResumenDto>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginaResultado<NivelAprobacionResumenDto>>> Listar(
@@ -45,6 +51,9 @@ public sealed class NivelesAprobacionController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Obtiene un nivel de aprobación por su identificador.
+    /// </summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType<NivelAprobacionResumenDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -62,6 +71,9 @@ public sealed class NivelesAprobacionController : ControllerBase
             : Ok(nivel);
     }
 
+    /// <summary>
+    /// Resuelve el nivel de aprobación correspondiente a un monto dado.
+    /// </summary>
     [HttpGet("resolver")]
     [ProducesResponseType<LicitacionNivelAprobacionDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -79,6 +91,9 @@ public sealed class NivelesAprobacionController : ControllerBase
             : Ok(nivel);
     }
 
+    /// <summary>
+    /// Crea un nuevo nivel de aprobación.
+    /// </summary>
     [HttpPost]
     public async Task<ActionResult<LicitacionNivelAprobacionDto>> Crear(
         GuardarNivelAprobacionRequest request,
@@ -111,6 +126,9 @@ public sealed class NivelesAprobacionController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Actualiza un nivel de aprobación existente.
+    /// </summary>
     [HttpPut("{id:int}")]
     [ProducesResponseType<NivelAprobacionResumenDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -155,6 +173,9 @@ public sealed class NivelesAprobacionController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Desactiva un nivel de aprobación existente.
+    /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]

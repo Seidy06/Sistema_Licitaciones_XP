@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Licitaciones.Infrastructure.Persistence.Configurations;
 
+/// <summary>
+/// Configuración de Entity Framework para el catálogo de estados de licitación.
+/// </summary>
 public sealed class EstadoLicitacionCatalogoConfiguration
     : IEntityTypeConfiguration<EstadoLicitacionCatalogo>
 {

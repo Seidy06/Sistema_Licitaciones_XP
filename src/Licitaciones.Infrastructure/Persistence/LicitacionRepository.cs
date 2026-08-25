@@ -10,12 +10,21 @@ using Npgsql;
 
 namespace Licitaciones.Infrastructure.Persistence;
 
+/// <summary>
+/// Repositorio de licitaciones con operaciones CRUD y baja lógica.
+/// </summary>
 public sealed class LicitacionRepository : ILicitacionRepository, ILicitacionBajaRepository
 {
     private readonly LicitacionesDbContext _context;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del repositorio de licitaciones.
+    /// </summary>
     public LicitacionRepository(LicitacionesDbContext context) => _context = context;
 
+    /// <summary>
+    /// Verifica si ya existe una licitación activa con el código normalizado dado.
+    /// </summary>
     public Task<bool> ExisteCodigoNormalizadoAsync(
         string codigoNormalizado,
         CancellationToken cancellationToken = default) =>
@@ -24,6 +33,9 @@ public sealed class LicitacionRepository : ILicitacionRepository, ILicitacionBaj
                 && licitacion.DeletedAt == null,
             cancellationToken);
 
+    /// <summary>
+    /// Agrega una nueva licitación y persiste los cambios.
+    /// </summary>
     public async Task AgregarAsync(
         Licitacion licitacion,
         CancellationToken cancellationToken = default)
@@ -45,6 +57,9 @@ public sealed class LicitacionRepository : ILicitacionRepository, ILicitacionBaj
         }
     }
 
+    /// <summary>
+    /// Obtiene una licitación activa por su identificador.
+    /// </summary>
     public Task<Licitacion?> ObtenerPorIdAsync(
         Guid id,
         CancellationToken cancellationToken = default) =>
@@ -53,6 +68,9 @@ public sealed class LicitacionRepository : ILicitacionRepository, ILicitacionBaj
                 l => l.Id == id && l.DeletedAt == null,
                 cancellationToken);
 
+    /// <summary>
+    /// Obtiene el monto mínimo entre todas las ofertas de una licitación.
+    /// </summary>
     public async Task<decimal?> ObtenerMontoMinimoOfertaAsync(
         Guid licitacionId,
         CancellationToken cancellationToken = default) =>
@@ -60,10 +78,16 @@ public sealed class LicitacionRepository : ILicitacionRepository, ILicitacionBaj
             .Where(o => o.LicitacionId == licitacionId)
             .MinAsync(o => (decimal?)o.Monto, cancellationToken);
 
+    /// <summary>
+    /// Persiste todos los cambios pendientes en el contexto.
+    /// </summary>
     public Task GuardarCambiosAsync(
         CancellationToken cancellationToken = default) =>
         _context.SaveChangesAsync(cancellationToken);
 
+    /// <summary>
+    /// Obtiene una licitación activa para dar de baja lógica.
+    /// </summary>
     public Task<Licitacion?> ObtenerActivaParaDarDeBajaAsync(
         Guid id,
         CancellationToken cancellationToken = default)
@@ -73,6 +97,9 @@ public sealed class LicitacionRepository : ILicitacionRepository, ILicitacionBaj
             cancellationToken);
     }
 
+    /// <summary>
+    /// Persiste la baja lógica de una licitación.
+    /// </summary>
     public async Task ActualizarBajaAsync(
         Licitacion licitacion,
         CancellationToken cancellationToken = default)

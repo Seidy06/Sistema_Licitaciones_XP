@@ -13,6 +13,9 @@ using CrearRequest = Licitaciones.Application.Ofertas.Crear.CrearOfertaRequest;
 
 namespace Licitaciones.Api.Controllers;
 
+/// <summary>
+/// API REST para gestionar ofertas de licitaciones.
+/// </summary>
 [ApiController]
 [Route("api/v1/ofertas")]
 public sealed class OfertasController : ControllerBase
@@ -34,6 +37,9 @@ public sealed class OfertasController : ControllerBase
         _consultarOfertaService = consultarOfertaService;
     }
 
+    /// <summary>
+    /// Lista ofertas de una licitación con paginación y filtros opcionales.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType<PaginaOfertas>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -65,6 +71,9 @@ public sealed class OfertasController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Obtiene el detalle de una oferta por su identificador.
+    /// </summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType<OfertaConsultaDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -96,6 +105,9 @@ public sealed class OfertasController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Crea una nueva oferta para una licitación.
+    /// </summary>
     [HttpPost]
     [ProducesResponseType<OfertaDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -141,6 +153,9 @@ public sealed class OfertasController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Actualiza el monto de una oferta existente.
+    /// </summary>
     [HttpPut("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -175,6 +190,9 @@ public sealed class OfertasController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Elimina una oferta del sistema.
+    /// </summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]

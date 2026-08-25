@@ -17,6 +17,9 @@ using HttpRequest = Licitaciones.Api.Contracts.Licitaciones.CrearLicitacionReque
 
 namespace Licitaciones.Api.Controllers;
 
+/// <summary>
+/// API REST para gestionar licitaciones del sistema.
+/// </summary>
 [ApiController]
 [Route("api/v1/licitaciones")]
 public sealed class LicitacionesController : ControllerBase
@@ -47,6 +50,9 @@ public sealed class LicitacionesController : ControllerBase
         _clock = clock;
     }
 
+    /// <summary>
+    /// Actualiza los datos de una licitación existente.
+    /// </summary>
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<LicitacionDto>> Editar(
         Guid id,
@@ -77,10 +83,16 @@ public sealed class LicitacionesController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Publica una licitación, cambiando su estado a Publicada.
+    /// </summary>
     [HttpPost("{id:guid}/publicar")]
     public Task<ActionResult<LicitacionDto>> Publicar(Guid id, CancellationToken cancellationToken) =>
         CambiarEstadoAsync(id, true, cancellationToken);
 
+    /// <summary>
+    /// Cierra una licitación, cambiando su estado a Cerrada.
+    /// </summary>
     [HttpPost("{id:guid}/cerrar")]
     public Task<ActionResult<LicitacionDto>> Cerrar(Guid id, CancellationToken cancellationToken) =>
         CambiarEstadoAsync(id, false, cancellationToken);
@@ -115,6 +127,9 @@ public sealed class LicitacionesController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Elimina una licitación del sistema.
+    /// </summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -140,6 +155,9 @@ public sealed class LicitacionesController : ControllerBase
     private ObjectResult CrearProblema(int estado, string titulo, string detalle, string codigoError) =>
         RespuestaProblema.Crear(HttpContext, estado, titulo, detalle, codigoError);
 
+    /// <summary>
+    /// Lista licitaciones con paginación y filtros opcionales.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType<PaginaLicitaciones>(StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginaLicitaciones>> Listar(
@@ -162,6 +180,9 @@ public sealed class LicitacionesController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Obtiene el detalle de una licitación por su identificador.
+    /// </summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType<LicitacionDetalleDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -181,6 +202,9 @@ public sealed class LicitacionesController : ControllerBase
             : Ok(detalle);
     }
 
+    /// <summary>
+    /// Crea una nueva licitación en estado Borrador.
+    /// </summary>
     [HttpPost]
     [ProducesResponseType<LicitacionDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]

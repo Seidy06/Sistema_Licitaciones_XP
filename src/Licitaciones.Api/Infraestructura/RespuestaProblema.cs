@@ -2,10 +2,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Licitaciones.Api.Infraestructura;
 
+/// <summary>
+/// Utilidad estática para crear respuestas de error estructuradas (ProblemDetails).
+/// </summary>
 public static class RespuestaProblema
 {
+    /// <summary>Tipo de contenido para respuestas ProblemDetails.</summary>
     public const string TipoContenido = "application/problem+json";
 
+    /// <summary>
+    /// Crea un ObjectResult con un ProblemDetails según el estado HTTP indicado.
+    /// </summary>
     public static ObjectResult Crear(
         HttpContext contexto,
         int estado,

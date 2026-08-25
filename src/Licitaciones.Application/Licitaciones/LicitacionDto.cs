@@ -2,6 +2,9 @@ using Licitaciones.Domain.Licitaciones;
 
 namespace Licitaciones.Application.Licitaciones;
 
+/// <summary>
+/// DTO que representa los datos de una licitación para transferencia entre capas.
+/// </summary>
 public sealed record LicitacionDto(
     Guid Id,
     string Codigo,

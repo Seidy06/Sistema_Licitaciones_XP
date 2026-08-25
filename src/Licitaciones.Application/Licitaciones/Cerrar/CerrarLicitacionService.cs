@@ -3,6 +3,9 @@ using Licitaciones.Domain.Common;
 
 namespace Licitaciones.Application.Licitaciones.Cerrar;
 
+/// <summary>
+/// Servicio para cerrar licitaciones cambiando su estado a Cerrada.
+/// </summary>
 public sealed class CerrarLicitacionService
 {
     private readonly ILicitacionRepository _repository;
@@ -14,6 +17,12 @@ public sealed class CerrarLicitacionService
         _clock = clock;
     }
 
+    /// <summary>
+    /// Cierra una licitación existente.
+    /// </summary>
+    /// <param name="id">Identificador de la licitación a cerrar.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>DTO con los datos de la licitación cerrada.</returns>
     public async Task<LicitacionDto> CerrarAsync(
         Guid id,
         CancellationToken cancellationToken = default)

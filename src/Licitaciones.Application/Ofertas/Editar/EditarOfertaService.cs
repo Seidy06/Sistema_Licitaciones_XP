@@ -4,6 +4,9 @@ using Licitaciones.Domain.Ofertas;
 
 namespace Licitaciones.Application.Ofertas.Editar;
 
+/// <summary>
+/// Servicio para editar ofertas existentes con validación de estado y presupuesto.
+/// </summary>
 public sealed class EditarOfertaService
 {
     private readonly IEditarOfertaRepository _repository;
@@ -15,6 +18,12 @@ public sealed class EditarOfertaService
         _clock = clock;
     }
 
+    /// <summary>
+    /// Actualiza el monto de una oferta existente.
+    /// </summary>
+    /// <param name="request">Datos a actualizar de la oferta.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>DTO con los datos actualizados de la oferta.</returns>
     public async Task<OfertaDto> EditarAsync(
         EditarOfertaRequest request,
         CancellationToken cancellationToken = default)

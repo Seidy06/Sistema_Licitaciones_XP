@@ -4,6 +4,9 @@ using Licitaciones.Domain.TiposCambio;
 
 namespace Licitaciones.Application.Ofertas.Consultar;
 
+/// <summary>
+/// Servicio para consultar ofertas con conversión de moneda y paginación.
+/// </summary>
 public sealed class ConsultarOfertaService
 {
     private readonly IOfertaConsultaRepository _repository;
@@ -17,6 +20,12 @@ public sealed class ConsultarOfertaService
         _tiposCambio = tiposCambio;
     }
 
+    /// <summary>
+    /// Lista ofertas de una licitación con conversión de moneda y filtrado.
+    /// </summary>
+    /// <param name="consulta">Parámetros de filtrado, moneda y paginación.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Página de resultados con las ofertas encontradas.</returns>
     public async Task<PaginaOfertas> ListarAsync(
         ConsultarOfertasRequest consulta,
         CancellationToken cancellationToken = default)
@@ -67,6 +76,13 @@ public sealed class ConsultarOfertaService
         }
     }
 
+    /// <summary>
+    /// Obtiene una oferta por su identificador con conversión de moneda.
+    /// </summary>
+    /// <param name="id">Identificador de la oferta.</param>
+    /// <param name="moneda">Moneda destino para la conversión (CRC o USD).</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>DTO de la oferta o null si no existe.</returns>
     public async Task<OfertaConsultaDto?> ObtenerAsync(
         Guid id,
         string moneda,
@@ -85,6 +101,18 @@ public sealed class ConsultarOfertaService
         return convertidas.Single(x => x.Id == id);
     }
 
+    /// <summary>
+    /// Lista ofertas de un proveedor específico con conversión de moneda y paginación.
+    /// </summary>
+    /// <param name="proveedorId">Identificador del proveedor.</param>
+    /// <param name="moneda">Moneda destino para la conversión (CRC o USD).</param>
+    /// <param name="licitacionCodigo">Filtro opcional por código de licitación.</param>
+    /// <param name="ordenarPor">Campo de ordenamiento (monto, licitacion, fecharegistro).</param>
+    /// <param name="descendente">Indica si el orden es descendente.</param>
+    /// <param name="pagina">Número de página.</param>
+    /// <param name="tamanoPagina">Tamaño de la página.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Página de resultados con las ofertas del proveedor.</returns>
     public async Task<PaginaOfertas> ListarPorProveedorAsync(
         Guid proveedorId,
         string moneda,

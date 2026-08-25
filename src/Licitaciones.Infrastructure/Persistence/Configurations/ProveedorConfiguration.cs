@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Licitaciones.Infrastructure.Persistence.Configurations;
 
+/// <summary>
+/// Configuración de Entity Framework para la entidad de proveedores.
+/// </summary>
 public sealed class ProveedorConfiguration
     : IEntityTypeConfiguration<Proveedor>
 {

@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Licitaciones.Web.Controllers;
 
+/// <summary>
+/// Controlador MVC para la gestión completa de licitaciones: consulta, creación, edición y publicación.
+/// </summary>
 public sealed class LicitacionesController : Controller
 {
     private readonly CrearLicitacionService _crearService;
@@ -20,6 +23,9 @@ public sealed class LicitacionesController : Controller
     private readonly ConsultarOfertaService _consultarOfertaService;
     private readonly IClock _clock;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del controlador de licitaciones con sus dependencias.
+    /// </summary>
     public LicitacionesController(
         CrearLicitacionService crearService,
         ConsultarLicitacionService consultarService,
@@ -36,6 +42,9 @@ public sealed class LicitacionesController : Controller
         _clock = clock;
     }
 
+    /// <summary>
+    /// Muestra el listado paginado de licitaciones con filtros de búsqueda y ordenamiento.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index(
         string? codigo = null,
@@ -74,6 +83,9 @@ public sealed class LicitacionesController : Controller
         }
     }
 
+    /// <summary>
+    /// Muestra el detalle completo de una licitación por su identificador.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Details(
         Guid id, CancellationToken cancellationToken = default)
@@ -110,9 +122,15 @@ public sealed class LicitacionesController : Controller
         return View(model);
     }
 
+    /// <summary>
+    /// Muestra el formulario para crear una nueva licitación.
+    /// </summary>
     [HttpGet]
     public IActionResult Create() => View(new CrearLicitacionViewModel());
 
+    /// <summary>
+    /// Procesa la creación de una nueva licitación con los datos del formulario.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
@@ -139,6 +157,9 @@ public sealed class LicitacionesController : Controller
         return RedirectToAction(nameof(Create));
     }
 
+    /// <summary>
+    /// Muestra el formulario de edición con los datos actuales de la licitación.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Edit(
         Guid id, CancellationToken cancellationToken = default)
@@ -158,6 +179,9 @@ public sealed class LicitacionesController : Controller
         return View(model);
     }
 
+    /// <summary>
+    /// Procesa la actualización de una licitación existente.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
@@ -189,6 +213,9 @@ public sealed class LicitacionesController : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
+    /// <summary>
+    /// Publica una licitación cambiando su estado a publicado.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Publicar(
@@ -211,6 +238,9 @@ public sealed class LicitacionesController : Controller
         return RedirectToAction(nameof(Index), new { codigo });
     }
 
+    /// <summary>
+    /// Muestra las ofertas recibidas para una licitación específica.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Ofertas(
         Guid id, CancellationToken cancellationToken = default)

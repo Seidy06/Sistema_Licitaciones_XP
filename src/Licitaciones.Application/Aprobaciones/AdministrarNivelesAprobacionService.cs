@@ -5,6 +5,9 @@ using Licitaciones.Domain.Common;
 
 namespace Licitaciones.Application.Aprobaciones;
 
+/// <summary>
+/// Servicio para administrar niveles de aprobación: crear, listar, actualizar y desactivar.
+/// </summary>
 public sealed class AdministrarNivelesAprobacionService
 {
     private readonly INivelAprobacionRepository _repository;
@@ -12,6 +15,14 @@ public sealed class AdministrarNivelesAprobacionService
     public AdministrarNivelesAprobacionService(INivelAprobacionRepository repository) =>
         _repository = repository;
 
+    /// <summary>
+    /// Crea un nuevo nivel de aprobación validando traslapes con niveles existentes.
+    /// </summary>
+    /// <param name="nombre">Nombre del nivel de aprobación.</param>
+    /// <param name="montoMinimo">Monto mínimo del rango.</param>
+    /// <param name="montoMaximo">Monto máximo del rango (null para ilimitado).</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>DTO con los datos del nivel creado.</returns>
     public async Task<LicitacionNivelAprobacionDto> CrearAsync(
         string nombre,
         decimal montoMinimo,
@@ -29,6 +40,12 @@ public sealed class AdministrarNivelesAprobacionService
         return new LicitacionNivelAprobacionDto(nivel.Id, nivel.Nombre);
     }
 
+    /// <summary>
+    /// Lista niveles de aprobación activos con filtrado y paginación.
+    /// </summary>
+    /// <param name="consulta">Parámetros de filtrado y paginación.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Página de resultados con los niveles encontrados.</returns>
     public async Task<PaginaResultado<NivelAprobacionResumenDto>> ListarAsync(
         NivelesAprobacionConsultaRequest consulta,
         CancellationToken cancellationToken = default)
@@ -63,6 +80,12 @@ public sealed class AdministrarNivelesAprobacionService
             items, todos.Length, consulta.Pagina, consulta.TamanoPagina);
     }
 
+    /// <summary>
+    /// Obtiene un nivel de aprobación por su identificador.
+    /// </summary>
+    /// <param name="id">Identificador del nivel.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>DTO del nivel o null si no existe.</returns>
     public async Task<NivelAprobacionResumenDto?> ObtenerPorIdAsync(
         int id,
         CancellationToken cancellationToken = default)
@@ -71,6 +94,15 @@ public sealed class AdministrarNivelesAprobacionService
         return nivel is null ? null : Mapear(nivel);
     }
 
+    /// <summary>
+    /// Actualiza un nivel de aprobación existente validando traslapes.
+    /// </summary>
+    /// <param name="id">Identificador del nivel a actualizar.</param>
+    /// <param name="nombre">Nuevo nombre del nivel.</param>
+    /// <param name="montoMinimo">Nuevo monto mínimo.</param>
+    /// <param name="montoMaximo">Nuevo monto máximo (null para ilimitado).</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>DTO del nivel actualizado o null si no existe.</returns>
     public async Task<NivelAprobacionResumenDto?> ActualizarAsync(
         int id,
         string nombre,
@@ -95,6 +127,12 @@ public sealed class AdministrarNivelesAprobacionService
         return Mapear(nivel);
     }
 
+    /// <summary>
+    /// Desactiva un nivel de aprobación activo.
+    /// </summary>
+    /// <param name="id">Identificador del nivel a desactivar.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>True si se desactivó, false si no existía o ya estaba inactivo.</returns>
     public async Task<bool> DesactivarAsync(
         int id,
         CancellationToken cancellationToken = default)

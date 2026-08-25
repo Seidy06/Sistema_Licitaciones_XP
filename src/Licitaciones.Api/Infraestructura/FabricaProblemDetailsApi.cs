@@ -4,8 +4,14 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Licitaciones.Api.Infraestructura;
 
+/// <summary>
+/// Fábrica personalizada de ProblemDetails para respuestas de error de la API.
+/// </summary>
 public sealed class FabricaProblemDetailsApi : ProblemDetailsFactory
 {
+    /// <summary>
+    /// Crea un ProblemDetails con valores predeterminados según el estado HTTP.
+    /// </summary>
     public override ProblemDetails CreateProblemDetails(
         HttpContext httpContext,
         int? statusCode = null,
@@ -29,6 +35,9 @@ public sealed class FabricaProblemDetailsApi : ProblemDetailsFactory
         return problema;
     }
 
+    /// <summary>
+    /// Crea un ValidationProblemDetails con errores de validación del modelo.
+    /// </summary>
     public override ValidationProblemDetails CreateValidationProblemDetails(
         HttpContext httpContext,
         ModelStateDictionary modelStateDictionary,

@@ -7,11 +7,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Licitaciones.Infrastructure.Persistence;
 
+/// <summary>
+/// Repositorio de consulta de licitaciones con soporte de filtros y ordenamiento.
+/// </summary>
 public sealed class LicitacionConsultaRepository : ILicitacionConsultaRepository
 {
     private readonly LicitacionesDbContext _context;
     private readonly IClock _clock;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del repositorio de consulta de licitaciones.
+    /// </summary>
     public LicitacionConsultaRepository(
         LicitacionesDbContext context,
         IClock clock)
@@ -20,6 +26,9 @@ public sealed class LicitacionConsultaRepository : ILicitacionConsultaRepository
         _clock = clock;
     }
 
+    /// <summary>
+    /// Lista licitaciones aplicando filtros, ordenamiento y paginación.
+    /// </summary>
     public async Task<IReadOnlyList<Licitacion>> ListarAsync(
         ConsultarLicitacionesRequest consulta,
         CancellationToken cancellationToken = default)
@@ -75,6 +84,9 @@ public sealed class LicitacionConsultaRepository : ILicitacionConsultaRepository
         return await query.ToListAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Obtiene una licitación activa por su identificador.
+    /// </summary>
     public async Task<Licitacion?> ObtenerPorIdAsync(
         Guid id,
         CancellationToken cancellationToken = default) =>
@@ -83,6 +95,9 @@ public sealed class LicitacionConsultaRepository : ILicitacionConsultaRepository
                 l => l.Id == id && l.DeletedAt == null,
                 cancellationToken);
 
+    /// <summary>
+    /// Obtiene todas las ofertas asociadas a una licitación.
+    /// </summary>
     public async Task<IReadOnlyList<Oferta>> ObtenerOfertasAsync(
         Guid licitacionId,
         CancellationToken cancellationToken = default) =>
@@ -90,6 +105,9 @@ public sealed class LicitacionConsultaRepository : ILicitacionConsultaRepository
             .Where(o => o.LicitacionId == licitacionId)
             .ToListAsync(cancellationToken);
 
+    /// <summary>
+    /// Obtiene el nivel de aprobación correspondiente al monto de oferta indicado.
+    /// </summary>
     public async Task<LicitacionNivelAprobacionDto?> ObtenerNivelAprobacionAsync(
         decimal montoOferta,
         CancellationToken cancellationToken = default)

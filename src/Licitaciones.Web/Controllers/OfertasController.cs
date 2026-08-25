@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Licitaciones.Web.Controllers;
 
+/// <summary>
+/// Controlador MVC para la gestión de ofertas: consulta, creación, edición y eliminación.
+/// </summary>
 public sealed class OfertasController : Controller
 {
     private const string MonedaPredeterminada = "CRC";
@@ -22,6 +25,9 @@ public sealed class OfertasController : Controller
     private readonly ConsultarLicitacionService _consultarLicitacionService;
     private readonly IClock _clock;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del controlador de ofertas con sus dependencias.
+    /// </summary>
     public OfertasController(
         ConsultarOfertaService consultarService,
         CrearOfertaService crearService,
@@ -38,6 +44,9 @@ public sealed class OfertasController : Controller
         _clock = clock;
     }
 
+    /// <summary>
+    /// Muestra el listado paginado de ofertas para una licitación con filtros de moneda y proveedor.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index(
         Guid licitacionId,
@@ -100,12 +109,18 @@ public sealed class OfertasController : Controller
         }
     }
 
+    /// <summary>
+    /// Muestra el formulario para registrar una nueva oferta.
+    /// </summary>
     [HttpGet]
     public IActionResult Create()
     {
         return View(new CrearOfertaViewModel());
     }
 
+    /// <summary>
+    /// Procesa el registro de una nueva oferta con los datos del formulario.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
@@ -133,6 +148,9 @@ public sealed class OfertasController : Controller
         return RedirectToAction(nameof(Index), new { licitacionId = model.LicitacionId });
     }
 
+    /// <summary>
+    /// Muestra el detalle completo de una oferta por su identificador.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Details(
         Guid id, string moneda = "CRC",
@@ -157,6 +175,9 @@ public sealed class OfertasController : Controller
         return View(model);
     }
 
+    /// <summary>
+    /// Muestra el formulario de edición con los datos actuales de la oferta.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Edit(
         Guid id, CancellationToken cancellationToken = default)
@@ -176,6 +197,9 @@ public sealed class OfertasController : Controller
         return View(model);
     }
 
+    /// <summary>
+    /// Procesa la actualización del monto de una oferta existente.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
@@ -200,6 +224,9 @@ public sealed class OfertasController : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
+    /// <summary>
+    /// Muestra la confirmación de eliminación de una oferta por su identificador.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Delete(
         Guid id, CancellationToken cancellationToken = default)
@@ -220,6 +247,9 @@ public sealed class OfertasController : Controller
         return View(model);
     }
 
+    /// <summary>
+    /// Confirma la eliminación de una oferta y redirige al listado.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(

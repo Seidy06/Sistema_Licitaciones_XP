@@ -2,6 +2,9 @@ using Licitaciones.Domain.Proveedores;
 
 namespace Licitaciones.Application.Proveedores.Consultar;
 
+/// <summary>
+/// Resultado paginado de la consulta de proveedores.
+/// </summary>
 public sealed record PaginaProveedores
 {
     public PaginaProveedores(IReadOnlyList<Proveedor> items, int total)

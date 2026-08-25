@@ -4,6 +4,9 @@ using Licitaciones.Domain.Ofertas;
 
 namespace Licitaciones.Application.Ofertas.Crear;
 
+/// <summary>
+/// Servicio para crear ofertas con validación de estado, presupuesto y duplicidad.
+/// </summary>
 public sealed class CrearOfertaService
 {
     private readonly IOfertaRepository _repository;
@@ -15,6 +18,12 @@ public sealed class CrearOfertaService
         _clock = clock;
     }
 
+    /// <summary>
+    /// Registra una oferta nueva para una licitación publicada.
+    /// </summary>
+    /// <param name="request">Datos de la oferta a crear.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>DTO con los datos de la oferta creada.</returns>
     public async Task<OfertaDto> CrearAsync(
         CrearOfertaRequest request,
         CancellationToken cancellationToken = default)

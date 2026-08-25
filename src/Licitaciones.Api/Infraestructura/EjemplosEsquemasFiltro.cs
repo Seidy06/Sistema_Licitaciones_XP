@@ -17,6 +17,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Licitaciones.Api.Infraestructura;
 
+/// <summary>
+/// Filtro de esquema Swagger que agrega ejemplos a los tipos de DTO y request de la API.
+/// </summary>
 public sealed class EjemplosEsquemasFiltro : ISchemaFilter
 {
     private static readonly Dictionary<Type, Func<OpenApiObject>> EjemplosPorTipo = new()
@@ -34,6 +37,9 @@ public sealed class EjemplosEsquemasFiltro : ISchemaFilter
         [typeof(GuardarTipoCambioRequest)] = EjemploGuardarTipoCambio
     };
 
+    /// <summary>
+    /// Aplica el ejemplo correspondiente al esquema Swagger si el tipo tiene un ejemplo registrado.
+    /// </summary>
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
         ArgumentNullException.ThrowIfNull(schema);

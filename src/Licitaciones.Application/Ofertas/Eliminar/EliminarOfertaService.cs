@@ -4,6 +4,9 @@ using Licitaciones.Domain.Ofertas;
 
 namespace Licitaciones.Application.Ofertas.Eliminar;
 
+/// <summary>
+/// Servicio para eliminar ofertas con validación de estado de licitación.
+/// </summary>
 public sealed class EliminarOfertaService
 {
     private readonly IEliminarOfertaRepository _repository;
@@ -15,6 +18,12 @@ public sealed class EliminarOfertaService
         _clock = clock;
     }
 
+    /// <summary>
+    /// Elimina una oferta existente si la licitación está publicada y no vencida.
+    /// </summary>
+    /// <param name="id">Identificador de la oferta a eliminar.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>True si se eliminó correctamente, false si no se encontró.</returns>
     public async Task<bool> EliminarAsync(
         Guid id, CancellationToken cancellationToken = default)
     {

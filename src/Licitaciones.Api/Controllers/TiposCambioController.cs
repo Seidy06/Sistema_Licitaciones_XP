@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Licitaciones.Api.Controllers;
 
+/// <summary>
+/// API REST para gestionar tipos de cambio del sistema.
+/// </summary>
 [ApiController]
 [Route("api/v1/tipos-cambio")]
 public sealed class TiposCambioController : ControllerBase
@@ -17,6 +20,9 @@ public sealed class TiposCambioController : ControllerBase
     public TiposCambioController(AdministrarTipoCambioService administrar) =>
         _administrar = administrar;
 
+    /// <summary>
+    /// Lista tipos de cambio con paginación y ordenamiento.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType<PaginaResultado<TipoCambioDto>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginaResultado<TipoCambioDto>>> Listar(
@@ -42,6 +48,9 @@ public sealed class TiposCambioController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Obtiene un tipo de cambio por su identificador.
+    /// </summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType<TipoCambioDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -59,6 +68,9 @@ public sealed class TiposCambioController : ControllerBase
             : Ok(tipoCambio);
     }
 
+    /// <summary>
+    /// Obtiene el tipo de cambio actualmente activo.
+    /// </summary>
     [HttpGet("activo")]
     [ProducesResponseType<TipoCambioDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -75,6 +87,9 @@ public sealed class TiposCambioController : ControllerBase
             : Ok(tipoCambio);
     }
 
+    /// <summary>
+    /// Crea un nuevo tipo de cambio.
+    /// </summary>
     [HttpPost]
     [ProducesResponseType<TipoCambioDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -100,6 +115,9 @@ public sealed class TiposCambioController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Actualiza un tipo de cambio existente.
+    /// </summary>
     [HttpPut("{id:int}")]
     [ProducesResponseType<TipoCambioDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -134,6 +152,9 @@ public sealed class TiposCambioController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Elimina un tipo de cambio del sistema.
+    /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -151,6 +172,9 @@ public sealed class TiposCambioController : ControllerBase
                 "tipo_cambio_no_encontrado");
     }
 
+    /// <summary>
+    /// Activa un tipo de cambio, desactivando el anterior.
+    /// </summary>
     [HttpPatch("{id:int}/activar")]
     [ProducesResponseType<TipoCambioDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]

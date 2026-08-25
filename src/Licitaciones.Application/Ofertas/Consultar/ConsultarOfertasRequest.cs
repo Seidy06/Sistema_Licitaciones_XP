@@ -1,5 +1,8 @@
 namespace Licitaciones.Application.Ofertas.Consultar;
 
+/// <summary>
+/// Parámetros de consulta para filtrar y paginar ofertas de una licitación.
+/// </summary>
 public sealed record ConsultarOfertasRequest(
     Guid LicitacionId,
     string Moneda = "CRC",

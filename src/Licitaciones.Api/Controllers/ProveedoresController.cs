@@ -15,6 +15,9 @@ using HttpRequest = Licitaciones.Api.Contracts.Proveedores.CrearProveedorRequest
 
 namespace Licitaciones.Api.Controllers;
 
+/// <summary>
+/// API REST para gestionar proveedores del sistema.
+/// </summary>
 [ApiController]
 [Route("api/v1/proveedores")]
 public sealed class ProveedoresController : ControllerBase
@@ -39,6 +42,9 @@ public sealed class ProveedoresController : ControllerBase
         _consultarOfertaService = consultarOfertaService;
     }
 
+    /// <summary>
+    /// Elimina un proveedor del sistema.
+    /// </summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -61,6 +67,9 @@ public sealed class ProveedoresController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Actualiza los datos de un proveedor existente.
+    /// </summary>
     [HttpPut("{id:guid}")]
     [ProducesResponseType<ProveedorDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -116,6 +125,9 @@ public sealed class ProveedoresController : ControllerBase
     private ObjectResult CrearProblema(int estado, string titulo, string detalle, string codigoError) =>
         RespuestaProblema.Crear(HttpContext, estado, titulo, detalle, codigoError);
 
+    /// <summary>
+    /// Lista proveedores activos con paginación y filtros opcionales.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType<PaginaResultado<ProveedorDto>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginaResultado<ProveedorDto>>> Listar(
@@ -134,6 +146,9 @@ public sealed class ProveedoresController : ControllerBase
         return Ok(resultado);
     }
 
+    /// <summary>
+    /// Lista el historial de proveedores con paginación y filtros opcionales.
+    /// </summary>
     [HttpGet("historico")]
     [ProducesResponseType<PaginaResultado<ProveedorHistoricoDto>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginaResultado<ProveedorHistoricoDto>>> ListarHistorico(
@@ -152,6 +167,9 @@ public sealed class ProveedoresController : ControllerBase
         return Ok(resultado);
     }
 
+    /// <summary>
+    /// Obtiene el registro histórico de un proveedor por su identificador.
+    /// </summary>
     [HttpGet("historico/{id:guid}")]
     [ProducesResponseType<ProveedorHistoricoDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -171,6 +189,9 @@ public sealed class ProveedoresController : ControllerBase
             : Ok(proveedor);
     }
 
+    /// <summary>
+    /// Obtiene un proveedor activo por su identificador.
+    /// </summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType<ProveedorDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -188,6 +209,9 @@ public sealed class ProveedoresController : ControllerBase
             : Ok(proveedor);
     }
 
+    /// <summary>
+    /// Lista las ofertas asociadas a un proveedor con paginación y filtros.
+    /// </summary>
     [HttpGet("{id:guid}/ofertas")]
     [ProducesResponseType<PaginaOfertas>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -227,6 +251,9 @@ public sealed class ProveedoresController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Crea un nuevo proveedor en el sistema.
+    /// </summary>
     [HttpPost]
     [ProducesResponseType<ProveedorDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
