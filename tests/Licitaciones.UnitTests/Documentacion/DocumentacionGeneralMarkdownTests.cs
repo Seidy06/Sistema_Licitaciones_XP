@@ -9,6 +9,13 @@ public sealed class DocumentacionGeneralMarkdownTests
     private static readonly string[] DocumentosConDiagrama =
         { "arquitectura-general.md", "modelo-datos.md" };
 
+    private const string HerramientasIaConocidas =
+        "(?:codex|claude|copilot|chatgpt|opencode)";
+
+    private static readonly string PatronDeclaracionHerramienta =
+        @"(?:herramienta|utilizad[oa])[^.\r\n]*" + HerramientasIaConocidas
+        + "|" + HerramientasIaConocidas + @"[^.\r\n]*(?:herramienta|utilizad[oa])";
+
     [Fact]
     [Trait("HU", "HU-36")]
     public void Readme_DebeFuncionarComoIndiceDeNavegacionDeTodaLaDocumentacion()
@@ -126,8 +133,7 @@ public sealed class DocumentacionGeneralMarkdownTests
         Assert.True(
             Regex.IsMatch(
                 declaracionAlcance.Value,
-                @"(herramienta|utilizad[oa])[^.\r\n]*(codex|claude|copilot|chatgpt|opencode)"
-                + "|(codex|claude|copilot|chatgpt|opencode)[^.\r\n]*(herramienta|utilizad[oa])",
+                PatronDeclaracionHerramienta,
                 RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
             "La declaración de alcance de 'docs/uso-ia.md' debe nombrar la "
             + "herramienta de IA utilizada de forma explícita; indicar solo "
