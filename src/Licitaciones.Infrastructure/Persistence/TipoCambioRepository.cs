@@ -21,6 +21,12 @@ public sealed class TipoCambioRepository : ITipoCambioRepository
                     && tipo.MonedaDestino == TipoCambio.MonedaDestinoPredeterminada,
                 cancellationToken);
 
+    public Task<TipoCambio?> ObtenerPorIdAsync(
+        int id,
+        CancellationToken cancellationToken = default) =>
+        _context.TiposCambio.FirstOrDefaultAsync(
+            tipo => tipo.Id == id, cancellationToken);
+
     public async Task<IReadOnlyList<TipoCambio>> ListarTodosAsync(
         CancellationToken cancellationToken = default)
     {
@@ -47,4 +53,8 @@ public sealed class TipoCambioRepository : ITipoCambioRepository
         await _context.TiposCambio.AddAsync(tipoCambio, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public Task GuardarCambiosAsync(
+        CancellationToken cancellationToken = default) =>
+        _context.SaveChangesAsync(cancellationToken);
 }

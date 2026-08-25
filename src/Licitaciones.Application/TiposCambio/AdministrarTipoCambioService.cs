@@ -28,6 +28,80 @@ public sealed class AdministrarTipoCambioService
         return tipoCambio is null ? null : Mapear(tipoCambio);
     }
 
+    public async Task<TipoCambioDto?> ObtenerPorIdAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var tipoCambio = await _repository.ObtenerPorIdAsync(id, cancellationToken);
+        return tipoCambio is null ? null : Mapear(tipoCambio);
+    }
+
+    public async Task<TipoCambioDto?> ActualizarAsync(
+        int id,
+        decimal valor,
+        DateOnly fecha,
+        CancellationToken cancellationToken = default)
+    {
+        var tipoCambio = await _repository.ObtenerPorIdAsync(id, cancellationToken);
+        if (tipoCambio is null)
+        {
+            return null;
+        }
+
+        if (valor <= 0)
+        {
+            throw new DomainException("El valor del tipo de cambio debe ser mayor que cero.");
+        }
+
+        if (tipoCambio.Activo)
+        {
+            tipoCambio.Actualizar(valor, fecha);
+        }
+        else
+        {
+            tipoCambio.Actualizar(valor, fecha);
+        }
+
+        await _repository.GuardarCambiosAsync(cancellationToken);
+        return Mapear(tipoCambio);
+    }
+
+    public async Task<bool> EliminarAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var tipoCambio = await _repository.ObtenerPorIdAsync(id, cancellationToken);
+        if (tipoCambio is null)
+        {
+            return false;
+        }
+
+        tipoCambio.Desactivar();
+        await _repository.GuardarCambiosAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<TipoCambioDto?> ActivarAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var tipoCambio = await _repository.ObtenerPorIdAsync(id, cancellationToken);
+        if (tipoCambio is null)
+        {
+            return null;
+        }
+
+        var activo = await _repository.ObtenerActivoAsync(cancellationToken);
+        if (activo is not null && activo.Id != id)
+        {
+            activo.Desactivar();
+        }
+
+        tipoCambio.Activar();
+        await _repository.GuardarCambiosAsync(cancellationToken);
+        return Mapear(tipoCambio);
+    }
+
     public async Task<PaginaResultado<TipoCambioDto>> ListarAsync(
         string ordenarPor = "fecha",
         bool descendente = false,

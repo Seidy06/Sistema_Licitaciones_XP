@@ -71,6 +71,30 @@ public sealed class AdministrarNivelesAprobacionService
         return nivel is null ? null : Mapear(nivel);
     }
 
+    public async Task<NivelAprobacionResumenDto?> ActualizarAsync(
+        int id,
+        string nombre,
+        decimal montoMinimo,
+        decimal? montoMaximo,
+        CancellationToken cancellationToken = default)
+    {
+        var nivel = await _repository.ObtenerPorIdAsync(id, cancellationToken);
+        if (nivel is null)
+        {
+            return null;
+        }
+
+        if (await _repository.ExisteTraslapeActivoAsync(
+                montoMinimo, montoMaximo, id, cancellationToken))
+        {
+            throw new NivelAprobacionConflictoException();
+        }
+
+        nivel.Actualizar(nombre, montoMinimo, montoMaximo);
+        await _repository.GuardarCambiosAsync(cancellationToken);
+        return Mapear(nivel);
+    }
+
     public async Task<bool> DesactivarAsync(
         int id,
         CancellationToken cancellationToken = default)

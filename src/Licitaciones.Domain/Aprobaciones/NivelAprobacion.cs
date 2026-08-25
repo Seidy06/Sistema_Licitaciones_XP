@@ -37,6 +37,17 @@ public sealed class NivelAprobacion : IAuditableEntity
         Activo = false;
     }
 
+    public void Actualizar(
+        string nombre,
+        decimal montoMinimo,
+        decimal? montoMaximo)
+    {
+        Validar(nombre, montoMinimo, montoMaximo);
+        Nombre = nombre.Trim();
+        MontoMinimo = montoMinimo;
+        MontoMaximo = montoMaximo;
+    }
+
     private static void Validar(
         string nombre,
         decimal montoMinimo,

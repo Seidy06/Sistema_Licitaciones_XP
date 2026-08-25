@@ -117,6 +117,7 @@ public sealed class AdministrarNivelesAprobacionServiceTests
         public Task<bool> ExisteTraslapeActivoAsync(
             decimal montoMinimo,
             decimal? montoMaximo,
+            int? excludeId = null,
             CancellationToken cancellationToken = default) =>
             Task.FromResult(_existeTraslape);
 

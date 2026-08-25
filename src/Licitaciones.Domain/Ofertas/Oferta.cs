@@ -15,6 +15,7 @@ public sealed class Oferta : IAuditableEntity
     public DateTimeOffset FechaRegistro { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }
+    public uint Version { get; private set; }
 
     public static Oferta Crear(
         Guid licitacionId,

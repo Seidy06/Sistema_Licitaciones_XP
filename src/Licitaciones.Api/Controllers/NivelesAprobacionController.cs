@@ -1,6 +1,7 @@
 using Licitaciones.Api.Contracts.Aprobaciones;
 using Licitaciones.Api.Infraestructura;
 using Licitaciones.Application.Aprobaciones;
+using Licitaciones.Application.Common;
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Domain.Common;
 
@@ -21,6 +22,44 @@ public sealed class NivelesAprobacionController : ControllerBase
     {
         _administrar = administrar;
         _resolver = resolver;
+    }
+
+    [HttpGet]
+    [ProducesResponseType<PaginaResultado<NivelAprobacionResumenDto>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<PaginaResultado<NivelAprobacionResumenDto>>> Listar(
+        [FromQuery] NivelesAprobacionConsultaRequest consulta,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await _administrar.ListarAsync(consulta, cancellationToken);
+            return Ok(resultado);
+        }
+        catch (DomainException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Consulta inválida",
+                exception.Message,
+                "consulta_niveles_aprobacion_invalida");
+        }
+    }
+
+    [HttpGet("{id:int}")]
+    [ProducesResponseType<NivelAprobacionResumenDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<NivelAprobacionResumenDto>> Obtener(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var nivel = await _administrar.ObtenerPorIdAsync(id, cancellationToken);
+        return nivel is null
+            ? CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Nivel de aprobación no encontrado",
+                "El nivel de aprobación solicitado no existe.",
+                "nivel_aprobacion_no_encontrado")
+            : Ok(nivel);
     }
 
     [HttpGet("resolver")]
@@ -70,6 +109,67 @@ public sealed class NivelesAprobacionController : ControllerBase
                 exception.Message,
                 "nivel_aprobacion_invalido");
         }
+    }
+
+    [HttpPut("{id:int}")]
+    [ProducesResponseType<NivelAprobacionResumenDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<NivelAprobacionResumenDto>> Actualizar(
+        int id,
+        GuardarNivelAprobacionRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var nivel = await _administrar.ActualizarAsync(
+                id,
+                request.Nombre,
+                request.MontoMinimo,
+                request.MontoMaximo,
+                cancellationToken);
+
+            return nivel is null
+                ? CrearProblema(
+                    StatusCodes.Status404NotFound,
+                    "Nivel de aprobación no encontrado",
+                    "El nivel de aprobación solicitado no existe.",
+                    "nivel_aprobacion_no_encontrado")
+                : Ok(nivel);
+        }
+        catch (NivelAprobacionConflictoException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Rango de aprobación en conflicto",
+                exception.Message,
+                "nivel_aprobacion_conflicto");
+        }
+        catch (DomainException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Nivel de aprobación inválido",
+                exception.Message,
+                "nivel_aprobacion_invalido");
+        }
+    }
+
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Eliminar(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var eliminado = await _administrar.DesactivarAsync(id, cancellationToken);
+        return eliminado
+            ? NoContent()
+            : CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Nivel de aprobación no encontrado",
+                "El nivel de aprobación solicitado no existe o ya está desactivado.",
+                "nivel_aprobacion_no_encontrado");
     }
 
     private ObjectResult CrearProblema(int estado, string titulo, string detalle, string codigoError) =>

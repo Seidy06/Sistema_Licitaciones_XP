@@ -22,6 +22,7 @@ public sealed class OfertaConfiguration : IEntityTypeConfiguration<Oferta>
         builder.Property(x => x.FechaRegistro).HasColumnType("timestamp with time zone");
         builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
         builder.Property(x => x.UpdatedAt).HasColumnType("timestamp with time zone");
+        builder.Property(x => x.Version).IsRowVersion();
         builder
             .HasIndex(x => new { x.LicitacionId, x.ProveedorId })
             .IsUnique()

@@ -22,6 +22,11 @@ internal sealed class RepositorioTipoCambioEnMemoria : ITipoCambioRepository
         CancellationToken cancellationToken = default) =>
         Task.FromResult(_tipos.FirstOrDefault(tipo => tipo.Activo));
 
+    public Task<TipoCambio?> ObtenerPorIdAsync(
+        int id,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(_tipos.FirstOrDefault(tipo => tipo.Id == id));
+
     public Task ReemplazarActivoAsync(
         TipoCambio tipoCambio,
         CancellationToken cancellationToken = default)
@@ -33,4 +38,8 @@ internal sealed class RepositorioTipoCambioEnMemoria : ITipoCambioRepository
     public Task<IReadOnlyList<TipoCambio>> ListarTodosAsync(
         CancellationToken cancellationToken = default) =>
         Task.FromResult(_tipos);
+
+    public Task GuardarCambiosAsync(
+        CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
 }

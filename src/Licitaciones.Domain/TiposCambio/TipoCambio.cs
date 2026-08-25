@@ -38,4 +38,17 @@ public sealed class TipoCambio : IAuditableEntity
     }
 
     public void Desactivar() => Activo = false;
+
+    public void Activar() => Activo = true;
+
+    public void Actualizar(decimal valor, DateOnly fecha)
+    {
+        if (valor <= 0)
+        {
+            throw new DomainException("El valor del tipo de cambio debe ser mayor que cero.");
+        }
+
+        Valor = valor;
+        Fecha = fecha;
+    }
 }

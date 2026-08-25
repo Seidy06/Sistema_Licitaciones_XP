@@ -18,9 +18,11 @@ public sealed class NivelAprobacionRepository : INivelAprobacionRepository
     public Task<bool> ExisteTraslapeActivoAsync(
         decimal montoMinimo,
         decimal? montoMaximo,
+        int? excludeId = null,
         CancellationToken cancellationToken = default) =>
         _context.NivelesAprobacion.AnyAsync(
             nivel => nivel.Activo
+                && (excludeId == null || nivel.Id != excludeId.Value)
                 && (nivel.MontoMaximo == null || nivel.MontoMaximo > montoMinimo)
                 && (montoMaximo == null || nivel.MontoMinimo < montoMaximo),
             cancellationToken);

@@ -7,6 +7,7 @@ public interface INivelAprobacionRepository
     Task<bool> ExisteTraslapeActivoAsync(
         decimal montoMinimo,
         decimal? montoMaximo,
+        int? excludeId = null,
         CancellationToken cancellationToken = default);
 
     Task AgregarAsync(
