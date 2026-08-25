@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Licitaciones.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(LicitacionesDbContext))]
-    [Migration("20260825160558_AddOfertaConcurrencyTokenAndUpdateApprovalSeed")]
+    [Migration("20260825163445_AddOfertaConcurrencyTokenAndUpdateApprovalSeed")]
     partial class AddOfertaConcurrencyTokenAndUpdateApprovalSeed
     {
         /// <inheritdoc />
