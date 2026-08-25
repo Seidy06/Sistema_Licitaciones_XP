@@ -717,6 +717,56 @@ La aplicación real de los manifiestos en un clúster (`kubectl apply`) todavía
 no tiene evidencia registrada; consta como pendiente en la bitácora. La Issue
 #74 permanece abierta y no se marca como completada desde esta fase.
 
+## Resultado verificado para HU-34 (Iteración 4)
+
+HU-34 corresponde a la Issue [#75](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/75).
+Sus tres criterios se cubren con la suite `KubernetesPostgresqlTests`
+(cinco unitarias de contrato, sin duplicar los escenarios de aplicación de
+`KubernetesManifestsTests`):
+
+| Criterio de aceptación de la Issue #75 | Pruebas | Evidencia |
+| --- | --- | --- |
+| Los datos se conservan gracias al `PersistentVolumeClaim` cuando el pod se reinicia. | `Postgresql_DebeDefinirUnStatefulSetConVolumeClaimTemplates`, `Postgresql_LosDatosDebenMontarseSobreElVolumenPersistente`. | `postgres-statefulset.yaml`: StatefulSet PostgreSQL 16 con `volumeClaimTemplates` (`postgres-data`, `ReadWriteOnce`, 1Gi) montado en `/var/lib/postgresql/data`; el nombre del montaje debe coincidir con la plantilla. |
+| Las migraciones se aplican de forma controlada (Job/InitContainer), no automáticamente en cada réplica. | `LasMigraciones_ClusterDebeAplicarlasDeFormaControlada`, `LasReplicasDeLaApi_NoDebenAplicarMigracionesAutomaticamente`. | `migrations-job.yaml`: `Job` `batch/v1` que ejecuta el bundle EF (imagen construida por `Dockerfile.migrations`) con la cadena desde `licitaciones-secret`; Deployment y ConfigMap sin `ApplyMigrationsOnStartup=true`. |
+| `/docs/kubernetes.md` documenta instrucciones reproducibles y evidencia de pods, servicios, PVC, logs y conservación tras reinicio. | `KubernetesMd_DebeDocumentarInstruccionesReproduciblesYLaEvidencia`. | La documentación exige `kubectl apply`, statefulset y postgres, más los comandos de evidencia (`get pods`, `get svc`, `get pvc`, `logs`) y la secuencia de reinicio con datos conservados. |
+
+La fase ROJO (`a4e73ff`) se confirmó con ejecución filtrada: cuatro pruebas
+fallaron por comportamiento ausente (sin manifiesto de PostgreSQL, sin Job o
+initContainer de migraciones y sin sección HU-34 en la documentación) y una
+pasó legítimamente porque HU-33 ya dejó `Database__ApplyMigrationsOnStartup`
+en `false` — rojo mixto registrado; CI fallida esperable (ejecución
+`32793287726`). Tras el VERDE (`9992131`: Service headless + StatefulSet con
+`volumeClaimTemplates`, Job de migraciones con bundle EF, `Dockerfile.migrations`,
+claves `POSTGRES_*` en el Secret y actualización de `docs/kubernetes.md`),
+el filtro `HU=HU-34` terminó 5/5 correcto, con CI en `success` (ejecución
+`32794832818`). Tras el refactor local (deduplicación de la regex de
+`volumeClaimTemplates` y corrección de una errata de comentario, sin cambios
+de comportamiento), la suite completa `dotnet test Licitaciones.sln` resultó:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 142 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **302** | **0** | **0** |
+
+La secuencia TDD queda trazada así:
+
+- `a4e73ff` — ROJO: creó `KubernetesPostgresqlTests`; 4 fallidas por
+  comportamiento ausente y 1 superada legítima.
+- `9992131` — VERDE: persistencia con PVC y migraciones controladas por Job;
+  CI en `success`.
+- REFACTOR local sin publicar: deduplicación de la regex de
+  `volumeClaimTemplates` en las pruebas y errata de comentario corregida.
+
+El PR [#86](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/86)
+(`iteracion-4/hu-34-k8s-postgresql` hacia `main`) está abierto como draft.
+La evidencia real en un clúster (pods, PVC `Bound`, logs del Job y
+conservación de datos tras `kubectl delete pod postgres-0`) todavía no tiene
+ejecución registrada; consta como pendiente en la bitácora. La Issue #75
+permanece abierta y no se marca como completada desde esta fase.
+
 ## Integración continua
 
 `.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release, instala los navegadores de Playwright (`pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium`, añadido por HU-30) y ejecuta toda la solución, incluidas las pruebas E2E con Chromium headless. En esta iteración no mide cobertura ni construye imágenes Docker.
