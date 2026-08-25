@@ -1,5 +1,6 @@
 using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Crear;
+using Licitaciones.Application.Licitaciones.Eliminar;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Infrastructure.Persistence.Configurations;
 
@@ -9,7 +10,7 @@ using Npgsql;
 
 namespace Licitaciones.Infrastructure.Persistence;
 
-public sealed class LicitacionRepository : ILicitacionRepository
+public sealed class LicitacionRepository : ILicitacionRepository, ILicitacionBajaRepository
 {
     private readonly LicitacionesDbContext _context;
 
@@ -62,4 +63,20 @@ public sealed class LicitacionRepository : ILicitacionRepository
     public Task GuardarCambiosAsync(
         CancellationToken cancellationToken = default) =>
         _context.SaveChangesAsync(cancellationToken);
+
+    public Task<Licitacion?> ObtenerActivaParaDarDeBajaAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return _context.Licitaciones.SingleOrDefaultAsync(
+            licitacion => licitacion.Id == id && licitacion.DeletedAt == null,
+            cancellationToken);
+    }
+
+    public async Task ActualizarBajaAsync(
+        Licitacion licitacion,
+        CancellationToken cancellationToken = default)
+    {
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

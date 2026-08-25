@@ -105,6 +105,11 @@ public sealed class Licitacion : IAuditableEntity
             clock.UtcNow()));
     }
 
+    public void DarDeBaja(DateTimeOffset momento)
+    {
+        DeletedAt = momento;
+    }
+
     public void Editar(
         string codigo,
         string titulo,

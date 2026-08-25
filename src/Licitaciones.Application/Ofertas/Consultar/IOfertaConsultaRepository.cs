@@ -6,6 +6,10 @@ public interface IOfertaConsultaRepository
         Guid licitacionId,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<OfertaConsultaRegistro>> ListarPorProveedorIdAsync(
+        Guid proveedorId,
+        CancellationToken cancellationToken = default);
+
     Task<OfertaConsultaRegistro?> ObtenerPorIdAsync(
         Guid id,
         CancellationToken cancellationToken = default);

@@ -193,6 +193,11 @@ public sealed class ConsultarOfertaServiceTests
             CancellationToken cancellationToken = default) =>
             Task.FromResult(_ofertas);
 
+        public Task<IReadOnlyList<OfertaConsultaRegistro>> ListarPorProveedorIdAsync(
+            Guid proveedorId,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<OfertaConsultaRegistro>>([]);
+
         public Task<OfertaConsultaRegistro?> ObtenerPorIdAsync(
             Guid id,
             CancellationToken cancellationToken = default) =>

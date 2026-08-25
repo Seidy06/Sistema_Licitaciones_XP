@@ -4,6 +4,7 @@ using Licitaciones.Application.Licitaciones.Cerrar;
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Application.Licitaciones.Crear;
 using Licitaciones.Application.Licitaciones.Editar;
+using Licitaciones.Application.Licitaciones.Eliminar;
 using Licitaciones.Application.Licitaciones.Publicar;
 using Licitaciones.Domain.Common;
 
@@ -25,6 +26,7 @@ public sealed class LicitacionesController : ControllerBase
     private readonly EditarLicitacionService _editarService;
     private readonly PublicarLicitacionService _publicarService;
     private readonly CerrarLicitacionService _cerrarService;
+    private readonly EliminarLicitacionService _eliminarService;
     private readonly IClock _clock;
 
     public LicitacionesController(
@@ -33,6 +35,7 @@ public sealed class LicitacionesController : ControllerBase
         EditarLicitacionService editarService,
         PublicarLicitacionService publicarService,
         CerrarLicitacionService cerrarService,
+        EliminarLicitacionService eliminarService,
         IClock clock)
     {
         _crearService = crearService;
@@ -40,6 +43,7 @@ public sealed class LicitacionesController : ControllerBase
         _editarService = editarService;
         _publicarService = publicarService;
         _cerrarService = cerrarService;
+        _eliminarService = eliminarService;
         _clock = clock;
     }
 
@@ -108,6 +112,28 @@ public sealed class LicitacionesController : ControllerBase
                 "Transición inválida",
                 exception.Message,
                 "transicion_licitacion_invalida");
+        }
+    }
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Eliminar(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _eliminarService.DarDeBajaAsync(id, cancellationToken);
+            return NoContent();
+        }
+        catch (LicitacionNoEncontradaParaBajaException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Licitación no encontrada",
+                exception.Message,
+                "licitacion_no_encontrada");
         }
     }
 

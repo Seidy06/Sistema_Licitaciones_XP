@@ -62,6 +62,15 @@ public sealed class OfertaRepository :
                     .ThenBy(oferta => oferta.FechaRegistro))
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<OfertaConsultaRegistro>> ListarPorProveedorIdAsync(
+        Guid proveedorId,
+        CancellationToken cancellationToken = default) =>
+        await ProyectarConsulta(
+                _context.Ofertas
+                    .Where(oferta => oferta.ProveedorId == proveedorId)
+                    .OrderBy(oferta => oferta.FechaRegistro))
+            .ToListAsync(cancellationToken);
+
     public Task<OfertaConsultaRegistro?> ObtenerPorIdAsync(
         Guid id,
         CancellationToken cancellationToken = default) =>

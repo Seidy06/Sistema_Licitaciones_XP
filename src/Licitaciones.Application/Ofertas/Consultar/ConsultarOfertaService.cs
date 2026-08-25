@@ -85,6 +85,54 @@ public sealed class ConsultarOfertaService
         return convertidas.Single(x => x.Id == id);
     }
 
+    public async Task<PaginaOfertas> ListarPorProveedorAsync(
+        Guid proveedorId,
+        string moneda,
+        string? licitacionCodigo,
+        string ordenarPor,
+        bool descendente,
+        int pagina,
+        int tamanoPagina,
+        CancellationToken cancellationToken = default)
+    {
+        if (pagina <= 0 || tamanoPagina is <= 0 or > 100)
+        {
+            throw new DomainException("La paginación solicitada no es válida.");
+        }
+
+        if (ordenarPor.ToLowerInvariant() is not ("monto" or "licitacion" or "fecharegistro"))
+        {
+            throw new DomainException("El campo de ordenamiento no es válido.");
+        }
+
+        var ofertas = await _repository.ListarPorProveedorIdAsync(
+            proveedorId, cancellationToken);
+        var convertidas = await ConvertirAsync(ofertas, moneda, cancellationToken);
+
+        IEnumerable<OfertaConsultaDto> filtradas = convertidas;
+        if (!string.IsNullOrWhiteSpace(licitacionCodigo))
+        {
+            filtradas = filtradas.Where(x => x.LicitacionId.ToString().Contains(
+                licitacionCodigo.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        filtradas = (ordenarPor.ToLowerInvariant(), descendente) switch
+        {
+            ("licitacion", false) => filtradas.OrderBy(x => x.LicitacionId),
+            ("licitacion", true) => filtradas.OrderByDescending(x => x.LicitacionId),
+            ("fecharegistro", false) => filtradas.OrderBy(x => x.FechaRegistro),
+            ("fecharegistro", true) => filtradas.OrderByDescending(x => x.FechaRegistro),
+            ("monto", true) => filtradas.OrderByDescending(x => x.Monto),
+            _ => filtradas.OrderBy(x => x.Monto)
+        };
+
+        var todas = filtradas.ToArray();
+        var items = todas.Skip((pagina - 1) * tamanoPagina)
+            .Take(tamanoPagina)
+            .ToArray();
+        return new PaginaOfertas(items, todas.Length, pagina, tamanoPagina);
+    }
+
     private async Task<IReadOnlyList<OfertaConsultaDto>> ConvertirAsync(
         IReadOnlyList<OfertaConsultaRegistro> ofertas,
         string moneda,

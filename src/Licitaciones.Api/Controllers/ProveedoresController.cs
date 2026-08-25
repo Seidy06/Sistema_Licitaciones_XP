@@ -1,5 +1,6 @@
 using Licitaciones.Api.Infraestructura;
 using Licitaciones.Application.Common;
+using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Application.Proveedores.Crear;
@@ -22,17 +23,20 @@ public sealed class ProveedoresController : ControllerBase
     private readonly ConsultarProveedorService? _consultarService;
     private readonly EditarProveedorService? _editarService;
     private readonly DarBajaProveedorService? _darBajaService;
+    private readonly ConsultarOfertaService? _consultarOfertaService;
 
     public ProveedoresController(
         CrearProveedorService crearService,
         ConsultarProveedorService? consultarService = null,
         EditarProveedorService? editarService = null,
-        DarBajaProveedorService? darBajaService = null)
+        DarBajaProveedorService? darBajaService = null,
+        ConsultarOfertaService? consultarOfertaService = null)
     {
         _crearService = crearService;
         _consultarService = consultarService;
         _editarService = editarService;
         _darBajaService = darBajaService;
+        _consultarOfertaService = consultarOfertaService;
     }
 
     [HttpDelete("{id:guid}")]
@@ -182,6 +186,45 @@ public sealed class ProveedoresController : ControllerBase
                 "El proveedor solicitado no existe.",
                 "proveedor_no_encontrado")
             : Ok(proveedor);
+    }
+
+    [HttpGet("{id:guid}/ofertas")]
+    [ProducesResponseType<PaginaOfertas>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PaginaOfertas>> Ofertas(
+        Guid id,
+        [FromQuery] string moneda = "CRC",
+        [FromQuery] string? licitacionCodigo = null,
+        [FromQuery] string ordenarPor = "fecharegistro",
+        [FromQuery] bool descendente = false,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 20,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var proveedor = await _consultarService!.ObtenerPorIdAsync(id, cancellationToken);
+            if (proveedor is null)
+            {
+                return CrearProblema(
+                    StatusCodes.Status404NotFound,
+                    "Proveedor no encontrado",
+                    "El proveedor solicitado no existe.",
+                    "proveedor_no_encontrado");
+            }
+
+            return Ok(await _consultarOfertaService!.ListarPorProveedorAsync(
+                id, moneda, licitacionCodigo, ordenarPor,
+                descendente, pagina, tamanoPagina, cancellationToken));
+        }
+        catch (Licitaciones.Domain.Common.DomainException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Consulta de ofertas inválida",
+                exception.Message,
+                "consulta_ofertas_invalida");
+        }
     }
 
     [HttpPost]
