@@ -49,7 +49,7 @@ roles en cada historia prevista:
 | 4 | HU-31 — Dockerfile multi-stage | Alta | 3 | Seidy | Tiffany | [#72](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/72) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR local sin publicar | `iteracion-4/hu-31-dockerfile` |
 | 5 | HU-32 — Docker Compose local | Alta | 3 | Tiffany | Seidy | [#73](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/73) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR commiteado localmente sin publicar | `iteracion-4/hu-32-docker-compose` |
 | 6 | HU-33 — Manifiestos K8s de la app | Alta | 5 | Seidy | Tiffany | [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR evaluado sin cambios; rama real difiere de la prevista | `iteracion-4/hu-33-k8s-app` |
-| 7 | HU-34 — Persistencia PostgreSQL en K8s | Alta | 5 | Tiffany | Seidy | [#75](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/75) | OPEN; no iniciada | `iteracion-4/hu-34-k8s-postgresql` |
+| 7 | HU-34 — Persistencia PostgreSQL en K8s | Alta | 5 | Tiffany | Seidy | [#75](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/75) | OPEN; ROJO y VERDE publicados con CI (rojo esperable, verde en success); REFACTOR local sin publicar | `iteracion-4/hu-34-k8s-postgresql` |
 | 8 | HU-35 — Pipeline de CI completo | Alta | 5 | Seidy | Tiffany | [#76](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/76) | OPEN; no iniciada | `iteracion-4/hu-35-pipeline-ci` |
 | 9 | HU-36 — Documentación final en /docs | Alta | 5 | Tiffany | Seidy | [#77](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/77) | OPEN; no iniciada | `iteracion-4/hu-36-documentacion-final` |
 | 10 | HU-37 — Etiquetado de entrega final | Alta | 1 | Seidy | Tiffany | [#78](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/78) | OPEN; no iniciada | `iteracion-4/hu-37-tag-entrega` |
@@ -667,6 +667,103 @@ tras HU-32). Verificación tras evaluar el refactor:
   no versionado.
 
 La Issue #74 permanece abierta.
+
+### HU-34 — Manifiestos de persistencia de PostgreSQL en Kubernetes
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-34 — Manifiestos de persistencia de PostgreSQL en Kubernetes | 5 | [#75](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/75) | Criterios cubiertos por pruebas en verde (5 focalizadas y suite completa 302 verdes tras el refactor local); la evidencia real en un clúster (pods, PVC, logs, conservación tras reinicio) aún no tiene ejecución registrada; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-34 | Seidy | Tiffany | `a4e73ff` |
+| VERDE HU-34 | Tiffany | Seidy | `9992131` |
+| REFACTOR HU-34 | Seidy | Tiffany | cambios locales sin commit todavía |
+
+La pareja planificada era Tiffany Driver/Seidy Navigator; la autoría real
+invirtió los roles (ROJO firmado por Seidy y VERDE por Tiffany). Git conserva
+la autoría del Driver de cada incremento publicado; el rol Navigator se
+reconstruye a partir del trabajo coordinado de la pareja.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #75 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Alta, estimación 5 SP, iteración 4 (RELEASE 10 — Kubernetes),
+pareja, rama prevista (que coincide exactamente con la rama real) y los tres
+criterios coinciden literalmente. Las notas técnicas de la Issue
+(`volumeClaimTemplates`; Job de migración con `dotnet ef database update` o
+bundle) se respetaron sin ampliarlas.
+
+Inspección previa para no duplicar escenarios: `Licitaciones.UnitTests/Despliegue`
+contenía `KubernetesManifestsTests` (HU-33, manifiestos de la aplicación);
+nada cubría el StatefulSet de PostgreSQL, las migraciones controladas ni
+`docs/kubernetes.md`.
+
+| Criterio de aceptación de la Issue #75 | Pruebas | Commits |
+| --- | --- | --- |
+| Los datos se conservan gracias al `PersistentVolumeClaim` cuando el pod se reinicia. | `Postgresql_DebeDefinirUnStatefulSetConVolumeClaimTemplates` (`kind: StatefulSet`, plantilla con metadata/spec/accessModes ReadWriteOnce/storage) y `Postgresql_LosDatosDebenMontarseSobreElVolumenPersistente` (montaje en `/var/lib/postgresql/data` referenciando el nombre declarado en `volumeClaimTemplates`). | ROJO `a4e73ff`; VERDE `9992131`. |
+| Las migraciones se aplican de forma controlada (Job/InitContainer), no automáticamente en cada réplica. | `LasMigraciones_ClusterDebeAplicarlasDeFormaControlada` (`kind: Job` o `initContainers:` con mecanismo de migración en líneas ejecutables) y `LasReplicasDeLaApi_NoDebenAplicarMigracionesAutomaticamente` (sin `ApplyMigrationsOnStartup=true` en Deployment ni ConfigMap). | Ídem. |
+| `/docs/kubernetes.md` documenta instrucciones reproducibles y evidencia de pods, servicios, PVC, logs y conservación de datos tras reinicio. | `KubernetesMd_DebeDocumentarInstruccionesReproduciblesYLaEvidencia`. | Ídem (+ documentación de esta fase). |
+
+Nota honesta: `LasReplicasDeLaApi_NoDebenAplicarMigracionesAutomaticamente`
+pasó ya durante el ROJO, legítimamente, porque HU-33 dejó la bandera en
+`false` a la espera de esta historia (rojo mixto registrado como en HU-27).
+
+El PR [#86](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/86)
+(`iteracion-4/hu-34-k8s-postgresql` hacia `main`) está abierto como draft,
+con los dos commits publicados: CI fallida en el ROJO `a4e73ff` como es
+esperable (ejecución `32793287726`) y `Build and Test` en `success` sobre el
+VERDE `9992131` (ejecución `32794832818`). El REFACTOR y esta documentación
+permanecen en el árbol local, sin push ni ejecución de CI registrada.
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `a4e73ff` — `test(k8s): cubrir criterios de manifiestos de persistencia de postgresql en kubernetes (HU-34)` | Creó `KubernetesPostgresqlTests` (cinco unitarias de contrato siguiendo el patrón de `ComposeFileTests` y `KubernetesManifestsTests`). Ejecución filtrada: 4 fallidas por comportamiento ausente (sin manifiesto de PostgreSQL, sin Job/initContainer de migraciones y sin sección HU-34 en la documentación) y 1 superada legítimamente por la bandera `false` heredada de HU-33. CI fallida esperable (ejecución `32793287726`). La IA corrigió antes de declarar el rojo un carácter cirílico accidental en un identificador propio. |
+| VERDE | `9992131` — `feat(k8s): implementar manifiestos de persistencia de postgresql en kubernetes (HU-34)` | Añadió `postgres-statefulset.yaml` (Service headless `postgres` + StatefulSet PostgreSQL 16 con credenciales vía `secretKeyRef`, subcarpeta `PGDATA`, montaje `postgres-data` en `/var/lib/postgresql/data`, readinessProbe `pg_isready` y `volumeClaimTemplates` RWO de 1Gi), `migrations-job.yaml` (Job `batch/v1` que ejecuta el bundle EF una sola vez con la cadena desde el Secret) y `Dockerfile.migrations` (SDK 9 genera `efbundle` self-contained linux-x64; runtime ASP.NET lo ejecuta), extendió `secret.yaml` con `POSTGRES_DB/USER/PASSWORD` y actualizó `docs/kubernetes.md` con manifiestos, órdenes reproducibles y evidencia esperada. Filtro 5/5 correctas; CI en `success` (ejecución `32794832818`). |
+| REFACTOR | cambios locales sin commit | En `KubernetesPostgresqlTests` deduplicó la regex de `volumeClaimTemplates` (constante `PatronVolumeClaimTemplates` + helper `RequerirCuerpoDeVolumeClaimTemplates`) y corrigió una errata de comentario en `postgres-statefulset.yaml` («delPV» → «del PV»); descartó anclas YAML entre manifiestos y un helper `Lineas` compartido entre suites por especulativos, sin comportamiento nuevo. Suite completa 302 verdes tras el cambio; sin push ni CI todavía. |
+
+#### Resultado de pruebas (HU-34)
+
+La línea base previa al incremento estaba verde con 297 pruebas (CI `success`
+tras HU-33). Verificación posterior al refactor:
+
+1. Ejecución focalizada:
+   `dotnet test tests\Licitaciones.UnitTests --configuration Release --no-build --filter "HU=HU-34"`:
+   5 correctas.
+2. Suite completa con `dotnet test Licitaciones.sln`:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 142 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **302** | **0** | **0** |
+
+`dotnet format Licitaciones.sln --verify-no-changes --no-restore` terminó sin
+diferencias.
+
+#### Pendientes y candidatos a Issues separadas
+
+- La evidencia real en clúster exigida por el tercer criterio (`kubectl apply`,
+  pods `Running`/`Completed`, PVC `Bound`, `kubectl logs job/licitaciones-migraciones`
+  y conservación de datos tras `kubectl delete pod postgres-0`) aún no tiene
+  ejecución registrada: existe la guía reproducible en `docs/kubernetes.md`.
+  Queda como verificación propia o candidata a Issue separada.
+- El push del REFACTOR y de esta documentación, con su CI, permanece pendiente.
+- La rotación Driver/Navigator observada invierte la pareja planificada según
+  la autoría real de commits.
+- CI todavía no construye las imágenes Docker (`licitaciones-api`,
+  `licitaciones-migrations`) usadas por los manifiestos; ese paso corresponde
+  a HU-35.
+
+La Issue #75 permanece abierta.
 
 ## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
 

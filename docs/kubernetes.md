@@ -1,8 +1,10 @@
 # Kubernetes en el estado actual
 
 Desde HU-33 el repositorio versiona los manifiestos de despliegue de la
-aplicación en la carpeta `/k8s`. Aún no se requiere clúster para desarrollar:
-las pruebas unitarias validan el contrato declarativo de estos archivos.
+aplicación en la carpeta `/k8s`, y desde HU-34 también los de persistencia de
+PostgreSQL y las migraciones controladas. Aún no se requiere clúster para
+desarrollar: las pruebas unitarias validan el contrato declarativo de estos
+archivos.
 
 ## Manifiestos incluidos
 
