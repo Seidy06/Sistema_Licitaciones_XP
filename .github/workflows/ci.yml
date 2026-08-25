@@ -49,7 +49,24 @@ jobs:
       - name: Instalar navegadores de Playwright
         run: pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium
 
-      - name: Ejecutar pruebas
-        run: dotnet test Licitaciones.sln --configuration Release --no-build
+      - name: Ejecutar pruebas con cobertura
+        run: >-
+          dotnet test Licitaciones.sln --configuration Release --no-build
+          --collect:"XPlat Code Coverage"
+          --results-directory ./cobertura
         env:
           LICITACIONES_INTEGRATION_CONNECTION_STRING: "Host=127.0.0.1;Port=5432;Database=licitaciones_db;Username=licitaciones_user;Password=licitaciones_password"
+
+      - name: Construir imagen de la API
+        run: docker build -f Dockerfile -t licitaciones-api:ci .
+
+      - name: Instalar kubeconform
+        run: |
+          curl -sSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Validar manifiestos de Kubernetes
+        run: kubeconform -strict -summary k8s/
+
+      - name: Auditar dependencias vulnerables
+        run: dotnet list package --vulnerable
