@@ -2,6 +2,7 @@ namespace Licitaciones.Application.Ofertas.Consultar;
 
 public sealed record OfertaConsultaDto(
     Guid Id,
+    Guid LicitacionId,
     string ProveedorNombre,
     decimal Monto,
     string Moneda,

@@ -7,6 +7,7 @@ using Licitaciones.Domain.TiposCambio;
 using Licitaciones.Infrastructure.Time;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Licitaciones.Infrastructure.Persistence;
 
@@ -20,6 +21,12 @@ public sealed class LicitacionesDbContext : DbContext
         : base(options)
     {
         _clock = clock ?? new SystemClock();
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.ConfigureWarnings(w =>
+            w.Ignore(RelationalEventId.PendingModelChangesWarning));
     }
 
     public DbSet<Proveedor> Proveedores => Set<Proveedor>();

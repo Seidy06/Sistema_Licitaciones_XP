@@ -59,9 +59,10 @@
     </div>
 }
 
+<div class="table-responsive">
 <table class="table table-striped align-middle">
     <thead>
-        <tr><th>Proveedor</th><th>Monto</th><th>Moneda</th><th>Fecha de registro</th></tr>
+        <tr><th>Proveedor</th><th>Monto</th><th>Moneda</th><th>Fecha de registro</th><th></th></tr>
     </thead>
     <tbody>
     @foreach (var oferta in Model.Ofertas.Items)
@@ -71,10 +72,14 @@
             <td>@oferta.Monto.Dinero(@oferta.Moneda)</td>
             <td>@oferta.Moneda</td>
             <td>@oferta.FechaRegistro.ToString("g")</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@oferta.Id">Detalle</a>
+            </td>
         </tr>
     }
     </tbody>
 </table>
+</div>
 
 @if (Model.Ofertas.Items.Count == 0)
 {

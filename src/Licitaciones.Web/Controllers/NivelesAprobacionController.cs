@@ -128,4 +128,72 @@ public sealed class NivelesAprobacionController : Controller
         TempData["MensajeExito"] = "El nivel de aprobación fue desactivado.";
         return RedirectToAction(nameof(Index));
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(
+        int id, CancellationToken cancellationToken = default)
+    {
+        var nivel = await _service.ObtenerPorIdAsync(id, cancellationToken);
+        if (nivel is null) return NotFound();
+
+        var model = new DetalleNivelAprobacionViewModel
+        {
+            Id = nivel.Id,
+            Nombre = nivel.Nombre,
+            MontoMinimo = nivel.MontoMinimo,
+            MontoMaximo = nivel.MontoMaximo,
+            Activo = nivel.Activo
+        };
+
+        return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(
+        int id, CancellationToken cancellationToken = default)
+    {
+        var nivel = await _service.ObtenerPorIdAsync(id, cancellationToken);
+        if (nivel is null) return NotFound();
+
+        var model = new EditarNivelAprobacionViewModel
+        {
+            Id = nivel.Id,
+            Nombre = nivel.Nombre,
+            MontoMinimo = nivel.MontoMinimo,
+            MontoMaximo = nivel.MontoMaximo
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        int id, EditarNivelAprobacionViewModel model, CancellationToken cancellationToken)
+    {
+        if (id != model.Id) return BadRequest();
+        if (!ModelState.IsValid) return View(model);
+
+        try
+        {
+            var resultado = await _service.ActualizarAsync(
+                id, model.Nombre, model.MontoMinimo, model.MontoMaximo, cancellationToken);
+
+            if (resultado is null) return NotFound();
+        }
+        catch (NivelAprobacionConflictoException)
+        {
+            ModelState.AddModelError(string.Empty,
+                "Ya existe un nivel de aprobación activo cuyo rango se traslape con el indicado.");
+            return View(model);
+        }
+        catch (DomainException exception)
+        {
+            ModelState.AddModelError(string.Empty, exception.Message);
+            return View(model);
+        }
+
+        TempData["MensajeExito"] = "El nivel de aprobación se actualizó correctamente.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
 }

@@ -115,6 +115,7 @@ public sealed class ConsultarOfertaService
         return ofertas
             .Select(x => new OfertaConsultaDto(
                 x.Id,
+                x.LicitacionId,
                 x.ProveedorNombre,
                 esDolares ? x.Monto / tipoCambio!.Valor : x.Monto,
                 monedaNormalizada,

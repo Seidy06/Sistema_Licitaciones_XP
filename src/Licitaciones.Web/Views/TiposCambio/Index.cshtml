@@ -33,9 +33,10 @@
     </div>
 </form>
 
+<div class="table-responsive">
 <table class="table table-striped align-middle">
     <thead>
-        <tr><th>Moneda origen</th><th>Moneda destino</th><th>Valor</th><th>Fecha</th><th>Activo</th></tr>
+        <tr><th>Moneda origen</th><th>Moneda destino</th><th>Valor</th><th>Fecha</th><th>Activo</th><th></th></tr>
     </thead>
     <tbody>
     @foreach (var tipo in Model.Items)
@@ -45,11 +46,24 @@
             <td>@tipo.MonedaDestino</td>
             <td>@tipo.Valor.ToString("N4")</td>
             <td>@tipo.Fecha.ToString("yyyy-MM-dd")</td>
-            <td>@(tipo.Activo ? "Sí" : "No")</td>
+            <td>
+                @if (tipo.Activo)
+                {
+                    <span class="badge bg-success">Activo</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Inactivo</span>
+                }
+            </td>
+            <td class="text-end">
+                <a asp-action="Details" asp-route-id="@tipo.Id">Detalle</a>
+            </td>
         </tr>
     }
     </tbody>
 </table>
+</div>
 
 @if (Model.Items.Count == 0)
 {

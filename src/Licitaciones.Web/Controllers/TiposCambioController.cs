@@ -88,4 +88,112 @@ public sealed class TiposCambioController : Controller
         TempData["MensajeExito"] = "El tipo de cambio se registró correctamente.";
         return RedirectToAction(nameof(Create));
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(
+        int id, CancellationToken cancellationToken = default)
+    {
+        var tipo = await _service.ObtenerPorIdAsync(id, cancellationToken);
+        if (tipo is null) return NotFound();
+
+        var model = new DetalleTipoCambioViewModel
+        {
+            Id = tipo.Id,
+            MonedaOrigen = tipo.MonedaOrigen,
+            MonedaDestino = tipo.MonedaDestino,
+            Valor = tipo.Valor,
+            Fecha = tipo.Fecha,
+            Activo = tipo.Activo
+        };
+
+        return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(
+        int id, CancellationToken cancellationToken = default)
+    {
+        var tipo = await _service.ObtenerPorIdAsync(id, cancellationToken);
+        if (tipo is null) return NotFound();
+
+        var model = new EditarTipoCambioViewModel
+        {
+            Id = tipo.Id,
+            Valor = tipo.Valor,
+            Fecha = tipo.Fecha.ToDateTime(TimeOnly.MinValue)
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        int id, EditarTipoCambioViewModel model, CancellationToken cancellationToken)
+    {
+        if (id != model.Id) return BadRequest();
+        if (!ModelState.IsValid) return View(model);
+
+        try
+        {
+            var resultado = await _service.ActualizarAsync(
+                id, model.Valor,
+                DateOnly.FromDateTime(model.Fecha!.Value),
+                cancellationToken);
+
+            if (resultado is null) return NotFound();
+        }
+        catch (DomainException exception)
+        {
+            ModelState.AddModelError(string.Empty, exception.Message);
+            return View(model);
+        }
+
+        TempData["MensajeExito"] = "El tipo de cambio se actualizó correctamente.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Delete(
+        int id, CancellationToken cancellationToken = default)
+    {
+        var tipo = await _service.ObtenerPorIdAsync(id, cancellationToken);
+        if (tipo is null) return NotFound();
+
+        var model = new EliminarTipoCambioViewModel
+        {
+            Id = tipo.Id,
+            MonedaOrigen = tipo.MonedaOrigen,
+            MonedaDestino = tipo.MonedaDestino,
+            Valor = tipo.Valor,
+            Fecha = tipo.Fecha,
+            Activo = tipo.Activo
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(
+        int id, CancellationToken cancellationToken)
+    {
+        var desactivado = await _service.EliminarAsync(id, cancellationToken);
+        if (!desactivado) return NotFound();
+
+        TempData["MensajeExito"] = "El tipo de cambio fue desactivado.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Activar(
+        int id, CancellationToken cancellationToken = default)
+    {
+        var resultado = await _service.ActivarAsync(id, cancellationToken);
+        if (resultado is null) return NotFound();
+
+        TempData["MensajeExito"] = "El tipo de cambio se activó correctamente.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
 }

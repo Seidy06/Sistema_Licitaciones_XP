@@ -15,7 +15,10 @@ public sealed class Oferta : IAuditableEntity
     public DateTimeOffset FechaRegistro { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }
+    public DateTimeOffset? DeletedAt { get; private set; }
     public uint Version { get; private set; }
+
+    public bool EstaEliminado => DeletedAt.HasValue;
 
     public static Oferta Crear(
         Guid licitacionId,
@@ -41,5 +44,30 @@ public sealed class Oferta : IAuditableEntity
             Monto = monto,
             FechaRegistro = clock.UtcNow()
         };
+    }
+
+    public void Editar(decimal monto, IClock clock)
+    {
+        if (EstaEliminado)
+        {
+            throw new DomainException("No se puede editar una oferta eliminada.");
+        }
+
+        if (monto <= 0)
+        {
+            throw new DomainException("El monto de la oferta debe ser mayor que cero.");
+        }
+
+        Monto = monto;
+    }
+
+    public void Eliminar(DateTimeOffset fecha)
+    {
+        if (EstaEliminado)
+        {
+            throw new DomainException("La oferta ya fue eliminada.");
+        }
+
+        DeletedAt = fecha;
     }
 }

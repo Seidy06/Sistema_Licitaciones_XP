@@ -1,6 +1,7 @@
 using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Ofertas.Crear;
-using Licitaciones.Application.Ofertas.Proteger;
+using Licitaciones.Application.Ofertas.Editar;
+using Licitaciones.Application.Ofertas.Eliminar;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Domain.Ofertas;
 using Licitaciones.Domain.Proveedores;
@@ -14,7 +15,8 @@ namespace Licitaciones.Infrastructure.Persistence;
 
 public sealed class OfertaRepository :
     IOfertaRepository,
-    IProteccionOfertaRepository,
+    IEditarOfertaRepository,
+    IEliminarOfertaRepository,
     IOfertaConsultaRepository
 {
     private readonly LicitacionesDbContext _context;
@@ -70,6 +72,28 @@ public sealed class OfertaRepository :
     public async Task AgregarAsync(
         Oferta oferta, CancellationToken cancellationToken = default) =>
         await _context.Ofertas.AddAsync(oferta, cancellationToken);
+
+    public Task<Oferta?> ObtenerEntidadPorIdAsync(
+        Guid id, CancellationToken cancellationToken = default) =>
+        _context.Ofertas.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+    Task<Licitacion?> IEditarOfertaRepository.ObtenerLicitacionPorIdAsync(
+        Guid id, CancellationToken cancellationToken) =>
+        _context.Licitaciones.FirstOrDefaultAsync(
+            x => x.Id == id && x.DeletedAt == null, cancellationToken);
+
+    Task<Licitacion?> IEliminarOfertaRepository.ObtenerLicitacionPorIdAsync(
+        Guid id, CancellationToken cancellationToken) =>
+        _context.Licitaciones.FirstOrDefaultAsync(
+            x => x.Id == id && x.DeletedAt == null, cancellationToken);
+
+    Task<Oferta?> IEditarOfertaRepository.ObtenerPorIdAsync(
+        Guid id, CancellationToken cancellationToken) =>
+        ObtenerEntidadPorIdAsync(id, cancellationToken);
+
+    Task<Oferta?> IEliminarOfertaRepository.ObtenerPorIdAsync(
+        Guid id, CancellationToken cancellationToken) =>
+        ObtenerEntidadPorIdAsync(id, cancellationToken);
 
     private IQueryable<OfertaConsultaRegistro> ProyectarConsulta(
         IQueryable<Oferta> ofertas) =>
