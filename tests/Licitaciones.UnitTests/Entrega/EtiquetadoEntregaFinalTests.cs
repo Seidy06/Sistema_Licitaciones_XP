@@ -9,6 +9,10 @@ public sealed class EtiquetadoEntregaFinalTests
 {
     private const string TagPrincipal = "v1.0.0";
     private const string TagAlternativo = "entrega-final";
+    private const double UmbralMinimoPorAutor = 0.30;
+    private const double UmbralVinculacionMinimo = 0.60;
+    private static readonly Regex PatronVinculacionHistoria = new(
+        @"HU-\d+|refs\s+#\d+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     [Fact]
     [Trait("HU", "HU-37")]
@@ -64,7 +68,7 @@ public sealed class EtiquetadoEntregaFinalTests
         var tiffany = autores.Count(a => a.Contains("Tiffany", StringComparison.OrdinalIgnoreCase));
 
         var total = autores.Length;
-        var minimoPorAutor = (int)Math.Ceiling(total * 0.30);
+        var minimoPorAutor = (int)Math.Ceiling(total * UmbralMinimoPorAutor);
 
         Assert.True(
             seidy >= minimoPorAutor,
@@ -81,10 +85,9 @@ public sealed class EtiquetadoEntregaFinalTests
         var mensajes = EjecutarGit(raiz, "log --format=%s main")
             .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        var vinculados = mensajes.Count(m =>
-            Regex.IsMatch(m, @"HU-\d+|refs\s+#\d+", RegexOptions.IgnoreCase));
+        var vinculados = mensajes.Count(m => PatronVinculacionHistoria.IsMatch(m));
 
-        var umbralVinculacion = Math.Max(1, (int)Math.Floor(mensajes.Length * 0.60));
+        var umbralVinculacion = Math.Max(1, (int)Math.Floor(mensajes.Length * UmbralVinculacionMinimo));
 
         Assert.True(
             vinculados >= umbralVinculacion,
