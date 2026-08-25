@@ -1,0 +1,35 @@
+# Ejecuta las migraciones de forma controlada: un Job que corre una sola vez
+# (o bajo demanda con `kubectl apply`), nunca en el arranque de cada réplica.
+# La imagen se construye con: docker build -f Dockerfile.migrations -t licitaciones-migrations:latest .
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: licitaciones-migraciones
+  labels:
+    app: licitaciones-migraciones
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: licitaciones-migraciones
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migraciones
+          image: licitaciones-migrations:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/app/efbundle", "--verbose"]
+          env:
+            - name: ConnectionStrings__Licitaciones
+              valueFrom:
+                secretKeyRef:
+                  name: licitaciones-secret
+                  key: ConnectionStrings__Licitaciones
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
