@@ -671,6 +671,52 @@ mergeable. La ejecución real del entorno completo (`docker compose up
 como pendiente en la bitácora. La Issue #73 permanece abierta y no se marca
 como completada desde esta fase.
 
+## Resultado verificado para HU-33 (Iteración 4)
+
+HU-33 corresponde a la Issue [#74](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/74).
+Sus tres criterios se cubren con la suite `KubernetesManifestsTests`
+(seis unitarias de contrato sobre los manifiestos de `/k8s`, sin duplicar
+los escenarios de `DockerfileTests` ni `ComposeFileTests`):
+
+| Criterio de aceptación de la Issue #74 | Pruebas | Evidencia |
+| --- | --- | --- |
+| El `Deployment` define `startupProbe`, `readinessProbe` y `livenessProbe`, además de `resources.requests/limits`. | `Deployment_DebeDefinirStartupReadinessYLivenessProbes` y `Deployment_DebeDefinirResourcesConRequestsYLimits`. | Las tres probes con `httpGet /health:8080` (startup cada 5 s con `failureThreshold: 30`, readiness cada 10 s, liveness cada 30 s); `resources` con requests cpu `100m`/memory `128Mi` y limits cpu `500m`/memory `256Mi`. |
+| Las credenciales provienen de un `Secret`, nunca hardcodeadas. | `Deployment_DebeObtenerLasCredencialesDesdeUnSecret` y `LosManifiestos_NoDebenContenerContrasenasHardcodeadas`. | `ConnectionStrings__Licitaciones` vía `secretKeyRef` del Secret `licitaciones-secret`; los cuatro manifiestos se analizan rechazando contraseñas literales conocidas; `secret.yaml` contiene solo marcadores `REEMPLAZAR_*`. |
+| El `Service` expone el puerto de la aplicación dentro del clúster. | `Service_DebeExponerElPuertoDeLaAplicacionDentroDelCluster`. | `kind: Service` ClusterIP con `port` y `targetPort` 8080. |
+
+La prueba `CarpetaK8s_DebeContenerLosCuatroManifiestosDeLaAplicacion` cubre el
+alcance declarado por la historia (Deployment, Service, ConfigMap y Secret).
+
+La fase ROJO (`f573872`) se confirmó con ejecución filtrada: las seis pruebas
+fallaron porque los manifiestos no existían (`/k8s` solo contenía `.gitkeep`),
+es decir, por comportamiento ausente; CI fallida esperable (ejecución
+`32789338916`). Tras el VERDE (`f775f63`), la misma ejecución terminó 6/6
+correcta, con CI en `success` (ejecución `32790252288`). El refactor se
+evaluó sin cambios necesarios (manifiestos mínimos y convencionales; pruebas
+ya apoyadas en `RaizRepositorio` común). La suite completa
+`dotnet test Licitaciones.sln` resultó:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 137 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **297** | **0** | **0** |
+
+La secuencia TDD queda trazada así:
+
+- `f573872` — ROJO: creó `KubernetesManifestsTests`; 6 fallidas por
+  comportamiento ausente (manifiestos inexistentes).
+- `f775f63` — VERDE: cuatro manifiestos en `/k8s`; CI en `success`.
+- REFACTOR evaluado sin cambios que commitear.
+
+El PR [#85](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/85)
+(`iteracion-4/hu-33-k8s-aplicacion` hacia `main`) está abierto como draft.
+La aplicación real de los manifiestos en un clúster (`kubectl apply`) todavía
+no tiene evidencia registrada; consta como pendiente en la bitácora. La Issue
+#74 permanece abierta y no se marca como completada desde esta fase.
+
 ## Integración continua
 
 `.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release, instala los navegadores de Playwright (`pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium`, añadido por HU-30) y ejecuta toda la solución, incluidas las pruebas E2E con Chromium headless. En esta iteración no mide cobertura ni construye imágenes Docker.
