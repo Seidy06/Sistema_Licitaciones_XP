@@ -54,7 +54,7 @@ spec:
                 secretKeyRef:
                   name: licitaciones-secret
                   key: POSTGRES_PASSWORD
-            # Subcarpeta dentro del volumen: evita que 'lost+found' delPV rompa initdb
+            # Subcarpeta dentro del volumen: evita que 'lost+found' del PV rompa initdb
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           volumeMounts:

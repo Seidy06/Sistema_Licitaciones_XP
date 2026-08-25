@@ -17,6 +17,10 @@ public sealed class KubernetesPostgresqlTests
         @"dotnet ef database update|ef\s+migrations\s+bundle|efbundle|migraci\w*|migrat\w*",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
+    private static readonly Regex PatronVolumeClaimTemplates = new(
+        @"volumeClaimTemplates:\s*\r?\n(?<cuerpo>(?:[ \t]+.+\r?\n?)+)",
+        RegexOptions.CultureInvariant);
+
     [Fact]
     [Trait("HU", "HU-34")]
     public void Postgresql_DebeDefinirUnStatefulSetConVolumeClaimTemplates()
@@ -29,16 +33,7 @@ public sealed class KubernetesPostgresqlTests
             + "'StatefulSet' para conservar identidad y almacenamiento entre "
             + "reinicios de pods.");
 
-        var plantillas = Regex.Match(
-            contenido,
-            @"volumeClaimTemplates:\s*\r?\n(?<cuerpo>(?:[ \t]+.+\r?\n?)+)");
-
-        Assert.True(
-            plantillas.Success,
-            "El StatefulSet debe aprovisionar el PersistentVolumeClaim "
-            + "mediante 'volumeClaimTemplates'.");
-
-        var cuerpo = plantillas.Groups["cuerpo"].Value;
+        var cuerpo = RequerirCuerpoDeVolumeClaimTemplates(contenido);
 
         foreach (var elemento in new[] { "metadata:", "spec:", "accessModes:", "storage:" })
         {
@@ -72,15 +67,10 @@ public sealed class KubernetesPostgresqlTests
 
         var nombre = montaje.Groups["nombre"].Value;
 
-        var plantillas = Regex.Match(
-            contenido,
-            @"volumeClaimTemplates:\s*\r?\n(?<cuerpo>(?:[ \t]+.+\r?\n?)+)");
+        var cuerpo = RequerirCuerpoDeVolumeClaimTemplates(contenido);
 
         Assert.True(
-            plantillas.Success
-            && plantillas.Groups["cuerpo"].Value.Contains(
-                "name: " + nombre,
-                StringComparison.Ordinal),
+            cuerpo.Contains("name: " + nombre, StringComparison.Ordinal),
             $"El montaje '{nombre}' debe corresponder al nombre declarado en "
             + "'volumeClaimTemplates' para garantizar la persistencia.");
     }
@@ -209,6 +199,18 @@ public sealed class KubernetesPostgresqlTests
             Regex.IsMatch(contenido, @"conserv\w*|persist\w*", RegexOptions.IgnoreCase),
             "docs/kubernetes.md debe dejar constancia de que los datos se "
             + "conservan o persisten entre reinicios.");
+    }
+
+    private static string RequerirCuerpoDeVolumeClaimTemplates(string contenido)
+    {
+        var coincidencia = PatronVolumeClaimTemplates.Match(contenido);
+
+        Assert.True(
+            coincidencia.Success,
+            "El StatefulSet debe aprovisionar el PersistentVolumeClaim "
+            + "mediante 'volumeClaimTemplates'.");
+
+        return coincidencia.Groups["cuerpo"].Value;
     }
 
     private static string LeerManifiesto(string[] nombresCandidatos)
