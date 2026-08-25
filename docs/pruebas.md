@@ -879,7 +879,12 @@ La fase ROJO (`1f0560e`) se confirmó con ejecución filtrada: rojo mixto
 documentado — 1 fallida por comportamiento ausente (sin tag de entrega) y 1
 superada legítimamente como línea base; CI fallida esperable (ejecución
 `97684643895`). Tras el VERDE (creación del tag, sin commit asociado porque el
-entregable es un artefacto git) la misma ejecución terminó 2/2 correcta. No hay
+entregable es un artefacto git) la misma ejecución terminó 2/2 correcta en
+local. La primera ejecución de CI del PR (`32810331513`) falló ambas pruebas:
+el checkout por defecto no trae tags ni rama local `main` y el tag aún no estaba
+publicado; el workflow se ajustó al mínimo (`fetch-depth: 0`, `fetch-tags: true`
+y referencia local `main` condicionada a `pull_request`, sin tocar las pruebas),
+quedando pendiente que la pareja publique `v1.0.0` con `git push --tags`. No hay
 refactor: la historia no introduce código de producción. La suite completa
 `dotnet test Licitaciones.sln` resultó:
 
