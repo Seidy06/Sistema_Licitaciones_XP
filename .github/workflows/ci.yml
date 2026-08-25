@@ -31,6 +31,13 @@ jobs:
     steps:
       - name: Obtener repositorio
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Preparar referencia main para las pruebas de entrega
+        if: github.event_name == 'pull_request'
+        run: git branch main origin/main
 
       - name: Configurar .NET 9
         uses: actions/setup-dotnet@v4

@@ -862,6 +862,51 @@ commit `9106afd` es local al momento de documentar y aún no tiene ejecución de
 CI asociada. La Issue #77 permanece abierta y no se marca como completada desde
 esta fase.
 
+## Resultado verificado para HU-37 (Iteración 4)
+
+HU-37 corresponde a la Issue [#78](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/78).
+Sus dos criterios se cubren con la suite `EtiquetadoEntregaFinalTests` (dos
+unitarias que ejecutan git real sobre el repositorio con
+`System.Diagnostics.Process`; las pruebas ROJO fueron aportadas por la pareja en
+`1f0560e` y se conservaron íntegras):
+
+| Criterio de aceptación de la Issue #78 | Prueba | Evidencia |
+| --- | --- | --- |
+| Existe `v1.0.0` (o `entrega-final`) apuntando al commit final funcional. | `TagEntrega_DebeExistir_v100_o_entregaFinal_ApuntandoAlCommitFinalFuncional`. | VERDE: tag anotado `v1.0.0` («Entrega final») creado localmente sobre `1f0560e`, según las notas técnicas de la historia; la prueba verifica existencia, resolución a commit válido y relación de ancestro con HEAD. Push del tag pendiente por la pareja. |
+| El historial muestra distribución equilibrada entre ambos integrantes, con mensajes descriptivos vinculados a historias. | `HistorialCommits_DebeMostrarDistribucionEquilibradaConMensajesVinculadosAHistorias`. | Superada legítimamente desde el ROJO con datos reales: 221 commits en `main` — Seidy 116 (52 %), Tiffany 105 (48 %), ambos ≥30 %; 169 mensajes vinculados (76 %) ≥60 %. |
+
+La fase ROJO (`1f0560e`) se confirmó con ejecución filtrada: rojo mixto
+documentado — 1 fallida por comportamiento ausente (sin tag de entrega) y 1
+superada legítimamente como línea base; CI fallida esperable (ejecución
+`97684643895`). Tras el VERDE (creación del tag, sin commit asociado porque el
+entregable es un artefacto git) la misma ejecución terminó 2/2 correcta en
+local. La primera ejecución de CI del PR (`32810331513`) falló ambas pruebas:
+el checkout por defecto no trae tags ni rama local `main` y el tag aún no estaba
+publicado; el workflow se ajustó al mínimo (`fetch-depth: 0`, `fetch-tags: true`
+y referencia local `main` condicionada a `pull_request`, sin tocar las pruebas),
+quedando pendiente que la pareja publique `v1.0.0` con `git push --tags`. No hay
+refactor: la historia no introduce código de producción. La suite completa
+`dotnet test Licitaciones.sln` resultó:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 154 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **314** | **0** | **0** |
+
+La secuencia TDD queda trazada así:
+
+- `1f0560e` — ROJO (pareja): creó `EtiquetadoEntregaFinalTests`; rojo mixto
+  documentado (1 por comportamiento ausente, 1 guardia legítima).
+- VERDE — tag `v1.0.0` local sobre `1f0560e`, sin commit; evidencia verde local
+  (filtro 2/2 y suite 314). Pendiente `git push --tags` por la pareja.
+
+El PR [#89](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/89)
+(`iteracion-4/hu-37-cierre` hacia `main`) está abierto como draft. La Issue #78
+permanece abierta y no se marca como completada desde esta fase.
+
 ## Integración continua
 
 `.github/workflows/ci.yml` se ejecuta para `push` y `pull_request` dirigidos a `main`. En Ubuntu configura .NET 9 y PostgreSQL 16, restaura, verifica formato, compila Release, instala los navegadores de Playwright (`pwsh tests/Licitaciones.E2ETests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium`, añadido por HU-30) y ejecuta toda la solución, incluidas las pruebas E2E con Chromium headless. Desde HU-35 (Iteración 4) el test recolecta cobertura (`--collect:"XPlat Code Coverage"`, resultados en `./cobertura`) y el pipeline añade, en orden, `docker build -f Dockerfile -t licitaciones-api:ci .` sin publicar, validación de manifiestos con `kubeconform -strict -summary k8s/` y auditoría final `dotnet list package --vulnerable`; ningún paso tolera fallos.

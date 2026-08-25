@@ -936,6 +936,91 @@ HU-35). Verificación tras el incremento y el refactor:
 
 La Issue #77 permanece abierta.
 
+### HU-37 — Etiquetado de entrega final
+
+#### Estado
+
+| Historia | SP | Issue | Estado |
+| --- | ---: | --- | --- |
+| HU-37 - Etiquetado de entrega final | 1 | [#78](https://github.com/Seidy06/Sistema_Licitaciones_XP/issues/78) | Criterios cubiertos por pruebas en verde (2 focalizadas y suite completa 314 verdes); tag anotado `v1.0.0` creado localmente apuntando a `1f0560e`, pendiente de `git push --tags` por la pareja; la Issue permanece abierta y no se marca como completada ni se cierra desde esta fase. |
+
+#### Programación en pareja
+
+| Sesión o incremento | Driver | Navigator | Evidencia |
+| --- | --- | --- | --- |
+| ROJO HU-37 | Tiffany | Seidy | `1f0560e` |
+| VERDE HU-37 | apoyo de IA bajo supervisión | Seidy y Tiffany | tag `v1.0.0` local, sin commit |
+
+La pareja planificada era Seidy Driver/Tiffany Navigator; el ROJO quedó firmado
+por Tiffany. El VERDE de esta historia no produce código ni commit: su entregable
+es el artefacto git `v1.0.0`, creado localmente con apoyo de la IA como
+implementación mínima y reversible (`git tag -d v1.0.0`). La rama real
+(`iteracion-4/hu-37-cierre`) difiere de la prevista
+(`iteracion-4/hu-37-tag-entrega`); se registra como observación.
+
+#### Trazabilidad Issue → criterios → pruebas → commits → PR
+
+La Issue #78 se contrastó con `docs/historias-usuario.md` antes de programar:
+título, prioridad Alta, estimación 1 SP, iteración 4 (RELEASE 12 — Documentación
+y Cierre), pareja, notas técnicas y los dos criterios coinciden literalmente.
+Las pruebas ROJO ya existían (`1f0560e`, pareja) y se conservaron íntegras:
+`EtiquetadoEntregaFinalTests` ejecuta git real sobre el repositorio mediante
+`System.Diagnostics.Process`.
+
+| Criterio de aceptación de la Issue #78 | Pruebas | Commits |
+| --- | --- | --- |
+| Existe `v1.0.0` o `entrega-final` apuntando al commit final funcional. | `TagEntrega_DebeExistir_v100_o_entregaFinal_ApuntandoAlCommitFinalFuncional`: exige el tag, que resuelva a un commit válido (`rev-parse ^{commit}`) y que ese commit sea ancestro de HEAD (`merge-base --is-ancestor`). | VERDE: tag `v1.0.0` local sobre `1f0560e` (sin commit asociado). |
+| El historial muestra distribución equilibrada entre la pareja, con mensajes vinculados a historias. | `HistorialCommits_DebeMostrarDistribucionEquilibradaConMensajesVinculadosAHistorias`: umbrales ≥30 % por integrante y ≥60 % de mensajes con `HU-##`/`refs #NN` sobre `main`. | Superada legítimamente desde el ROJO: 221 commits en `main` — Seidy 116 (52 %), Tiffany 105 (48 %); 169 mensajes vinculados (76 %). |
+
+El PR [#89](https://github.com/Seidy06/Sistema_Licitaciones_XP/pull/89)
+(`iteracion-4/hu-37-cierre` hacia `main`) está abierto como draft, con CI fallida
+esperable sobre el ROJO `1f0560e` (`Build and Test`, ejecución `97684643895`,
+consultada en la API pública de GitHub). El VERDE no genera ejecución de CI
+propia porque no introduce cambios commiteables; su evidencia es la ejecución
+local (filtro 2/2 y suite 314 verdes).
+
+#### Evidencia TDD rojo–verde–refactor
+
+| Fase | Commit | Resultado |
+| --- | --- | --- |
+| ROJO | `1f0560e` — `test(xp): cubrir criterios de etiquetado de entrega final (HU-37)` | Creó `EtiquetadoEntregaFinalTests` (dos unitarias que consultan tags, ancestros y autores con git real). Ejecución filtrada: rojo mixto documentado — 1 fallida porque no existía `v1.0.0` ni `entrega-final` (solo había v0.1.0, v0.2.0 y v0.3.0) y 1 superada legítimamente porque la distribución real del historial ya cumple ambos umbrales. CI fallida esperable (ejecución `97684643895`). |
+| VERDE | sin commit — artefacto git + ajuste de CI | Creó el tag anotado local `v1.0.0` («Entrega final») apuntando a `1f0560e`, exactamente según las notas técnicas de la historia. La primera ejecución del PR tras publicar la documentación falló las dos pruebas de la historia en CI (`32810331513`): el checkout por defecto de `actions/checkout@v4` no trae tags ni rama local `main`, y `v1.0.0` aún no estaba publicado en el remoto. Corrección mínima aplicada al workflow (sin tocar las pruebas ROJO): `fetch-depth: 0`, `fetch-tags: true` y un paso condicionado a `pull_request` que crea la referencia local `main` desde `origin/main`; verificado que el contrato de HU-35 sigue verde (8/8 con el filtro HU-37+HU-35). Publicar el tag (`git push --tags`) queda para la pareja; si llegan commits posteriores antes del merge final, mover el tag mientras no esté publicado: `git tag -fa v1.0.0 -m "Entrega final" <sha>`. Filtro 2/2 correctas, suite completa 314 verdes y formato sin diferencias. |
+| REFACTOR | no aplicado | La historia no introduce código de producción: solo el artefacto git y esta documentación. Se detuvo antes de refactorización amplia según la fase. |
+
+#### Resultado de pruebas (HU-37)
+
+La línea base previa al incremento estaba verde con 312 pruebas (CI success tras
+HU-36). Verificación tras el VERDE:
+
+1. Ejecución focalizada:
+   `dotnet test tests\Licitaciones.UnitTests --configuration Release --filter "HU=HU-37"`:
+   2 correctas.
+2. Suite completa con `dotnet test Licitaciones.sln`:
+
+| Proyecto | Superadas | Fallidas | Omitidas |
+| --- | ---: | ---: | ---: |
+| `Licitaciones.UnitTests` | 154 | 0 | 0 |
+| `Licitaciones.IntegrationTests` | 136 | 0 | 0 |
+| `Licitaciones.FunctionalTests` | 16 | 0 | 0 |
+| `Licitaciones.E2ETests` | 8 | 0 | 0 |
+| **Total ejecutado** | **314** | **0** | **0** |
+
+#### Pendientes y candidatos a Issues separadas
+
+- El push de la rama y del tag (`git push origin iteracion-4/hu-37-cierre` y
+  `git push --tags`) es acción de la pareja; hasta entonces `v1.0.0` existe solo
+  localmente.
+- Si se registran commits posteriores al `1f0560e` antes del cierre (por ejemplo
+  esta misma documentación), evaluar mover el tag al commit definitivo mientras
+  no esté publicado, para que «apunte al commit final funcional» en sentido
+  estricto.
+- La discrepancia del nombre de rama (real `-cierre` frente a la prevista
+  `-tag-entrega`) queda registrada como observación de trazabilidad.
+- Tras fusionar el PR #89 conviene reverificar el criterio de distribución sobre
+  `main` actualizado.
+
+La Issue #78 permanece abierta.
+
 ## Iteración 3 — Aprobación, conversión, experiencia web y API documentada
 
 **Estado: INICIADA.**
