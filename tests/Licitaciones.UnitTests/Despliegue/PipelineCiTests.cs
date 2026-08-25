@@ -7,7 +7,11 @@ namespace Licitaciones.UnitTests.Despliegue;
 public sealed class PipelineCiTests
 {
     private static readonly Regex PatronCobertura = new(
-        @"--collect[^""]*XPlat\s+Code\s+Coverage|--collect:""XPlat Code Coverage""",
+        @"--collect[:\s""]*XPlat\s+Code\s+Coverage",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    private static readonly Regex PatronDockerBuild = new(
+        @"docker\s+build[^\n]*|uses:\s*docker/build-push-action",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     private static string LeerWorkflow()
@@ -72,7 +76,7 @@ public sealed class PipelineCiTests
 
     [Fact]
     [Trait("HU", "HU-35")]
-    public void ElPipeline_DebeIncluirAnalisisEstaticoOVisionadoDeFormato()
+    public void ElPipeline_DebeVerificarElFormatoConDotnetFormat()
     {
         var contenido = LeerWorkflow();
 
@@ -92,10 +96,7 @@ public sealed class PipelineCiTests
         var contenido = LeerWorkflow();
         var test = IndiceDe(contenido, "dotnet test", "la ejecución de pruebas");
 
-        var dockerBuild = Regex.Match(
-            contenido,
-            @"docker\s+build[^\n]*|uses:\s*docker/build-push-action",
-            RegexOptions.IgnoreCase);
+        var dockerBuild = PatronDockerBuild.Match(contenido);
 
         Assert.True(
             dockerBuild.Success,
@@ -113,12 +114,9 @@ public sealed class PipelineCiTests
     public void ElPipeline_DebeValidarLosManifiestosDeKubernetes()
     {
         var contenido = LeerWorkflow();
-        var dockerBuildIndice = Regex.Match(
-            contenido,
-            @"docker\s+build[^\n]*|uses:\s*docker/build-push-action",
-            RegexOptions.IgnoreCase);
-        var docker = dockerBuildIndice.Success
-            ? contenido.IndexOf(dockerBuildIndice.Value, StringComparison.OrdinalIgnoreCase)
+        var dockerMatch = PatronDockerBuild.Match(contenido);
+        var docker = dockerMatch.Success
+            ? contenido.IndexOf(dockerMatch.Value, StringComparison.OrdinalIgnoreCase)
             : -1;
 
         var validacion = Regex.Match(
