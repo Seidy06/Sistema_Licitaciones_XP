@@ -4,9 +4,12 @@
     ViewData["Title"] = "Eliminar oferta";
 }
 
-<h1>Eliminar oferta</h1>
+<div class="section-header">
+    <h1>Eliminar oferta</h1>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancelar</a>
+</div>
 
-<div class="alert alert-warning">
+<div class="alert alert-danger">
     ¿Está seguro que desea eliminar esta oferta? Esta acción no se puede deshacer.
 </div>
 
@@ -14,13 +17,14 @@
     <div class="col-12 col-md-6">
         <div class="card">
             <div class="card-body">
+                <h5 class="card-title">Resumen</h5>
                 <dl class="row mb-0">
                     <dt class="col-sm-4">Proveedor</dt>
-                    <dd class="col-sm-8">@Model.ProveedorNombre</dd>
+                    <dd class="col-sm-8"><strong>@Model.ProveedorNombre</strong></dd>
                     <dt class="col-sm-4">Monto</dt>
                     <dd class="col-sm-8">@Model.Monto.ToString("N2") @Model.Moneda</dd>
                     <dt class="col-sm-4">Fecha de registro</dt>
-                    <dd class="col-sm-8">@Model.FechaRegistro.ToString("g")</dd>
+                    <dd class="col-sm-8">@Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</dd>
                 </dl>
             </div>
         </div>

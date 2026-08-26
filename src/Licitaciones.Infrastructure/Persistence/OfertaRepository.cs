@@ -84,6 +84,17 @@ public sealed class OfertaRepository :
             .ToListAsync(cancellationToken);
 
     /// <summary>
+    /// Lista todas las ofertas ordenadas por monto y fecha.
+    /// </summary>
+    public async Task<IReadOnlyList<OfertaConsultaRegistro>> ListarTodasAsync(
+        CancellationToken cancellationToken = default) =>
+        await ProyectarConsulta(
+                _context.Ofertas
+                    .OrderBy(oferta => oferta.Monto)
+                    .ThenBy(oferta => oferta.FechaRegistro))
+            .ToListAsync(cancellationToken);
+
+    /// <summary>
     /// Lista todas las ofertas de un proveedor ordenadas por fecha de registro.
     /// </summary>
     public async Task<IReadOnlyList<OfertaConsultaRegistro>> ListarPorProveedorIdAsync(

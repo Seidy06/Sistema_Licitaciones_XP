@@ -4,9 +4,12 @@
     ViewData["Title"] = "Desactivar tipo de cambio";
 }
 
-<h1>Desactivar tipo de cambio</h1>
+<div class="section-header">
+    <h1>Desactivar tipo de cambio</h1>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancelar</a>
+</div>
 
-<div class="alert alert-warning">
+<div class="alert alert-danger">
     ¿Está seguro que desea desactivar este tipo de cambio?
 </div>
 
@@ -14,24 +17,25 @@
     <div class="col-12 col-md-6">
         <div class="card">
             <div class="card-body">
+                <h5 class="card-title">Resumen</h5>
                 <dl class="row mb-0">
                     <dt class="col-sm-4">Moneda origen</dt>
                     <dd class="col-sm-8">@Model.MonedaOrigen</dd>
                     <dt class="col-sm-4">Moneda destino</dt>
                     <dd class="col-sm-8">@Model.MonedaDestino</dd>
                     <dt class="col-sm-4">Valor</dt>
-                    <dd class="col-sm-8">@Model.Valor.ToString("N4")</dd>
+                    <dd class="col-sm-8"><strong>@Model.Valor.ToString("N4")</strong></dd>
                     <dt class="col-sm-4">Fecha</dt>
-                    <dd class="col-sm-8">@Model.Fecha.ToString("yyyy-MM-dd")</dd>
+                    <dd class="col-sm-8">@Model.Fecha.ToString("dd/MM/yyyy")</dd>
                     <dt class="col-sm-4">Estado</dt>
                     <dd class="col-sm-8">
                         @if (Model.Activo)
                         {
-                            <span class="badge bg-success">Activo</span>
+                            <span class="badge badge-success">Activo</span>
                         }
                         else
                         {
-                            <span class="badge bg-secondary">Inactivo</span>
+                            <span class="badge badge-secondary">Inactivo</span>
                         }
                     </dd>
                 </dl>

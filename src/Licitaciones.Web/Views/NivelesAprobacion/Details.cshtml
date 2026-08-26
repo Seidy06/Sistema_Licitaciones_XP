@@ -4,9 +4,9 @@
     ViewData["Title"] = $"Detalle - {Model.Nombre}";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="section-header">
     <h1>@Model.Nombre</h1>
-    <div>
+    <div class="actions">
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Editar</a>
         <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
     </div>
@@ -19,7 +19,7 @@
                 <h5 class="card-title">Información del nivel</h5>
                 <dl class="row mb-0">
                     <dt class="col-sm-4">Nombre</dt>
-                    <dd class="col-sm-8">@Model.Nombre</dd>
+                    <dd class="col-sm-8"><strong>@Model.Nombre</strong></dd>
                     <dt class="col-sm-4">Monto mínimo</dt>
                     <dd class="col-sm-8">@Model.MontoMinimo.ToString("N2")</dd>
                     <dt class="col-sm-4">Monto máximo</dt>
@@ -28,11 +28,11 @@
                     <dd class="col-sm-8">
                         @if (Model.Activo)
                         {
-                            <span class="badge bg-success">Activo</span>
+                            <span class="badge badge-success">Activo</span>
                         }
                         else
                         {
-                            <span class="badge bg-secondary">Inactivo</span>
+                            <span class="badge badge-secondary">Inactivo</span>
                         }
                     </dd>
                 </dl>

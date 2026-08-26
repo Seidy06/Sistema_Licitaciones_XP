@@ -13,6 +13,12 @@ public interface IOfertaConsultaRepository
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Lista todas las ofertas registradas sin filtro de licitación.
+    /// </summary>
+    Task<IReadOnlyList<OfertaConsultaRegistro>> ListarTodasAsync(
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Lista las ofertas registradas por un proveedor específico.
     /// </summary>
     Task<IReadOnlyList<OfertaConsultaRegistro>> ListarPorProveedorIdAsync(

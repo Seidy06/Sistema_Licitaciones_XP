@@ -4,18 +4,26 @@
     ViewData["Title"] = "Registrar proveedor";
 }
 
-<h1>Registrar proveedor</h1>
+<div class="section-header">
+    <h1>Registrar proveedor</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+</div>
 
 <partial name="_Mensajes" />
 
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label asp-for="Nombre" class="form-label"></label>
-        <input asp-for="Nombre" class="form-control" />
-        <span asp-validation-for="Nombre" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Registrar</button>
-</form>
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        <div class="mb-3">
+            <label asp-for="Nombre" class="form-label"></label>
+            <input asp-for="Nombre" class="form-control" placeholder="Nombre del proveedor" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Registrar</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

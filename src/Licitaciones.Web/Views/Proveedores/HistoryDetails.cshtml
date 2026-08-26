@@ -4,17 +4,27 @@
     ViewData["Title"] = "Detalle histórico del proveedor";
 }
 
-<h1>Detalle histórico del proveedor</h1>
+<div class="section-header">
+    <h1>Detalle histórico del proveedor</h1>
+    <a asp-action="History" class="btn btn-outline-secondary">Volver al histórico</a>
+</div>
 
-<dl class="row">
-    <dt class="col-sm-3">Nombre</dt>
-    <dd class="col-sm-9">@Model.Nombre</dd>
-    <dt class="col-sm-3">Fecha de creación</dt>
-    <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
-    <dt class="col-sm-3">Última actualización</dt>
-    <dd class="col-sm-9">@Model.UpdatedAt.ToString("g")</dd>
-    <dt class="col-sm-3">Fecha de baja</dt>
-    <dd class="col-sm-9">@Model.DeletedAt.ToString("g")</dd>
-</dl>
-
-<a asp-action="History" class="btn btn-outline-secondary">Volver al histórico</a>
+<div class="row">
+    <div class="col-12 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Información del proveedor</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Nombre</dt>
+                    <dd class="col-sm-8"><strong>@Model.Nombre</strong></dd>
+                    <dt class="col-sm-4">Fecha de creación</dt>
+                    <dd class="col-sm-8">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                    <dt class="col-sm-4">Última actualización</dt>
+                    <dd class="col-sm-8">@Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                    <dt class="col-sm-4">Fecha de baja</dt>
+                    <dd class="col-sm-8">@Model.DeletedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

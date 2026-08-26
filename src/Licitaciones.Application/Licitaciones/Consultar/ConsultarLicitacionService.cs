@@ -35,6 +35,7 @@ public sealed class ConsultarLicitacionService
             .Take(consulta.TamanoPagina)
             .Select(l => new LicitacionConsultaDto(
                 l.Id,
+                l.Codigo,
                 l.Titulo,
                 l.Presupuesto,
                 l.FechaCierre,

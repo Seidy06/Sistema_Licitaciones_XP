@@ -4,9 +4,9 @@
     ViewData["Title"] = "Detalle de tipo de cambio";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="section-header">
     <h1>Tipo de cambio</h1>
-    <div>
+    <div class="actions">
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Editar</a>
         @if (!Model.Activo)
         {
@@ -30,18 +30,18 @@
                     <dt class="col-sm-4">Moneda destino</dt>
                     <dd class="col-sm-8">@Model.MonedaDestino</dd>
                     <dt class="col-sm-4">Valor</dt>
-                    <dd class="col-sm-8">@Model.Valor.ToString("N4")</dd>
+                    <dd class="col-sm-8"><strong>@Model.Valor.ToString("N4")</strong></dd>
                     <dt class="col-sm-4">Fecha</dt>
-                    <dd class="col-sm-8">@Model.Fecha.ToString("yyyy-MM-dd")</dd>
+                    <dd class="col-sm-8">@Model.Fecha.ToString("dd/MM/yyyy")</dd>
                     <dt class="col-sm-4">Estado</dt>
                     <dd class="col-sm-8">
                         @if (Model.Activo)
                         {
-                            <span class="badge bg-success">Activo</span>
+                            <span class="badge badge-success">Activo</span>
                         }
                         else
                         {
-                            <span class="badge bg-secondary">Inactivo</span>
+                            <span class="badge badge-secondary">Inactivo</span>
                         }
                     </dd>
                 </dl>

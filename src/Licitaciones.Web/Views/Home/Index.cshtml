@@ -2,87 +2,51 @@
     ViewData["Title"] = "Inicio";
 }
 
-<section class="py-5 text-center" aria-labelledby="titulo-landing">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-8">
-            <h1 id="titulo-landing" class="display-5">Sistema de Licitaciones</h1>
-            <p class="lead">
-                El propósito de la aplicación es ofrecer un espacio único donde la institución
-                publica sus licitaciones y los proveedores compiten con propuestas transparentes,
-                desde la convocatoria hasta la adjudicación final.
-            </p>
-        </div>
-    </div>
+<section class="hero" aria-labelledby="titulo-landing">
+    <h1 id="titulo-landing">Sistema de Licitaciones</h1>
+    <p>
+        Plataforma integral para publicar licitaciones, recibir ofertas de proveedores
+        y adjudicar de forma transparente — desde la convocatoria hasta la decisión final.
+    </p>
 </section>
 
-<section class="pb-5" aria-label="Cómo funciona el sistema">
-    <h2 class="h4 mb-4">¿Qué encontrarás en el sistema?</h2>
-    <div class="row g-4">
-        <div class="col-12 col-md-6 col-xl-4">
-            <article class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h3 class="h5 card-title">Flujo de licitación</h3>
-                    <p class="card-text mb-0">
-                        Cada licitación se crea, se publica, recibe ofertas dentro del plazo,
-                        se cierra en la fecha indicada y culmina con la adjudicación al ganador.
-                    </p>
-                </div>
-            </article>
-        </div>
-        <div class="col-12 col-md-6 col-xl-4">
-            <article class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h3 class="h5 card-title">Ofertas</h3>
-                    <p class="card-text mb-0">
-                        Los proveedores registrados presentan sus propuestas económicas
-                        asociadas a cada licitación publicada y pueden consultar su estado.
-                    </p>
-                </div>
-            </article>
-        </div>
-        <div class="col-12 col-md-6 col-xl-4">
-            <article class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h3 class="h5 card-title">Mejor oferta</h3>
-                    <p class="card-text mb-0">
-                        Al cerrar la licitación, el sistema calcula automáticamente la mejor
-                        oferta entre las recibidas para recomendar la adjudicación.
-                    </p>
-                </div>
-            </article>
-        </div>
-        <div class="col-12 col-md-6 col-xl-4">
-            <article class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h3 class="h5 card-title">Nivel de aprobación</h3>
-                    <p class="card-text mb-0">
-                        Los montos de cada proceso se validan contra niveles de aprobación
-                        que definen qué jerarquía autoriza la adjudicación según el monto.
-                    </p>
-                </div>
-            </article>
-        </div>
-        <div class="col-12 col-md-6 col-xl-4">
-            <article class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h3 class="h5 card-title">Conversión monetaria</h3>
-                    <p class="card-text mb-0">
-                        Las ofertas se expresan en CRC o USD; el sistema aplica el tipo de
-                        cambio activo para compararlas en una moneda común.
-                    </p>
-                </div>
-            </article>
-        </div>
-        <div class="col-12 col-md-6 col-xl-4">
-            <article class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h3 class="h5 card-title">Tipo de cambio</h3>
-                    <p class="card-text mb-0">
-                        Se administra el tipo de cambio activo de CRC a USD que el
-                        sistema utiliza para convertir y comparar montos entre monedas.
-                    </p>
-                </div>
-            </article>
-        </div>
+<section aria-label="Accesos rápidos">
+    <div class="kpi-grid">
+        <a asp-controller="Licitaciones" asp-action="Index" class="kpi-card">
+            <div class="kpi-icon blue">&#128196;</div>
+            <span class="kpi-title">Licitaciones</span>
+            <span class="kpi-value">Gestionar</span>
+            <p class="kpi-desc">Crear, publicar y administrar procesos de licitación.</p>
+        </a>
+        <a asp-controller="Proveedores" asp-action="Index" class="kpi-card">
+            <div class="kpi-icon green">&#128101;</div>
+            <span class="kpi-title">Proveedores</span>
+            <span class="kpi-value">Administrar</span>
+            <p class="kpi-desc">Registrar y dar de baja proveedores habilitados.</p>
+        </a>
+        <a asp-controller="Ofertas" asp-action="Index" class="kpi-card">
+            <div class="kpi-icon amber">&#128176;</div>
+            <span class="kpi-title">Ofertas</span>
+            <span class="kpi-value">Revisar</span>
+            <p class="kpi-desc">Consultar ofertas recibidas y encontrar la mejor propuesta.</p>
+        </a>
+        <a asp-controller="TiposCambio" asp-action="Index" class="kpi-card">
+            <div class="kpi-icon cyan">&#128176;</div>
+            <span class="kpi-title">Tipo de cambio</span>
+            <span class="kpi-value">Configurar</span>
+            <p class="kpi-desc">Administrar el tipo de cambio activo CRC/USD.</p>
+        </a>
+        <a asp-controller="NivelesAprobacion" asp-action="Index" class="kpi-card">
+            <div class="kpi-icon red">&#128736;</div>
+            <span class="kpi-title">Niveles de aprobación</span>
+            <span class="kpi-value">Definir</span>
+            <p class="kpi-desc">Establecer montos y jerarquías de autorización.</p>
+        </a>
+        <a href="http://localhost:8080/swagger/index.html" class="kpi-card" target="_blank" rel="noopener">
+            <div class="kpi-icon blue">&#128196;</div>
+            <span class="kpi-title">API</span>
+            <span class="kpi-value">Documentación</span>
+            <p class="kpi-desc">Explorar los endpoints REST disponibles con Swagger.</p>
+        </a>
     </div>
 </section>

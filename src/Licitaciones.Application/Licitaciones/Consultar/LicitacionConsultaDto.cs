@@ -7,6 +7,7 @@ namespace Licitaciones.Application.Licitaciones.Consultar;
 /// </summary>
 public sealed record LicitacionConsultaDto(
     Guid Id,
+    string Codigo,
     string Titulo,
     decimal Presupuesto,
     DateTimeOffset FechaCierre,

@@ -1,29 +1,23 @@
-# Sistema de Gestión de Licitaciones
+📋 Sistema de Gestión de Licitaciones
 
-## Documentación general
+Aplicación web para gestionar licitaciones, proveedores y ofertas económicas. Permite crear licitaciones, recibir ofertas, calcular automáticamente la mejor oferta y su nivel de aprobación, y ver los montos en colones (CRC) o dólares (USD).
 
-- [Visión y alcance](vision-alcance.md)
-- [Historias de usuario](historias-usuario.md) — catálogo aprobado HU-00 a HU-37 y trazabilidad histórica.
-- [Plan XP](plan-xp.md) — distribución de historias en cuatro iteraciones.
-- [Bitácora XP](bitacora-xp.md) — evidencia de ejecución y decisiones de planificación.
-- [Arquitectura general](arquitectura-general.md)
-- [Modelo de datos](modelo-datos.md)
-- [API REST](api.md)
-- [Pruebas](pruebas.md)
-- [Docker](docker.md)
-- [Kubernetes](kubernetes.md)
-- [Uso de inteligencia artificial](uso-ia.md)
-- [Integración de módulos](integracion-modulos.md)
+Desarrollado con la metodología ágil Extreme Programming (XP).
 
-## Documentación por módulo
+🛠️ Tecnologías
+Backend: .NET 9, ASP.NET Core MVC, API REST
+Base de datos: PostgreSQL + Entity Framework Core
+Frontend: HTML, CSS, JavaScript, Bootstrap
+Pruebas: xUnit, Playwright
+Infraestructura: Docker, Kubernetes
+CI/CD: GitHub Actions
 
-- [Proveedores](modulos/proveedores.md)
-- [HU-08: borrado lógico de proveedores](hu-08-borrado-logico-proveedores.md)
-- [HU-09: listado y consulta de proveedores](hu-09-listar-consultar-proveedores.md)
-- [Licitaciones](modulos/licitaciones.md)
-- [Ofertas](modulos/ofertas.md)
-- [Niveles de aprobación](modulos/niveles-aprobacion.md)
-- [Tipos de cambio](modulos/tipo-cambio.md)
-- [Interfaz web](modulos/interfaz-web.md)
-- [API REST](modulos/api-rest.md)
-- [Persistencia](modulos/persistencia.md)
+🚀 Cómo ejecutarlo
+bash
+git clone https://github.com/Seidy06/Sistema_Licitaciones_XP.git
+cd Sistema_Licitaciones_XP
+docker compose up --build
+
+📚 Documentación
+
+Toda la documentación está en la carpeta /docs.

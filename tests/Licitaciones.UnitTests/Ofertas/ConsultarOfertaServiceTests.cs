@@ -103,12 +103,16 @@ public sealed class ConsultarOfertaServiceTests
 
     [Fact]
     [Trait("HU", "HU-28")]
-    public async Task ListarAsync_SinLicitacion_DebeRechazarConsulta()
+    public async Task ListarAsync_SinLicitacion_DebeRetornarTodas()
     {
-        var service = CrearService([]);
+        var licitacionId = Guid.NewGuid();
+        var oferta = CrearRegistro(licitacionId, "Proveedor A", 5_000m, Ahora);
+        var service = CrearService([oferta]);
 
-        await Assert.ThrowsAsync<DomainException>(
-            () => service.ListarAsync(new ConsultarOfertasRequest(Guid.Empty)));
+        var resultado = await service.ListarAsync(new ConsultarOfertasRequest());
+
+        var item = Assert.Single(resultado.Items);
+        Assert.Equal("Proveedor A", item.ProveedorNombre);
     }
 
     [Fact]
@@ -190,6 +194,10 @@ public sealed class ConsultarOfertaServiceTests
 
         public Task<IReadOnlyList<OfertaConsultaRegistro>> ListarAsync(
             Guid licitacionId,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(_ofertas);
+
+        public Task<IReadOnlyList<OfertaConsultaRegistro>> ListarTodasAsync(
             CancellationToken cancellationToken = default) =>
             Task.FromResult(_ofertas);
 

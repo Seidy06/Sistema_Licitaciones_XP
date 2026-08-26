@@ -11,18 +11,18 @@
     var totalPaginas = (int)Math.Ceiling(Model.Total / (double)Model.TamanoPagina);
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="section-header">
     <h1>Proveedores</h1>
-    <div>
-        <a asp-action="History" class="btn btn-outline-secondary">Ver histórico</a>
-        <a asp-action="Create" class="btn btn-primary">Registrar proveedor</a>
+    <div class="actions">
+        <a asp-action="History" class="btn btn-outline-secondary">Histórico</a>
+        <a asp-action="Create" class="btn btn-primary">+ Registrar proveedor</a>
     </div>
 </div>
 
 <form asp-action="Index" method="get" class="row g-2 mb-3">
     <div class="col-md-5">
         <label for="nombre" class="visually-hidden">Nombre</label>
-        <input id="nombre" name="nombre" value="@nombre" class="form-control" placeholder="Filtrar por nombre" />
+        <input id="nombre" name="nombre" value="@nombre" class="form-control" placeholder="Buscar por nombre..." />
     </div>
     <div class="col-md-3">
         <label for="ordenarPor" class="visually-hidden">Ordenar por</label>
@@ -41,19 +41,23 @@
 </form>
 
 <div class="table-responsive">
-<table class="table table-striped align-middle">
+<table class="table align-middle">
     <thead>
-        <tr><th>Nombre</th><th>Fecha de creación</th><th></th></tr>
+        <tr>
+            <th>Nombre</th>
+            <th>Fecha de creación</th>
+            <th class="text-end">Acciones</th>
+        </tr>
     </thead>
     <tbody>
     @foreach (var proveedor in Model.Items)
     {
         <tr>
-            <td>@proveedor.Nombre</td>
-            <td>@proveedor.CreatedAt.ToString("g")</td>
+            <td><strong>@proveedor.Nombre</strong></td>
+            <td>@proveedor.CreatedAt.ToString("dd/MM/yyyy")</td>
             <td class="text-end">
-                <a asp-action="Details" asp-route-id="@proveedor.Id">Ver detalle</a>
-                <a asp-action="Delete" asp-route-id="@proveedor.Id" class="ms-2 text-danger">Eliminar</a>
+                <a asp-action="Details" asp-route-id="@proveedor.Id" class="me-2">Detalle</a>
+                <a asp-action="Delete" asp-route-id="@proveedor.Id" class="text-danger">Eliminar</a>
             </td>
         </tr>
     }
@@ -63,7 +67,9 @@
 
 @if (Model.Items.Count == 0)
 {
-    <p>No se encontraron proveedores.</p>
+    <div class="empty-state">
+        <p>No se encontraron proveedores.</p>
+    </div>
 }
 
 @if (totalPaginas > 1)

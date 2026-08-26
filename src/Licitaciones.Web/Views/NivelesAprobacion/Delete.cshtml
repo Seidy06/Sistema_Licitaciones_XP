@@ -4,22 +4,36 @@
     ViewData["Title"] = "Eliminar nivel de aprobación";
 }
 
-<h1>Eliminar nivel de aprobación</h1>
+<div class="section-header">
+    <h1>Eliminar nivel de aprobación</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+</div>
 
-<div class="alert alert-warning" role="alert">
+<div class="alert alert-danger" role="alert">
     ¿Confirma que desea eliminar este nivel de aprobación? Quedará desactivado.
 </div>
 
-<dl class="row">
-    <dt class="col-sm-3">Nombre</dt>
-    <dd class="col-sm-9">@Model.Nombre</dd>
-    <dt class="col-sm-3">Monto mínimo</dt>
-    <dd class="col-sm-9">@Model.MontoMinimo.ToString("N2")</dd>
-    <dt class="col-sm-3">Monto máximo</dt>
-    <dd class="col-sm-9">@(Model.MontoMaximo?.ToString("N2") ?? "Sin límite")</dd>
-</dl>
+<div class="row">
+    <div class="col-12 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Resumen</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Nombre</dt>
+                    <dd class="col-sm-8"><strong>@Model.Nombre</strong></dd>
+                    <dt class="col-sm-4">Monto mínimo</dt>
+                    <dd class="col-sm-8">@Model.MontoMinimo.ToString("N2")</dd>
+                    <dt class="col-sm-4">Monto máximo</dt>
+                    <dd class="col-sm-8">@(Model.MontoMaximo?.ToString("N2") ?? "Sin límite")</dd>
+                </dl>
+            </div>
+        </div>
 
-<form asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post">
-    <button type="submit" class="btn btn-danger">Confirmar</button>
-    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
-</form>
+        <form asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post" class="mt-3">
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger">Confirmar</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

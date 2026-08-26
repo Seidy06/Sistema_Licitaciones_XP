@@ -4,10 +4,10 @@ namespace Licitaciones.Web.Models.Ofertas;
 
 public sealed class CrearOfertaViewModel
 {
-    [Required(ErrorMessage = "La licitación es obligatoria.")]
+    [Required(ErrorMessage = "Seleccione una licitación.")]
     public Guid? LicitacionId { get; set; }
 
-    [Required(ErrorMessage = "El proveedor es obligatorio.")]
+    [Required(ErrorMessage = "Seleccione un proveedor.")]
     public Guid? ProveedorId { get; set; }
 
     [Range(0.01, double.MaxValue,

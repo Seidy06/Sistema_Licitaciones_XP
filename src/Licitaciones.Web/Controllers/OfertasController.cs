@@ -4,6 +4,7 @@ using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Ofertas.Crear;
 using Licitaciones.Application.Ofertas.Editar;
 using Licitaciones.Application.Ofertas.Eliminar;
+using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Domain.Common;
 using Licitaciones.Web.Models.Ofertas;
 
@@ -23,6 +24,7 @@ public sealed class OfertasController : Controller
     private readonly EditarOfertaService _editarService;
     private readonly EliminarOfertaService _eliminarService;
     private readonly ConsultarLicitacionService _consultarLicitacionService;
+    private readonly ConsultarProveedorService _consultarProveedorService;
     private readonly IClock _clock;
 
     /// <summary>
@@ -34,6 +36,7 @@ public sealed class OfertasController : Controller
         EditarOfertaService editarService,
         EliminarOfertaService eliminarService,
         ConsultarLicitacionService consultarLicitacionService,
+        ConsultarProveedorService consultarProveedorService,
         IClock clock)
     {
         _consultarService = consultarService;
@@ -41,6 +44,7 @@ public sealed class OfertasController : Controller
         _editarService = editarService;
         _eliminarService = eliminarService;
         _consultarLicitacionService = consultarLicitacionService;
+        _consultarProveedorService = consultarProveedorService;
         _clock = clock;
     }
 
@@ -49,7 +53,7 @@ public sealed class OfertasController : Controller
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index(
-        Guid licitacionId,
+        Guid? licitacionId = null,
         string? moneda = null,
         string? proveedor = null,
         int pagina = 1,
@@ -92,7 +96,7 @@ public sealed class OfertasController : Controller
                 await ObtenerMejorOfertaAsync(licitacionId, cancellationToken),
                 monedaSeleccionada);
 
-            ViewData["LicitacionId"] = licitacionId == Guid.Empty ? null : licitacionId;
+            ViewData["LicitacionId"] = licitacionId;
             ViewData["Proveedor"] = proveedor;
             ViewData["OrdenarPor"] = ordenarPor;
             ViewData["Descendente"] = descendente;
@@ -113,8 +117,26 @@ public sealed class OfertasController : Controller
     /// Muestra el formulario para registrar una nueva oferta.
     /// </summary>
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create(
+        CancellationToken cancellationToken = default)
     {
+        var licitaciones = await _consultarLicitacionService.ListarAsync(
+            new ConsultarLicitacionesRequest(TamanoPagina: 100),
+            _clock,
+            cancellationToken);
+
+        var proveedores = await _consultarProveedorService.ListarAsync(
+            new ConsultarProveedoresRequest(pagina: 1, tamanoPagina: 100),
+            cancellationToken);
+
+        ViewBag.Licitaciones = licitaciones.Items
+            .Select(l => new { l.Id, l.Codigo, l.Titulo })
+            .ToList();
+
+        ViewBag.Proveedores = proveedores.Items
+            .Select(p => new { p.Id, p.Nombre })
+            .ToList();
+
         return View(new CrearOfertaViewModel());
     }
 
@@ -127,7 +149,27 @@ public sealed class OfertasController : Controller
         CrearOfertaViewModel model,
         CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid) return View(model);
+        if (!ModelState.IsValid)
+        {
+            var licitaciones = await _consultarLicitacionService.ListarAsync(
+                new ConsultarLicitacionesRequest(TamanoPagina: 100),
+                _clock,
+                cancellationToken);
+
+            var proveedores = await _consultarProveedorService.ListarAsync(
+                new ConsultarProveedoresRequest(pagina: 1, tamanoPagina: 100),
+                cancellationToken);
+
+            ViewBag.Licitaciones = licitaciones.Items
+                .Select(l => new { l.Id, l.Codigo, l.Titulo })
+                .ToList();
+
+            ViewBag.Proveedores = proveedores.Items
+                .Select(p => new { p.Id, p.Nombre })
+                .ToList();
+
+            return View(model);
+        }
 
         try
         {
@@ -271,13 +313,13 @@ public sealed class OfertasController : Controller
     }
 
     private async Task<LicitacionMejorOfertaDto?> ObtenerMejorOfertaAsync(
-        Guid licitacionId,
+        Guid? licitacionId,
         CancellationToken cancellationToken)
     {
-        if (licitacionId == Guid.Empty) return null;
+        if (licitacionId is null || licitacionId == Guid.Empty) return null;
 
         var detalle = await _consultarLicitacionService.ObtenerDetalleAsync(
-            licitacionId, _clock, cancellationToken);
+            licitacionId.Value, _clock, cancellationToken);
         return detalle?.MejorOferta;
     }
 }

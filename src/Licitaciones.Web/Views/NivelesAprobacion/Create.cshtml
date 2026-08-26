@@ -4,28 +4,36 @@
     ViewData["Title"] = "Crear nivel de aprobación";
 }
 
-<h1>Crear nivel de aprobación</h1>
+<div class="section-header">
+    <h1>Crear nivel de aprobación</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+</div>
 
 <partial name="_Mensajes" />
 
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label asp-for="Nombre" class="form-label"></label>
-        <input asp-for="Nombre" class="form-control" />
-        <span asp-validation-for="Nombre" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="MontoMinimo" class="form-label"></label>
-        <input asp-for="MontoMinimo" type="number" min="0" step="0.01" class="form-control" />
-        <span asp-validation-for="MontoMinimo" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="MontoMaximo" class="form-label"></label>
-        <input asp-for="MontoMaximo" type="number" min="0" step="0.01" class="form-control" />
-        <span asp-validation-for="MontoMaximo" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Crear</button>
-</form>
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        <div class="mb-3">
+            <label asp-for="Nombre" class="form-label"></label>
+            <input asp-for="Nombre" class="form-control" placeholder="Nombre del nivel" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="MontoMinimo" class="form-label"></label>
+            <input asp-for="MontoMinimo" type="number" min="0" step="0.01" class="form-control" placeholder="0.00" />
+            <span asp-validation-for="MontoMinimo" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="MontoMaximo" class="form-label"></label>
+            <input asp-for="MontoMaximo" type="number" min="0" step="0.01" class="form-control" placeholder="Sin límite (opcional)" />
+            <span asp-validation-for="MontoMaximo" class="text-danger"></span>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Crear nivel</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -9,9 +9,11 @@
     var totalPaginas = (int)Math.Ceiling(Model.Total / (double)Model.TamanoPagina);
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="section-header">
     <h1>Tipos de cambio</h1>
-    <a asp-action="Create" class="btn btn-primary">Registrar tipo de cambio</a>
+    <div class="actions">
+        <a asp-action="Create" class="btn btn-primary">+ Registrar tipo de cambio</a>
+    </div>
 </div>
 
 <partial name="_Mensajes" />
@@ -34,9 +36,16 @@
 </form>
 
 <div class="table-responsive">
-<table class="table table-striped align-middle">
+<table class="table align-middle">
     <thead>
-        <tr><th>Moneda origen</th><th>Moneda destino</th><th>Valor</th><th>Fecha</th><th>Activo</th><th></th></tr>
+        <tr>
+            <th>Moneda origen</th>
+            <th>Moneda destino</th>
+            <th>Valor</th>
+            <th>Fecha</th>
+            <th>Activo</th>
+            <th class="text-end">Acciones</th>
+        </tr>
     </thead>
     <tbody>
     @foreach (var tipo in Model.Items)
@@ -44,16 +53,16 @@
         <tr>
             <td>@tipo.MonedaOrigen</td>
             <td>@tipo.MonedaDestino</td>
-            <td>@tipo.Valor.ToString("N4")</td>
-            <td>@tipo.Fecha.ToString("yyyy-MM-dd")</td>
+            <td><strong>@tipo.Valor.ToString("N4")</strong></td>
+            <td>@tipo.Fecha.ToString("dd/MM/yyyy")</td>
             <td>
                 @if (tipo.Activo)
                 {
-                    <span class="badge bg-success">Activo</span>
+                    <span class="badge badge-success">Activo</span>
                 }
                 else
                 {
-                    <span class="badge bg-secondary">Inactivo</span>
+                    <span class="badge badge-secondary">Inactivo</span>
                 }
             </td>
             <td class="text-end">
@@ -67,7 +76,9 @@
 
 @if (Model.Items.Count == 0)
 {
-    <p>No se encontraron tipos de cambio.</p>
+    <div class="empty-state">
+        <p>No se encontraron tipos de cambio.</p>
+    </div>
 }
 
 @if (totalPaginas > 1)
