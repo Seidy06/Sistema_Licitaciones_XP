@@ -180,6 +180,14 @@ public sealed class OfertasController : ControllerBase
                 exception.Message,
                 "oferta_no_procesable");
         }
+        catch (OfertaConcurrenciaException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Conflicto de concurrencia",
+                exception.Message,
+                "oferta_concurrencia");
+        }
         catch (DomainException exception)
         {
             return CrearProblema(
@@ -214,6 +222,14 @@ public sealed class OfertasController : ControllerBase
                 "Oferta inalterable",
                 exception.Message,
                 "oferta_no_procesable");
+        }
+        catch (OfertaConcurrenciaException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Conflicto de concurrencia",
+                exception.Message,
+                "oferta_concurrencia");
         }
         catch (DomainException exception)
         {

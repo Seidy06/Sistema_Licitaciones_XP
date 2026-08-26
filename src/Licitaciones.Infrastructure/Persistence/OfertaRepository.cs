@@ -160,6 +160,10 @@ public sealed class OfertaRepository :
         {
             await _context.SaveChangesAsync(cancellationToken);
         }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new OfertaConcurrenciaException(Guid.Empty);
+        }
         catch (DbUpdateException exception)
             when (exception.InnerException is PostgresException
             {

@@ -59,17 +59,29 @@ public sealed class TipoCambioRepository : ITipoCambioRepository
         TipoCambio tipoCambio,
         CancellationToken cancellationToken = default)
     {
-        var activos = await _context.TiposCambio
-            .Where(tipo => tipo.Activo)
-            .ToListAsync(cancellationToken);
+        await using var transaccion = await _context.Database.BeginTransactionAsync(
+            cancellationToken);
 
-        foreach (var activo in activos)
+        try
         {
-            activo.Desactivar();
-        }
+            var activos = await _context.TiposCambio
+                .Where(tipo => tipo.Activo)
+                .ToListAsync(cancellationToken);
 
-        await _context.TiposCambio.AddAsync(tipoCambio, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+            foreach (var activo in activos)
+            {
+                activo.Desactivar();
+            }
+
+            await _context.TiposCambio.AddAsync(tipoCambio, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+            await transaccion.CommitAsync(cancellationToken);
+        }
+        catch
+        {
+            await transaccion.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 
     /// <summary>

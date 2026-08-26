@@ -1,3 +1,5 @@
+using Licitaciones.Api.Contracts.Licitaciones;
+using Licitaciones.Api.Contracts.Ofertas;
 using Licitaciones.Api.Infraestructura;
 using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Cerrar;
@@ -6,11 +8,16 @@ using Licitaciones.Application.Licitaciones.Crear;
 using Licitaciones.Application.Licitaciones.Editar;
 using Licitaciones.Application.Licitaciones.Eliminar;
 using Licitaciones.Application.Licitaciones.Publicar;
+using Licitaciones.Application.Ofertas;
+using Licitaciones.Application.Ofertas.Consultar;
+using Licitaciones.Application.Ofertas.Crear;
 using Licitaciones.Domain.Common;
 
 using Microsoft.AspNetCore.Mvc;
 
 using ApplicationRequest = Licitaciones.Application.Licitaciones.Crear.CrearLicitacionRequest;
+using CrearOfertaHttpRequest = Licitaciones.Api.Contracts.Ofertas.CrearOfertaRequest;
+using CrearOfertaAppRequest = Licitaciones.Application.Ofertas.Crear.CrearOfertaRequest;
 using EditarApplicationRequest = Licitaciones.Application.Licitaciones.Editar.EditarLicitacionRequest;
 using EditarHttpRequest = Licitaciones.Api.Contracts.Licitaciones.EditarLicitacionRequest;
 using HttpRequest = Licitaciones.Api.Contracts.Licitaciones.CrearLicitacionRequest;
@@ -30,6 +37,8 @@ public sealed class LicitacionesController : ControllerBase
     private readonly PublicarLicitacionService _publicarService;
     private readonly CerrarLicitacionService _cerrarService;
     private readonly EliminarLicitacionService _eliminarService;
+    private readonly ConsultarOfertaService _consultarOfertaService;
+    private readonly CrearOfertaService _crearOfertaService;
     private readonly IClock _clock;
 
     public LicitacionesController(
@@ -39,6 +48,8 @@ public sealed class LicitacionesController : ControllerBase
         PublicarLicitacionService publicarService,
         CerrarLicitacionService cerrarService,
         EliminarLicitacionService eliminarService,
+        ConsultarOfertaService consultarOfertaService,
+        CrearOfertaService crearOfertaService,
         IClock clock)
     {
         _crearService = crearService;
@@ -47,6 +58,8 @@ public sealed class LicitacionesController : ControllerBase
         _publicarService = publicarService;
         _cerrarService = cerrarService;
         _eliminarService = eliminarService;
+        _consultarOfertaService = consultarOfertaService;
+        _crearOfertaService = crearOfertaService;
         _clock = clock;
     }
 
@@ -72,6 +85,14 @@ public sealed class LicitacionesController : ControllerBase
                 "Licitación no encontrada",
                 exception.Message,
                 "licitacion_no_encontrada");
+        }
+        catch (LicitacionConcurrenciaException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Conflicto de concurrencia",
+                exception.Message,
+                "licitacion_concurrencia");
         }
         catch (DomainException exception)
         {
@@ -117,6 +138,14 @@ public sealed class LicitacionesController : ControllerBase
                 exception.Message,
                 "licitacion_no_encontrada");
         }
+        catch (LicitacionConcurrenciaException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Conflicto de concurrencia",
+                exception.Message,
+                "licitacion_concurrencia");
+        }
         catch (DomainException exception)
         {
             return CrearProblema(
@@ -149,6 +178,161 @@ public sealed class LicitacionesController : ControllerBase
                 "Licitación no encontrada",
                 exception.Message,
                 "licitacion_no_encontrada");
+        }
+        catch (LicitacionConcurrenciaException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Conflicto de concurrencia",
+                exception.Message,
+                "licitacion_concurrencia");
+        }
+    }
+
+    /// <summary>
+    /// Lista las ofertas asociadas a una licitación específica.
+    /// </summary>
+    [HttpGet("{id:guid}/ofertas")]
+    [ProducesResponseType<PaginaOfertas>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PaginaOfertas>> ObtenerOfertas(
+        Guid id,
+        [FromQuery] string moneda = "CRC",
+        [FromQuery] string? proveedor = null,
+        [FromQuery] string ordenarPor = "monto",
+        [FromQuery] bool descendente = false,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 20,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return Ok(await _consultarOfertaService.ListarAsync(
+                new ConsultarOfertasRequest(
+                    id, moneda, proveedor, ordenarPor,
+                    descendente, pagina, tamanoPagina),
+                cancellationToken));
+        }
+        catch (DomainException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Consulta de ofertas inválida",
+                exception.Message,
+                "consulta_ofertas_invalida");
+        }
+    }
+
+    /// <summary>
+    /// Registra una nueva oferta para una licitación específica.
+    /// </summary>
+    [HttpPost("{id:guid}/ofertas")]
+    [ProducesResponseType<OfertaDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<ActionResult<OfertaDto>> CrearOferta(
+        Guid id,
+        CrearOfertaHttpRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var oferta = await _crearOfertaService.CrearAsync(
+                new CrearOfertaAppRequest(
+                    id, request.ProveedorId, request.Monto),
+                cancellationToken);
+
+            return Created($"/api/v1/ofertas/{oferta.Id}", oferta);
+        }
+        catch (OfertaDuplicadaException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Oferta duplicada",
+                exception.Message,
+                "oferta_duplicada");
+        }
+        catch (DomainException exception)
+            when (exception.Code == OfertaErrorCodes.NoProcesable)
+        {
+            return CrearProblema(
+                StatusCodes.Status422UnprocessableEntity,
+                "Oferta rechazada",
+                exception.Message,
+                "oferta_no_procesable");
+        }
+        catch (DomainException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Solicitud inválida",
+                exception.Message,
+                "solicitud_invalida");
+        }
+    }
+
+    /// <summary>
+    /// Obtiene la mejor oferta de una licitación específica.
+    /// </summary>
+    [HttpGet("{id:guid}/mejor-oferta")]
+    [ProducesResponseType<LicitacionDetalleDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<LicitacionDetalleDto>> ObtenerMejorOferta(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var detalle = await _consultarService.ObtenerDetalleAsync(
+            id, _clock, cancellationToken);
+
+        return detalle is null
+            ? CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Licitación no encontrada",
+                "La licitación solicitada no existe.",
+                "licitacion_no_encontrada")
+            : Ok(detalle);
+    }
+
+    /// <summary>
+    /// Cambia el estado de una licitación (Publicada o Cerrada).
+    /// </summary>
+    [HttpPatch("{id:guid}/estado")]
+    [ProducesResponseType<LicitacionDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<LicitacionDto>> CambiarEstado(
+        Guid id,
+        CambiarEstadoRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var estado = request.Estado?.Trim();
+            LicitacionDto resultado = estado?.ToLowerInvariant() switch
+            {
+                "publicada" => await _publicarService.PublicarAsync(id, cancellationToken),
+                "cerrada" => await _cerrarService.CerrarAsync(id, cancellationToken),
+                _ => throw new DomainException(
+                    $"El estado '{request.Estado}' no es válido. Valores permitidos: Publicada, Cerrada.")
+            };
+            return Ok(resultado);
+        }
+        catch (LicitacionNoEncontradaException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status404NotFound,
+                "Licitación no encontrada",
+                exception.Message,
+                "licitacion_no_encontrada");
+        }
+        catch (DomainException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Transición inválida",
+                exception.Message,
+                "transicion_licitacion_invalida");
         }
     }
 

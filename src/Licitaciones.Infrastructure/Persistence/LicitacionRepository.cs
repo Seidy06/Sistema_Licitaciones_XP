@@ -1,5 +1,6 @@
 using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Crear;
+using Licitaciones.Application.Licitaciones.Editar;
 using Licitaciones.Application.Licitaciones.Eliminar;
 using Licitaciones.Domain.Licitaciones;
 using Licitaciones.Infrastructure.Persistence.Configurations;
@@ -81,9 +82,18 @@ public sealed class LicitacionRepository : ILicitacionRepository, ILicitacionBaj
     /// <summary>
     /// Persiste todos los cambios pendientes en el contexto.
     /// </summary>
-    public Task GuardarCambiosAsync(
-        CancellationToken cancellationToken = default) =>
-        _context.SaveChangesAsync(cancellationToken);
+    public async Task GuardarCambiosAsync(
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new LicitacionConcurrenciaException();
+        }
+    }
 
     /// <summary>
     /// Obtiene una licitación activa para dar de baja lógica.
@@ -104,6 +114,13 @@ public sealed class LicitacionRepository : ILicitacionRepository, ILicitacionBaj
         Licitacion licitacion,
         CancellationToken cancellationToken = default)
     {
-        await _context.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new LicitacionConcurrenciaException();
+        }
     }
 }
