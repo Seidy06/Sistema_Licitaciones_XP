@@ -175,8 +175,8 @@ public sealed class FlujoMinimoE2ETests : IClassFixture<LicitacionesE2EFixture>
         string monto)
     {
         await IrAsync("/Ofertas/Create");
-        await _e2e.Pagina.FillAsync("#LicitacionId", idLicitacion.ToString());
-        await _e2e.Pagina.FillAsync("#ProveedorId", idProveedor.ToString());
+        await _e2e.Pagina.SelectOptionAsync("#LicitacionId", idLicitacion.ToString());
+        await _e2e.Pagina.SelectOptionAsync("#ProveedorId", idProveedor.ToString());
         await _e2e.Pagina.FillAsync("#Monto", monto);
         await _e2e.Pagina.ClickAsync("button[type=submit]");
     }

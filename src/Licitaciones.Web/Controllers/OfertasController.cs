@@ -120,23 +120,7 @@ public sealed class OfertasController : Controller
     public async Task<IActionResult> Create(
         CancellationToken cancellationToken = default)
     {
-        var licitaciones = await _consultarLicitacionService.ListarAsync(
-            new ConsultarLicitacionesRequest(TamanoPagina: 100),
-            _clock,
-            cancellationToken);
-
-        var proveedores = await _consultarProveedorService.ListarAsync(
-            new ConsultarProveedoresRequest(pagina: 1, tamanoPagina: 100),
-            cancellationToken);
-
-        ViewBag.Licitaciones = licitaciones.Items
-            .Select(l => new { l.Id, l.Codigo, l.Titulo })
-            .ToList();
-
-        ViewBag.Proveedores = proveedores.Items
-            .Select(p => new { p.Id, p.Nombre })
-            .ToList();
-
+        await CargarDropdownsOfertaAsync(cancellationToken);
         return View(new CrearOfertaViewModel());
     }
 
@@ -151,23 +135,7 @@ public sealed class OfertasController : Controller
     {
         if (!ModelState.IsValid)
         {
-            var licitaciones = await _consultarLicitacionService.ListarAsync(
-                new ConsultarLicitacionesRequest(TamanoPagina: 100),
-                _clock,
-                cancellationToken);
-
-            var proveedores = await _consultarProveedorService.ListarAsync(
-                new ConsultarProveedoresRequest(pagina: 1, tamanoPagina: 100),
-                cancellationToken);
-
-            ViewBag.Licitaciones = licitaciones.Items
-                .Select(l => new { l.Id, l.Codigo, l.Titulo })
-                .ToList();
-
-            ViewBag.Proveedores = proveedores.Items
-                .Select(p => new { p.Id, p.Nombre })
-                .ToList();
-
+            await CargarDropdownsOfertaAsync(cancellationToken);
             return View(model);
         }
 
@@ -310,6 +278,34 @@ public sealed class OfertasController : Controller
 
         TempData["MensajeExito"] = "La oferta fue eliminada.";
         return RedirectToAction(nameof(Index));
+    }
+
+    private async Task CargarDropdownsOfertaAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var licitaciones = await _consultarLicitacionService.ListarAsync(
+                new ConsultarLicitacionesRequest(TamanoPagina: 100),
+                _clock,
+                cancellationToken);
+
+            var proveedores = await _consultarProveedorService.ListarAsync(
+                new ConsultarProveedoresRequest(pagina: 1, tamanoPagina: 100),
+                cancellationToken);
+
+            ViewBag.Licitaciones = licitaciones.Items
+                .Select(l => new { l.Id, l.Codigo, l.Titulo })
+                .ToList();
+
+            ViewBag.Proveedores = proveedores.Items
+                .Select(p => new { p.Id, p.Nombre })
+                .ToList();
+        }
+        catch
+        {
+            ViewBag.Licitaciones = Array.Empty<object>();
+            ViewBag.Proveedores = Array.Empty<object>();
+        }
     }
 
     private async Task<LicitacionMejorOfertaDto?> ObtenerMejorOfertaAsync(
