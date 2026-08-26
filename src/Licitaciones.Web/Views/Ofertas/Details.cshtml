@@ -1,0 +1,42 @@
+@model DetalleOfertaViewModel
+
+@{
+    ViewData["Title"] = "Detalle de oferta";
+}
+
+<div class="section-header">
+    <h1>Detalle de oferta</h1>
+    <div class="actions">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Editar</a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">Eliminar</a>
+        <a asp-action="Index" asp-route-licitacionId="@Model.LicitacionId" class="btn btn-outline-secondary">Volver</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Información de la oferta</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Proveedor</dt>
+                    <dd class="col-sm-8"><strong>@Model.ProveedorNombre</strong></dd>
+                    <dt class="col-sm-4">Monto</dt>
+                    <dd class="col-sm-8">@Model.Monto.ToString("N2") @Model.Moneda</dd>
+                    <dt class="col-sm-4">Fecha de registro</dt>
+                    <dd class="col-sm-8">@Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</dd>
+                    @if (Model.TipoCambioValor.HasValue)
+                    {
+                        <dt class="col-sm-4">Tipo de cambio</dt>
+                        <dd class="col-sm-8">@Model.TipoCambioValor.Value.ToString("N4") (@Model.TipoCambioFecha)</dd>
+                    }
+                    @if (Model.EsMejorOferta)
+                    {
+                        <dt class="col-sm-4">Clasificación</dt>
+                        <dd class="col-sm-8"><span class="badge badge-success">Mejor oferta</span></dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

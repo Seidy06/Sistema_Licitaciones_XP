@@ -12,6 +12,9 @@ using Npgsql;
 
 namespace Licitaciones.Infrastructure.Persistence;
 
+/// <summary>
+/// Repositorio de proveedores con operaciones CRUD, consulta y baja lógica.
+/// </summary>
 public sealed class ProveedorRepository :
     IProveedorRepository,
     IProveedorConsultaRepository,
@@ -19,11 +22,17 @@ public sealed class ProveedorRepository :
 {
     private readonly LicitacionesDbContext _context;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del repositorio de proveedores.
+    /// </summary>
     public ProveedorRepository(LicitacionesDbContext context)
     {
         _context = context;
     }
 
+    /// <summary>
+    /// Verifica si ya existe un proveedor con el nombre normalizado dado.
+    /// </summary>
     public Task<bool> ExisteNombreNormalizadoAsync(
         string nombreNormalizado,
         CancellationToken cancellationToken = default)
@@ -33,6 +42,9 @@ public sealed class ProveedorRepository :
             cancellationToken);
     }
 
+    /// <summary>
+    /// Agrega un nuevo proveedor y persiste los cambios.
+    /// </summary>
     public async Task AgregarAsync(
         Proveedor proveedor,
         CancellationToken cancellationToken = default)
@@ -51,6 +63,9 @@ public sealed class ProveedorRepository :
         }
     }
 
+    /// <summary>
+    /// Obtiene un proveedor activo por su identificador.
+    /// </summary>
     public Task<Proveedor?> ObtenerPorIdAsync(
         Guid id,
         CancellationToken cancellationToken = default)
@@ -60,6 +75,9 @@ public sealed class ProveedorRepository :
             .SingleOrDefaultAsync(proveedor => proveedor.Id == id, cancellationToken);
     }
 
+    /// <summary>
+    /// Obtiene un proveedor dado de baja por su identificador.
+    /// </summary>
     public Task<Proveedor?> ObtenerHistoricoPorIdAsync(
         Guid id,
         CancellationToken cancellationToken = default)
@@ -72,6 +90,9 @@ public sealed class ProveedorRepository :
                 cancellationToken);
     }
 
+    /// <summary>
+    /// Lista proveedores activos con filtros, ordenamiento y paginación.
+    /// </summary>
     public async Task<PaginaProveedores> ListarAsync(
         ConsultarProveedoresRequest consulta,
         CancellationToken cancellationToken = default)
@@ -95,6 +116,9 @@ public sealed class ProveedorRepository :
         return new PaginaProveedores(items, total);
     }
 
+    /// <summary>
+    /// Lista proveedores dados de baja con filtros, ordenamiento y paginación.
+    /// </summary>
     public async Task<PaginaProveedores> ListarHistoricoAsync(
         ConsultarProveedoresRequest consulta,
         CancellationToken cancellationToken = default)
@@ -120,6 +144,9 @@ public sealed class ProveedorRepository :
         return new PaginaProveedores(items, total);
     }
 
+    /// <summary>
+    /// Obtiene un proveedor para edición, incluyendo registros eliminados.
+    /// </summary>
     public Task<Proveedor?> ObtenerParaEditarAsync(
         Guid id,
         CancellationToken cancellationToken = default)
@@ -129,6 +156,9 @@ public sealed class ProveedorRepository :
             cancellationToken);
     }
 
+    /// <summary>
+    /// Verifica si existe otro proveedor activo con el nombre normalizado, excluyendo el dado.
+    /// </summary>
     public Task<bool> ExisteNombreNormalizadoAsync(
         string nombreNormalizado,
         Guid excluirProveedorId,
@@ -140,6 +170,9 @@ public sealed class ProveedorRepository :
             cancellationToken);
     }
 
+    /// <summary>
+    /// Actualiza un proveedor verificando la concurrencia optimista.
+    /// </summary>
     public async Task ActualizarAsync(
         Proveedor proveedor,
         uint versionEsperada,
@@ -163,6 +196,9 @@ public sealed class ProveedorRepository :
         }
     }
 
+    /// <summary>
+    /// Obtiene un proveedor activo para dar de baja lógica.
+    /// </summary>
     public Task<Proveedor?> ObtenerActivoParaDarDeBajaAsync(
         Guid id,
         CancellationToken cancellationToken = default)
@@ -172,6 +208,9 @@ public sealed class ProveedorRepository :
             cancellationToken);
     }
 
+    /// <summary>
+    /// Persiste la baja lógica de un proveedor.
+    /// </summary>
     public async Task ActualizarBajaAsync(
         Proveedor proveedor,
         CancellationToken cancellationToken = default)

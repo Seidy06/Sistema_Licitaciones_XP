@@ -2,30 +2,52 @@
 
 @{
     ViewData["Title"] = "Registrar oferta";
+    var licitaciones = ViewBag.Licitaciones as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var proveedores = ViewBag.Proveedores as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
 }
 
-<h1>Registrar oferta</h1>
+<div class="section-header">
+    <h1>Registrar oferta</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+</div>
 
 <partial name="_Mensajes" />
 
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label asp-for="LicitacionId" class="form-label"></label>
-        <input asp-for="LicitacionId" class="form-control" />
-        <span asp-validation-for="LicitacionId" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="ProveedorId" class="form-label"></label>
-        <input asp-for="ProveedorId" class="form-control" />
-        <span asp-validation-for="ProveedorId" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="Monto" class="form-label"></label>
-        <input asp-for="Monto" type="number" min="0.01" step="0.01" class="form-control" />
-        <span asp-validation-for="Monto" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Registrar</button>
-</form>
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        <div class="mb-3">
+            <label asp-for="LicitacionId" class="form-label">ID Licitaciones</label>
+            <select asp-for="LicitacionId" class="form-select">
+                <option value="">-- Seleccione una licitación --</option>
+                @foreach (var lic in licitaciones)
+                {
+                    <option value="@lic.Id">@lic.Codigo - @lic.Titulo</option>
+                }
+            </select>
+            <span asp-validation-for="LicitacionId" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ProveedorId" class="form-label">Proveedor</label>
+            <select asp-for="ProveedorId" class="form-select">
+                <option value="">-- Seleccione un proveedor --</option>
+                @foreach (var proveedor in proveedores)
+                {
+                    <option value="@proveedor.Id">@proveedor.Nombre</option>
+                }
+            </select>
+            <span asp-validation-for="ProveedorId" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Monto" class="form-label">Monto</label>
+            <input asp-for="Monto" type="number" min="0.01" step="0.01" class="form-control" placeholder="0.00" />
+            <span asp-validation-for="Monto" class="text-danger"></span>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Registrar oferta</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -1,0 +1,42 @@
+@model EditarNivelAprobacionViewModel
+
+@{
+    ViewData["Title"] = $"Editar - {Model.Nombre}";
+}
+
+<div class="section-header">
+    <h1>Editar nivel de aprobación</h1>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancelar</a>
+</div>
+
+<div class="form-card">
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="Nombre" class="form-label">Nombre</label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="MontoMinimo" class="form-label">Monto mínimo</label>
+            <input asp-for="MontoMinimo" class="form-control" type="number" step="0.01" />
+            <span asp-validation-for="MontoMinimo" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="MontoMaximo" class="form-label">Monto máximo (vacío = sin límite)</label>
+            <input asp-for="MontoMaximo" class="form-control" type="number" step="0.01" />
+            <span asp-validation-for="MontoMaximo" class="text-danger"></span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

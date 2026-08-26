@@ -3,6 +3,9 @@ using Licitaciones.Domain.Licitaciones;
 
 namespace Licitaciones.Application.Licitaciones.Editar;
 
+/// <summary>
+/// Servicio para editar licitaciones existentes con validación de presupuesto.
+/// </summary>
 public sealed class EditarLicitacionService
 {
     private readonly ILicitacionRepository _repository;
@@ -16,6 +19,12 @@ public sealed class EditarLicitacionService
         _clock = clock;
     }
 
+    /// <summary>
+    /// Actualiza los datos de una licitación validando el presupuesto mínimo.
+    /// </summary>
+    /// <param name="request">Datos a actualizar de la licitación.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>DTO con los datos actualizados de la licitación.</returns>
     public async Task<LicitacionDto> EditarAsync(
         EditarLicitacionRequest request,
         CancellationToken cancellationToken = default)

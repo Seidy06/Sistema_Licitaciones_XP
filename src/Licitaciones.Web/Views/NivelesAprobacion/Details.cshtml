@@ -1,0 +1,42 @@
+@model DetalleNivelAprobacionViewModel
+
+@{
+    ViewData["Title"] = $"Detalle - {Model.Nombre}";
+}
+
+<div class="section-header">
+    <h1>@Model.Nombre</h1>
+    <div class="actions">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Editar</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Información del nivel</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Nombre</dt>
+                    <dd class="col-sm-8"><strong>@Model.Nombre</strong></dd>
+                    <dt class="col-sm-4">Monto mínimo</dt>
+                    <dd class="col-sm-8">@Model.MontoMinimo.ToString("N2")</dd>
+                    <dt class="col-sm-4">Monto máximo</dt>
+                    <dd class="col-sm-8">@(Model.MontoMaximo?.ToString("N2") ?? "Sin límite")</dd>
+                    <dt class="col-sm-4">Estado</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Activo)
+                        {
+                            <span class="badge badge-success">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">Inactivo</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

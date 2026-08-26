@@ -3,6 +3,7 @@ using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Application.Licitaciones.Crear;
 using Licitaciones.Application.Licitaciones.Editar;
 using Licitaciones.Application.Licitaciones.Publicar;
+using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Domain.Common;
 using Licitaciones.Web.Models.Licitaciones;
 
@@ -10,25 +11,40 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Licitaciones.Web.Controllers;
 
+/// <summary>
+/// Controlador MVC para la gestión completa de licitaciones: consulta, creación, edición y publicación.
+/// </summary>
 public sealed class LicitacionesController : Controller
 {
     private readonly CrearLicitacionService _crearService;
     private readonly ConsultarLicitacionService _consultarService;
     private readonly PublicarLicitacionService _publicarService;
+    private readonly EditarLicitacionService _editarService;
+    private readonly ConsultarOfertaService _consultarOfertaService;
     private readonly IClock _clock;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del controlador de licitaciones con sus dependencias.
+    /// </summary>
     public LicitacionesController(
         CrearLicitacionService crearService,
         ConsultarLicitacionService consultarService,
         PublicarLicitacionService publicarService,
+        EditarLicitacionService editarService,
+        ConsultarOfertaService consultarOfertaService,
         IClock clock)
     {
         _crearService = crearService;
         _consultarService = consultarService;
         _publicarService = publicarService;
+        _editarService = editarService;
+        _consultarOfertaService = consultarOfertaService;
         _clock = clock;
     }
 
+    /// <summary>
+    /// Muestra el listado paginado de licitaciones con filtros de búsqueda y ordenamiento.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index(
         string? codigo = null,
@@ -42,29 +58,17 @@ public sealed class LicitacionesController : Controller
         {
             var resultado = await _consultarService.ListarAsync(
                 new ConsultarLicitacionesRequest(
-                    null,
-                    codigo,
-                    null,
-                    null,
-                    ordenarPor,
-                    descendente,
-                    pagina,
-                    tamanoPagina),
-                _clock,
-                cancellationToken);
+                    null, codigo, null, null,
+                    ordenarPor, descendente, pagina, tamanoPagina),
+                _clock, cancellationToken);
 
             var model = new PaginaResultado<LicitacionItemViewModel>(
                 resultado.Items
                     .Select(licitacion => new LicitacionItemViewModel(
-                        licitacion.Id,
-                        licitacion.Titulo,
-                        licitacion.Presupuesto,
-                        licitacion.FechaCierre,
-                        licitacion.EstadoEfectivo.ToString()))
+                        licitacion.Id, licitacion.Titulo, licitacion.Presupuesto,
+                        licitacion.FechaCierre, licitacion.EstadoEfectivo.ToString()))
                     .ToArray(),
-                resultado.Total,
-                resultado.Pagina,
-                resultado.TamanoPagina);
+                resultado.Total, resultado.Pagina, resultado.TamanoPagina);
 
             ViewData["Codigo"] = codigo;
             ViewData["OrdenarPor"] = ordenarPor;
@@ -79,27 +83,67 @@ public sealed class LicitacionesController : Controller
         }
     }
 
+    /// <summary>
+    /// Muestra el detalle completo de una licitación por su identificador.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Details(
+        Guid id, CancellationToken cancellationToken = default)
+    {
+        var detalle = await _consultarService.ObtenerDetalleAsync(id, _clock, cancellationToken);
+        if (detalle is null) return NotFound();
+
+        var model = new DetalleLicitacionViewModel
+        {
+            Id = detalle.Id,
+            Codigo = detalle.Codigo,
+            Titulo = detalle.Titulo,
+            Presupuesto = detalle.Presupuesto,
+            FechaCierre = detalle.FechaCierre,
+            MejorOferta = detalle.MejorOferta is not null
+                ? new LicitacionMejorOfertaViewModel
+                {
+                    Id = detalle.MejorOferta.Id,
+                    Monto = detalle.MejorOferta.Monto,
+                    AhorroPorcentaje = detalle.MejorOferta.AhorroPorcentaje,
+                    Clasificacion = detalle.MejorOferta.Clasificacion
+                }
+                : null,
+            MensajeMejorOferta = detalle.MensajeMejorOferta,
+            NivelAprobacion = detalle.NivelAprobacion is not null
+                ? new LicitacionNivelAprobacionViewModel
+                {
+                    Id = detalle.NivelAprobacion.Id,
+                    Nombre = detalle.NivelAprobacion.Nombre
+                }
+                : null
+        };
+
+        return View(model);
+    }
+
+    /// <summary>
+    /// Muestra el formulario para crear una nueva licitación.
+    /// </summary>
     [HttpGet]
     public IActionResult Create() => View(new CrearLicitacionViewModel());
 
+    /// <summary>
+    /// Procesa la creación de una nueva licitación con los datos del formulario.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
         CrearLicitacionViewModel model,
         CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-        {
-            return View(model);
-        }
+        if (!ModelState.IsValid) return View(model);
 
         try
         {
             await _crearService.CrearAsync(
                 new CrearLicitacionRequest(
-                    model.Codigo,
-                    model.Titulo,
-                    model.Presupuesto,
+                    model.Codigo, model.Titulo, model.Presupuesto,
                     new DateTimeOffset(model.FechaCierre).ToUniversalTime()),
                 cancellationToken);
         }
@@ -113,11 +157,69 @@ public sealed class LicitacionesController : Controller
         return RedirectToAction(nameof(Create));
     }
 
+    /// <summary>
+    /// Muestra el formulario de edición con los datos actuales de la licitación.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Edit(
+        Guid id, CancellationToken cancellationToken = default)
+    {
+        var detalle = await _consultarService.ObtenerDetalleAsync(id, _clock, cancellationToken);
+        if (detalle is null) return NotFound();
+
+        var model = new EditarLicitacionViewModel
+        {
+            Id = detalle.Id,
+            Codigo = detalle.Codigo,
+            Titulo = detalle.Titulo,
+            Presupuesto = detalle.Presupuesto,
+            FechaCierre = detalle.FechaCierre.UtcDateTime
+        };
+
+        return View(model);
+    }
+
+    /// <summary>
+    /// Procesa la actualización de una licitación existente.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        Guid id, EditarLicitacionViewModel model, CancellationToken cancellationToken)
+    {
+        if (id != model.Id) return BadRequest();
+        if (!ModelState.IsValid) return View(model);
+
+        try
+        {
+            await _editarService.EditarAsync(
+                new EditarLicitacionRequest(
+                    model.Id, model.Codigo, model.Titulo,
+                    model.Presupuesto,
+                    new DateTimeOffset(model.FechaCierre).ToUniversalTime()),
+                cancellationToken);
+        }
+        catch (LicitacionNoEncontradaException)
+        {
+            return NotFound();
+        }
+        catch (DomainException exception)
+        {
+            ModelState.AddModelError(string.Empty, exception.Message);
+            return View(model);
+        }
+
+        TempData["MensajeExito"] = "La licitación se actualizó correctamente.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    /// <summary>
+    /// Publica una licitación cambiando su estado a publicado.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Publicar(
-        Guid id,
-        string? codigo = null,
+        Guid id, string? codigo = null,
         CancellationToken cancellationToken = default)
     {
         try
@@ -134,5 +236,32 @@ public sealed class LicitacionesController : Controller
         }
 
         return RedirectToAction(nameof(Index), new { codigo });
+    }
+
+    /// <summary>
+    /// Muestra las ofertas recibidas para una licitación específica.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Ofertas(
+        Guid id, CancellationToken cancellationToken = default)
+    {
+        var detalle = await _consultarService.ObtenerDetalleAsync(id, _clock, cancellationToken);
+        if (detalle is null) return NotFound();
+
+        try
+        {
+            var resultado = await _consultarOfertaService.ListarAsync(
+                new ConsultarOfertasRequest(id),
+                cancellationToken);
+
+            ViewData["LicitacionCodigo"] = detalle.Codigo;
+            ViewData["LicitacionId"] = id;
+            return View(resultado);
+        }
+        catch (DomainException exception)
+        {
+            TempData["MensajeError"] = exception.Message;
+            return RedirectToAction(nameof(Details), new { id });
+        }
     }
 }

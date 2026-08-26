@@ -138,24 +138,24 @@ public sealed class CrudWebListadosTests
         using var client = factory.CreateClient();
 
         var pagina1 = await client.GetStringAsync(
-            "/NivelesAprobacion?nombre=tivo&pagina=1&tamanoPagina=1&ordenarPor=montoMinimo&descendente=false");
+            "/NivelesAprobacion?pagina=1&tamanoPagina=1&ordenarPor=montoMinimo&descendente=false");
 
         Assert.Contains(TablaHtml, pagina1, StringComparison.Ordinal);
-        Assert.Contains("Operativo", pagina1, StringComparison.Ordinal);
-        Assert.DoesNotContain("Directivo", pagina1, StringComparison.Ordinal);
+        Assert.Contains("Encargado de area", pagina1, StringComparison.Ordinal);
+        Assert.DoesNotContain("Junta Directiva", pagina1, StringComparison.Ordinal);
 
         var pagina2 = await client.GetStringAsync(
-            "/NivelesAprobacion?nombre=tivo&pagina=2&tamanoPagina=1&ordenarPor=montoMinimo&descendente=false");
+            "/NivelesAprobacion?pagina=2&tamanoPagina=1&ordenarPor=montoMinimo&descendente=false");
 
-        Assert.Contains("Directivo", pagina2, StringComparison.Ordinal);
-        Assert.DoesNotContain("Operativo", pagina2, StringComparison.Ordinal);
+        Assert.Contains("Gerencia", pagina2, StringComparison.Ordinal);
+        Assert.DoesNotContain("Encargado de area", pagina2, StringComparison.Ordinal);
 
         var descendente = await client.GetStringAsync(
             "/NivelesAprobacion?pagina=1&tamanoPagina=50&ordenarPor=montoMinimo&descendente=true");
 
         Assert.True(
-            Posicion(descendente, "Directivo") < Posicion(descendente, "Gerencial")
-                && Posicion(descendente, "Gerencial") < Posicion(descendente, "Operativo"),
+            Posicion(descendente, "Junta Directiva") < Posicion(descendente, "Gerencia")
+                && Posicion(descendente, "Gerencia") < Posicion(descendente, "Encargado de area"),
             "El listado de niveles debe respetar el orden descendente por monto mínimo.");
     }
 

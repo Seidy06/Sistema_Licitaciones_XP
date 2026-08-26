@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Licitaciones.Infrastructure.Persistence.Configurations;
 
+/// <summary>
+/// Configuración de Entity Framework para la entidad de niveles de aprobación.
+/// </summary>
 public sealed class NivelAprobacionConfiguration : IEntityTypeConfiguration<NivelAprobacion>
 {
     private static readonly DateTimeOffset SeedDate = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
@@ -30,8 +33,8 @@ public sealed class NivelAprobacionConfiguration : IEntityTypeConfiguration<Nive
         builder.Property(x => x.UpdatedAt).HasColumnType("timestamp with time zone");
 
         builder.HasData(
-            new { Id = 1, Nombre = "Operativo", MontoMinimo = 0m, MontoMaximo = (decimal?)1_000_000m, Activo = true, CreatedAt = SeedDate, UpdatedAt = SeedDate },
-            new { Id = 2, Nombre = "Gerencial", MontoMinimo = 1_000_000m, MontoMaximo = (decimal?)10_000_000m, Activo = true, CreatedAt = SeedDate, UpdatedAt = SeedDate },
-            new { Id = 3, Nombre = "Directivo", MontoMinimo = 10_000_000m, MontoMaximo = (decimal?)null, Activo = true, CreatedAt = SeedDate, UpdatedAt = SeedDate });
+            new { Id = 1, Nombre = "Encargado de area", MontoMinimo = 0.01m, MontoMaximo = (decimal?)999_999.99m, Activo = true, CreatedAt = SeedDate, UpdatedAt = SeedDate },
+            new { Id = 2, Nombre = "Gerencia", MontoMinimo = 1_000_000m, MontoMaximo = (decimal?)9_999_999.99m, Activo = true, CreatedAt = SeedDate, UpdatedAt = SeedDate },
+            new { Id = 3, Nombre = "Junta Directiva", MontoMinimo = 10_000_000m, MontoMaximo = (decimal?)null, Activo = true, CreatedAt = SeedDate, UpdatedAt = SeedDate });
     }
 }

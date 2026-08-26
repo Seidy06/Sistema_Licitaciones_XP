@@ -2,6 +2,9 @@ using Licitaciones.Application.Common;
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Ofertas.Crear;
+using Licitaciones.Application.Ofertas.Editar;
+using Licitaciones.Application.Ofertas.Eliminar;
+using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Domain.Common;
 using Licitaciones.Web.Models.Ofertas;
 
@@ -9,30 +12,48 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Licitaciones.Web.Controllers;
 
+/// <summary>
+/// Controlador MVC para la gestión de ofertas: consulta, creación, edición y eliminación.
+/// </summary>
 public sealed class OfertasController : Controller
 {
     private const string MonedaPredeterminada = "CRC";
 
     private readonly ConsultarOfertaService _consultarService;
     private readonly CrearOfertaService _crearService;
+    private readonly EditarOfertaService _editarService;
+    private readonly EliminarOfertaService _eliminarService;
     private readonly ConsultarLicitacionService _consultarLicitacionService;
+    private readonly ConsultarProveedorService _consultarProveedorService;
     private readonly IClock _clock;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del controlador de ofertas con sus dependencias.
+    /// </summary>
     public OfertasController(
         ConsultarOfertaService consultarService,
         CrearOfertaService crearService,
+        EditarOfertaService editarService,
+        EliminarOfertaService eliminarService,
         ConsultarLicitacionService consultarLicitacionService,
+        ConsultarProveedorService consultarProveedorService,
         IClock clock)
     {
         _consultarService = consultarService;
         _crearService = crearService;
+        _editarService = editarService;
+        _eliminarService = eliminarService;
         _consultarLicitacionService = consultarLicitacionService;
+        _consultarProveedorService = consultarProveedorService;
         _clock = clock;
     }
 
+    /// <summary>
+    /// Muestra el listado paginado de ofertas para una licitación con filtros de moneda y proveedor.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index(
-        Guid licitacionId,
+        Guid? licitacionId = null,
         string? moneda = null,
         string? proveedor = null,
         int pagina = 1,
@@ -75,7 +96,7 @@ public sealed class OfertasController : Controller
                 await ObtenerMejorOfertaAsync(licitacionId, cancellationToken),
                 monedaSeleccionada);
 
-            ViewData["LicitacionId"] = licitacionId == Guid.Empty ? null : licitacionId;
+            ViewData["LicitacionId"] = licitacionId;
             ViewData["Proveedor"] = proveedor;
             ViewData["OrdenarPor"] = ordenarPor;
             ViewData["Descendente"] = descendente;
@@ -92,12 +113,20 @@ public sealed class OfertasController : Controller
         }
     }
 
+    /// <summary>
+    /// Muestra el formulario para registrar una nueva oferta.
+    /// </summary>
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create(
+        CancellationToken cancellationToken = default)
     {
+        await CargarDropdownsOfertaAsync(cancellationToken);
         return View(new CrearOfertaViewModel());
     }
 
+    /// <summary>
+    /// Procesa el registro de una nueva oferta con los datos del formulario.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
@@ -106,6 +135,7 @@ public sealed class OfertasController : Controller
     {
         if (!ModelState.IsValid)
         {
+            await CargarDropdownsOfertaAsync(cancellationToken);
             return View(model);
         }
 
@@ -128,19 +158,164 @@ public sealed class OfertasController : Controller
         return RedirectToAction(nameof(Index), new { licitacionId = model.LicitacionId });
     }
 
-    private async Task<LicitacionMejorOfertaDto?> ObtenerMejorOfertaAsync(
-        Guid licitacionId,
-        CancellationToken cancellationToken)
+    /// <summary>
+    /// Muestra el detalle completo de una oferta por su identificador.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Details(
+        Guid id, string moneda = "CRC",
+        CancellationToken cancellationToken = default)
     {
-        if (licitacionId == Guid.Empty)
+        var oferta = await _consultarService.ObtenerAsync(id, moneda, cancellationToken);
+        if (oferta is null) return NotFound();
+
+        var model = new DetalleOfertaViewModel
         {
-            return null;
+            Id = oferta.Id,
+            LicitacionId = oferta.LicitacionId,
+            ProveedorNombre = oferta.ProveedorNombre,
+            Monto = oferta.Monto,
+            Moneda = oferta.Moneda,
+            FechaRegistro = oferta.FechaRegistro,
+            EsMejorOferta = oferta.EsMejorOferta,
+            TipoCambioValor = oferta.TipoCambioValor,
+            TipoCambioFecha = oferta.TipoCambioFecha
+        };
+
+        return View(model);
+    }
+
+    /// <summary>
+    /// Muestra el formulario de edición con los datos actuales de la oferta.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Edit(
+        Guid id, CancellationToken cancellationToken = default)
+    {
+        var oferta = await _consultarService.ObtenerAsync(id, "CRC", cancellationToken);
+        if (oferta is null) return NotFound();
+
+        var model = new EditarOfertaViewModel
+        {
+            Id = oferta.Id,
+            LicitacionId = oferta.LicitacionId,
+            ProveedorNombre = oferta.ProveedorNombre,
+            Monto = oferta.Monto,
+            Moneda = oferta.Moneda
+        };
+
+        return View(model);
+    }
+
+    /// <summary>
+    /// Procesa la actualización del monto de una oferta existente.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        Guid id, EditarOfertaViewModel model, CancellationToken cancellationToken)
+    {
+        if (id != model.Id) return BadRequest();
+        if (!ModelState.IsValid) return View(model);
+
+        try
+        {
+            await _editarService.EditarAsync(
+                new EditarOfertaRequest(model.Id, model.Monto),
+                cancellationToken);
+        }
+        catch (DomainException exception)
+        {
+            ModelState.AddModelError(string.Empty, exception.Message);
+            return View(model);
         }
 
+        TempData["MensajeExito"] = "La oferta se actualizó correctamente.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    /// <summary>
+    /// Muestra la confirmación de eliminación de una oferta por su identificador.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Delete(
+        Guid id, CancellationToken cancellationToken = default)
+    {
+        var oferta = await _consultarService.ObtenerAsync(id, "CRC", cancellationToken);
+        if (oferta is null) return NotFound();
+
+        var model = new EliminarOfertaViewModel
+        {
+            Id = oferta.Id,
+            LicitacionId = oferta.LicitacionId,
+            ProveedorNombre = oferta.ProveedorNombre,
+            Monto = oferta.Monto,
+            Moneda = oferta.Moneda,
+            FechaRegistro = oferta.FechaRegistro
+        };
+
+        return View(model);
+    }
+
+    /// <summary>
+    /// Confirma la eliminación de una oferta y redirige al listado.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(
+        Guid id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var eliminada = await _eliminarService.EliminarAsync(id, cancellationToken);
+            if (!eliminada) return NotFound();
+        }
+        catch (DomainException exception)
+        {
+            TempData["MensajeError"] = exception.Message;
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        TempData["MensajeExito"] = "La oferta fue eliminada.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    private async Task CargarDropdownsOfertaAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var licitaciones = await _consultarLicitacionService.ListarAsync(
+                new ConsultarLicitacionesRequest(TamanoPagina: 100),
+                _clock,
+                cancellationToken);
+
+            var proveedores = await _consultarProveedorService.ListarAsync(
+                new ConsultarProveedoresRequest(pagina: 1, tamanoPagina: 100),
+                cancellationToken);
+
+            ViewBag.Licitaciones = licitaciones.Items
+                .Select(l => new { l.Id, l.Codigo, l.Titulo })
+                .ToList();
+
+            ViewBag.Proveedores = proveedores.Items
+                .Select(p => new { p.Id, p.Nombre })
+                .ToList();
+        }
+        catch
+        {
+            ViewBag.Licitaciones = Array.Empty<object>();
+            ViewBag.Proveedores = Array.Empty<object>();
+        }
+    }
+
+    private async Task<LicitacionMejorOfertaDto?> ObtenerMejorOfertaAsync(
+        Guid? licitacionId,
+        CancellationToken cancellationToken)
+    {
+        if (licitacionId is null || licitacionId == Guid.Empty) return null;
+
         var detalle = await _consultarLicitacionService.ObtenerDetalleAsync(
-            licitacionId,
-            _clock,
-            cancellationToken);
+            licitacionId.Value, _clock, cancellationToken);
         return detalle?.MejorOferta;
     }
 }

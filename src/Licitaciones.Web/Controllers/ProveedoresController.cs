@@ -1,33 +1,48 @@
 using Licitaciones.Application.Common;
+using Licitaciones.Application.Licitaciones.Consultar;
+using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Application.Proveedores.Crear;
 using Licitaciones.Application.Proveedores.Editar;
 using Licitaciones.Application.Proveedores.Eliminar;
+using Licitaciones.Domain.Common;
 using Licitaciones.Web.Models.Proveedores;
 
 using Microsoft.AspNetCore.Mvc;
 
 namespace Licitaciones.Web.Controllers;
 
+/// <summary>
+/// Controlador MVC para la gestión de proveedores: consulta, creación, edición, baja e historial.
+/// </summary>
 public sealed class ProveedoresController : Controller
 {
     private readonly CrearProveedorService _crearService;
     private readonly ConsultarProveedorService _consultarService;
     private readonly EditarProveedorService? _editarService;
     private readonly DarBajaProveedorService? _darBajaService;
+    private readonly ConsultarOfertaService _consultarOfertaService;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del controlador de proveedores con sus dependencias.
+    /// </summary>
     public ProveedoresController(
         CrearProveedorService crearService,
         ConsultarProveedorService consultarService,
         EditarProveedorService? editarService = null,
-        DarBajaProveedorService? darBajaService = null)
+        DarBajaProveedorService? darBajaService = null,
+        ConsultarOfertaService? consultarOfertaService = null)
     {
         _crearService = crearService;
         _consultarService = consultarService;
         _editarService = editarService;
         _darBajaService = darBajaService;
+        _consultarOfertaService = consultarOfertaService!;
     }
 
+    /// <summary>
+    /// Muestra la confirmación de eliminación de un proveedor por su identificador.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Delete(
         Guid id,
@@ -46,6 +61,9 @@ public sealed class ProveedoresController : Controller
         });
     }
 
+    /// <summary>
+    /// Confirma la baja de un proveedor y redirige al listado.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(
@@ -64,6 +82,9 @@ public sealed class ProveedoresController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    /// <summary>
+    /// Muestra el formulario de edición con los datos actuales del proveedor.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
     {
@@ -81,6 +102,9 @@ public sealed class ProveedoresController : Controller
         });
     }
 
+    /// <summary>
+    /// Procesa la actualización de un proveedor existente.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
@@ -129,6 +153,9 @@ public sealed class ProveedoresController : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
+    /// <summary>
+    /// Muestra el listado paginado de proveedores activos con filtros de búsqueda.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index(
         int pagina = 1,
@@ -158,6 +185,9 @@ public sealed class ProveedoresController : Controller
         return View(model);
     }
 
+    /// <summary>
+    /// Muestra el historial de proveedores dados de baja con paginación y filtros.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> History(
         int pagina = 1,
@@ -190,6 +220,9 @@ public sealed class ProveedoresController : Controller
         return View(model);
     }
 
+    /// <summary>
+    /// Muestra el detalle histórico de un proveedor dado de baja.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> HistoryDetails(
         Guid id,
@@ -211,6 +244,9 @@ public sealed class ProveedoresController : Controller
             proveedor.DeletedAt));
     }
 
+    /// <summary>
+    /// Muestra el detalle completo de un proveedor activo por su identificador.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Details(
         Guid id,
@@ -229,12 +265,18 @@ public sealed class ProveedoresController : Controller
             proveedor.UpdatedAt));
     }
 
+    /// <summary>
+    /// Muestra el formulario para registrar un nuevo proveedor.
+    /// </summary>
     [HttpGet]
     public IActionResult Create()
     {
         return View(new CrearProveedorViewModel());
     }
 
+    /// <summary>
+    /// Procesa el registro de un nuevo proveedor con los datos del formulario.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
@@ -271,5 +313,41 @@ public sealed class ProveedoresController : Controller
 
         TempData["MensajeExito"] = "El proveedor se registró correctamente.";
         return RedirectToAction(nameof(Create));
+    }
+
+    /// <summary>
+    /// Muestra todas las ofertas asociadas a un proveedor específico.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Ofertas(
+        Guid id, CancellationToken cancellationToken = default)
+    {
+        var proveedor = await _consultarService.ObtenerPorIdAsync(id, cancellationToken);
+        if (proveedor is null) return NotFound();
+
+        var resultado = await _consultarOfertaService.ListarPorProveedorAsync(
+            proveedor.Id,
+            "CRC",
+            null,
+            "monto",
+            false,
+            1,
+            100,
+            cancellationToken);
+
+        var model = new ProveedorOfertasViewModel
+        {
+            Proveedor = new ProveedorResumenViewModel(
+                proveedor.Id, proveedor.Nombre, proveedor.CreatedAt),
+            Ofertas = new PaginaResultado<ProveedorOfertaItemViewModel>(
+                resultado.Items
+                    .Select(o => new ProveedorOfertaItemViewModel(
+                        o.Id, o.LicitacionId.ToString(), o.Monto, o.Moneda, o.FechaRegistro))
+                    .ToArray(),
+                resultado.Total, 1, 100),
+            Moneda = "CRC"
+        };
+
+        return View(model);
     }
 }

@@ -11,9 +11,11 @@
     var totalPaginas = (int)Math.Ceiling(Model.Ofertas.Total / (double)Model.Ofertas.TamanoPagina);
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="section-header">
     <h1>Ofertas</h1>
-    <a asp-action="Create" class="btn btn-primary">Registrar oferta</a>
+    <div class="actions">
+        <a asp-action="Create" class="btn btn-primary">+ Registrar oferta</a>
+    </div>
 </div>
 
 <partial name="_Mensajes" />
@@ -21,11 +23,12 @@
 <form asp-action="Index" method="get" class="row g-2 mb-3">
     <div class="col-md-3">
         <label for="licitacionId" class="visually-hidden">Licitación</label>
-        <input id="licitacionId" name="licitacionId" value="@licitacionId" class="form-control" placeholder="Identificador de la licitación" />
+        <input id="licitacionId" name="licitacionId" value="@licitacionId" class="form-control"
+               placeholder="ID licitación (dejar vacío para ver todas)" />
     </div>
     <div class="col-md-3">
         <label for="proveedor" class="visually-hidden">Proveedor</label>
-        <input id="proveedor" name="proveedor" value="@proveedor" class="form-control" placeholder="Filtrar por proveedor" />
+        <input id="proveedor" name="proveedor" value="@proveedor" class="form-control" placeholder="Buscar por proveedor..." />
     </div>
     <div class="col-md-2">
         <label for="ordenarPor" class="visually-hidden">Ordenar por</label>
@@ -59,29 +62,42 @@
     </div>
 }
 
-<table class="table table-striped align-middle">
+<div class="table-responsive">
+<table class="table align-middle">
     <thead>
-        <tr><th>Proveedor</th><th>Monto</th><th>Moneda</th><th>Fecha de registro</th></tr>
+        <tr>
+            <th>Proveedor</th>
+            <th>Monto</th>
+            <th>Moneda</th>
+            <th>Fecha de registro</th>
+            <th class="text-end">Acciones</th>
+        </tr>
     </thead>
     <tbody>
     @foreach (var oferta in Model.Ofertas.Items)
     {
         <tr>
-            <td>@oferta.ProveedorNombre</td>
+            <td><strong>@oferta.ProveedorNombre</strong></td>
             <td>@oferta.Monto.Dinero(@oferta.Moneda)</td>
-            <td>@oferta.Moneda</td>
-            <td>@oferta.FechaRegistro.ToString("g")</td>
+            <td><span class="badge badge-info">@oferta.Moneda</span></td>
+            <td>@oferta.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+            <td class="text-end">
+                <a asp-action="Details" asp-route-id="@oferta.Id">Detalle</a>
+            </td>
         </tr>
     }
     </tbody>
 </table>
+</div>
 
 @if (Model.Ofertas.Items.Count == 0)
 {
-    <p>No se encontraron ofertas.</p>
+    <div class="empty-state">
+        <p>No se encontraron ofertas.</p>
+    </div>
 }
 
-@if (totalPaginas > 1 && licitacionId is not null)
+@if (totalPaginas > 1)
 {
     <nav aria-label="Paginación de ofertas">
         <ul class="pagination">

@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Licitaciones.Infrastructure.Persistence.Configurations;
 
+/// <summary>
+/// Configuración de Entity Framework para la entidad de ofertas.
+/// </summary>
 public sealed class OfertaConfiguration : IEntityTypeConfiguration<Oferta>
 {
     public const string IndiceUnicoLicitacionProveedor =
@@ -22,11 +25,15 @@ public sealed class OfertaConfiguration : IEntityTypeConfiguration<Oferta>
         builder.Property(x => x.FechaRegistro).HasColumnType("timestamp with time zone");
         builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
         builder.Property(x => x.UpdatedAt).HasColumnType("timestamp with time zone");
+        builder.Property(x => x.DeletedAt).HasColumnType("timestamp with time zone");
+        builder.Property(x => x.Version).IsRowVersion();
         builder
             .HasIndex(x => new { x.LicitacionId, x.ProveedorId })
             .IsUnique()
-            .HasDatabaseName(IndiceUnicoLicitacionProveedor);
+            .HasDatabaseName(IndiceUnicoLicitacionProveedor)
+            .HasFilter("\"DeletedAt\" IS NULL");
         builder.HasOne<Licitacion>().WithMany().HasForeignKey(x => x.LicitacionId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Proveedor>().WithMany().HasForeignKey(x => x.ProveedorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasQueryFilter(x => x.DeletedAt == null);
     }
 }

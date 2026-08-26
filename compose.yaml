@@ -29,6 +29,7 @@ services:
       db:
         condition: service_healthy
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Licitaciones=Host=db;Port=5432;Database=${POSTGRES_DB:-licitaciones_db};Username=${POSTGRES_USER:-licitaciones_user};Password=${POSTGRES_PASSWORD:-licitaciones_password}
       - Database__ApplyMigrationsOnStartup=true
     ports:

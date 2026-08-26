@@ -3,6 +3,9 @@ using Licitaciones.Domain.Ofertas;
 
 namespace Licitaciones.Application.Licitaciones.Consultar;
 
+/// <summary>
+/// Servicio para consultar licitaciones paginadas y obtener detalles con mejor oferta.
+/// </summary>
 public sealed class ConsultarLicitacionService
 {
     private readonly ILicitacionConsultaRepository _repository;
@@ -12,6 +15,13 @@ public sealed class ConsultarLicitacionService
         _repository = repository;
     }
 
+    /// <summary>
+    /// Lista licitaciones paginadas según los filtros de búsqueda.
+    /// </summary>
+    /// <param name="consulta">Parámetros de filtrado y paginación.</param>
+    /// <param name="clock">Reloj para determinar el estado efectivo.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Página de resultados con las licitaciones encontradas.</returns>
     public async Task<PaginaLicitaciones> ListarAsync(
         ConsultarLicitacionesRequest consulta,
         IClock clock,
@@ -25,6 +35,7 @@ public sealed class ConsultarLicitacionService
             .Take(consulta.TamanoPagina)
             .Select(l => new LicitacionConsultaDto(
                 l.Id,
+                l.Codigo,
                 l.Titulo,
                 l.Presupuesto,
                 l.FechaCierre,
@@ -35,6 +46,13 @@ public sealed class ConsultarLicitacionService
             items, licitaciones.Count, consulta.Pagina, consulta.TamanoPagina);
     }
 
+    /// <summary>
+    /// Obtiene el detalle de una licitación con su mejor oferta y nivel de aprobación.
+    /// </summary>
+    /// <param name="id">Identificador de la licitación.</param>
+    /// <param name="clock">Reloj para determinar el estado efectivo.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Detalle de la licitación o null si no existe.</returns>
     public async Task<LicitacionDetalleDto?> ObtenerDetalleAsync(
         Guid id,
         IClock clock,

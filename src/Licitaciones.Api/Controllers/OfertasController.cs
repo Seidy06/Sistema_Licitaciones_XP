@@ -2,34 +2,44 @@ using Licitaciones.Api.Infraestructura;
 using Licitaciones.Application.Ofertas;
 using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Ofertas.Crear;
-using Licitaciones.Application.Ofertas.Proteger;
+using Licitaciones.Application.Ofertas.Editar;
+using Licitaciones.Application.Ofertas.Eliminar;
 using Licitaciones.Domain.Common;
 
 using Microsoft.AspNetCore.Mvc;
 
-using ApplicationRequest = Licitaciones.Application.Ofertas.Crear.CrearOfertaRequest;
-using HttpRequest = Licitaciones.Api.Contracts.Ofertas.CrearOfertaRequest;
+using CrearHttpRequest = Licitaciones.Api.Contracts.Ofertas.CrearOfertaRequest;
+using CrearRequest = Licitaciones.Application.Ofertas.Crear.CrearOfertaRequest;
 
 namespace Licitaciones.Api.Controllers;
 
+/// <summary>
+/// API REST para gestionar ofertas de licitaciones.
+/// </summary>
 [ApiController]
 [Route("api/v1/ofertas")]
 public sealed class OfertasController : ControllerBase
 {
     private readonly CrearOfertaService _crearOfertaService;
-    private readonly ProtegerOfertaService _protegerOfertaService;
+    private readonly EditarOfertaService _editarOfertaService;
+    private readonly EliminarOfertaService _eliminarOfertaService;
     private readonly ConsultarOfertaService _consultarOfertaService;
 
     public OfertasController(
         CrearOfertaService crearOfertaService,
-        ProtegerOfertaService protegerOfertaService,
+        EditarOfertaService editarOfertaService,
+        EliminarOfertaService eliminarOfertaService,
         ConsultarOfertaService consultarOfertaService)
     {
         _crearOfertaService = crearOfertaService;
-        _protegerOfertaService = protegerOfertaService;
+        _editarOfertaService = editarOfertaService;
+        _eliminarOfertaService = eliminarOfertaService;
         _consultarOfertaService = consultarOfertaService;
     }
 
+    /// <summary>
+    /// Lista ofertas de una licitación con paginación y filtros opcionales.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType<PaginaOfertas>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -61,6 +71,9 @@ public sealed class OfertasController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Obtiene el detalle de una oferta por su identificador.
+    /// </summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType<OfertaConsultaDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -92,19 +105,22 @@ public sealed class OfertasController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Crea una nueva oferta para una licitación.
+    /// </summary>
     [HttpPost]
     [ProducesResponseType<OfertaDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity)]
     public async Task<ActionResult<OfertaDto>> Crear(
-        HttpRequest request,
+        CrearHttpRequest request,
         CancellationToken cancellationToken)
     {
         try
         {
             var oferta = await _crearOfertaService.CrearAsync(
-                new ApplicationRequest(
+                new CrearRequest(
                     request.LicitacionId, request.ProveedorId, request.Monto),
                 cancellationToken);
 
@@ -137,28 +153,23 @@ public sealed class OfertasController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Actualiza el monto de una oferta existente.
+    /// </summary>
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity)]
-    public Task<IActionResult> Editar(
+    public async Task<IActionResult> Editar(
         Guid id,
-        CancellationToken cancellationToken) =>
-        RechazarCambioAsync(id, cancellationToken);
-
-    [HttpDelete("{id:guid}")]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity)]
-    public Task<IActionResult> Eliminar(
-        Guid id,
-        CancellationToken cancellationToken) =>
-        RechazarCambioAsync(id, cancellationToken);
-
-    private async Task<IActionResult> RechazarCambioAsync(
-        Guid id,
+        [FromBody] EditarOfertaRequest request,
         CancellationToken cancellationToken)
     {
         try
         {
-            await _protegerOfertaService.RechazarCambioAsync(id, cancellationToken);
-            return NoContent();
+            var oferta = await _editarOfertaService.EditarAsync(
+                new EditarOfertaRequest(id, request.Monto), cancellationToken);
+            return Ok(oferta);
         }
         catch (DomainException exception)
             when (exception.Code == OfertaErrorCodes.NoProcesable)
@@ -167,7 +178,66 @@ public sealed class OfertasController : ControllerBase
                 StatusCodes.Status422UnprocessableEntity,
                 "Oferta inalterable",
                 exception.Message,
-                "oferta_inalterable");
+                "oferta_no_procesable");
+        }
+        catch (OfertaConcurrenciaException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Conflicto de concurrencia",
+                exception.Message,
+                "oferta_concurrencia");
+        }
+        catch (DomainException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Solicitud inválida",
+                exception.Message,
+                "solicitud_invalida");
+        }
+    }
+
+    /// <summary>
+    /// Elimina una oferta del sistema.
+    /// </summary>
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Eliminar(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var eliminada = await _eliminarOfertaService.EliminarAsync(id, cancellationToken);
+            return eliminada ? NoContent() : NotFound();
+        }
+        catch (DomainException exception)
+            when (exception.Code == OfertaErrorCodes.NoProcesable)
+        {
+            return CrearProblema(
+                StatusCodes.Status422UnprocessableEntity,
+                "Oferta inalterable",
+                exception.Message,
+                "oferta_no_procesable");
+        }
+        catch (OfertaConcurrenciaException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status409Conflict,
+                "Conflicto de concurrencia",
+                exception.Message,
+                "oferta_concurrencia");
+        }
+        catch (DomainException exception)
+        {
+            return CrearProblema(
+                StatusCodes.Status400BadRequest,
+                "Solicitud inválida",
+                exception.Message,
+                "solicitud_invalida");
         }
     }
 

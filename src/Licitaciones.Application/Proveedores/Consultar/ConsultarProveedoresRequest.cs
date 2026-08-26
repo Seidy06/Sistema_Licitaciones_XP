@@ -1,5 +1,8 @@
 namespace Licitaciones.Application.Proveedores.Consultar;
 
+/// <summary>
+/// Parámetros de consulta para filtrar y paginar proveedores.
+/// </summary>
 public sealed record ConsultarProveedoresRequest
 {
     public ConsultarProveedoresRequest(

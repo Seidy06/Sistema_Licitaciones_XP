@@ -1,0 +1,63 @@
+@model DetalleLicitacionViewModel
+
+@{
+    ViewData["Title"] = $"Detalle - {Model.Codigo}";
+}
+
+<div class="section-header">
+    <h1>@Model.Codigo</h1>
+    <div class="actions">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Editar</a>
+        <a asp-action="Ofertas" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Ver ofertas</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+    </div>
+</div>
+
+<partial name="_Mensajes" />
+
+<div class="row g-4">
+    <div class="col-12 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Información general</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Título</dt>
+                    <dd class="col-sm-8">@Model.Titulo</dd>
+                    <dt class="col-sm-4">Presupuesto</dt>
+                    <dd class="col-sm-8">@Model.Presupuesto.ToString("N2")</dd>
+                    <dt class="col-sm-4">Fecha de cierre</dt>
+                    <dd class="col-sm-8">@Model.FechaCierre.ToString("dd/MM/yyyy HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Evaluación</h5>
+                @if (Model.MejorOferta is not null)
+                {
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">Mejor oferta</dt>
+                        <dd class="col-sm-7">@Model.MejorOferta.Monto.ToString("N2")</dd>
+                        <dt class="col-sm-5">Ahorro</dt>
+                        <dd class="col-sm-7">@Model.MejorOferta.AhorroPorcentaje.ToString("N1")%</dd>
+                        <dt class="col-sm-5">Clasificación</dt>
+                        <dd class="col-sm-7">
+                            <span class="badge badge-success">@Model.MejorOferta.Clasificacion</span>
+                        </dd>
+                        @if (Model.NivelAprobacion is not null)
+                        {
+                            <dt class="col-sm-5">Nivel de aprobación</dt>
+                            <dd class="col-sm-7">@Model.NivelAprobacion.Nombre</dd>
+                        }
+                    </dl>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">@Model.MensajeMejorOferta</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

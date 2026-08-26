@@ -5,9 +5,13 @@ using Licitaciones.Application.Aprobaciones;
 using Licitaciones.Application.Licitaciones;
 using Licitaciones.Application.Licitaciones.Consultar;
 using Licitaciones.Application.Licitaciones.Crear;
+using Licitaciones.Application.Licitaciones.Editar;
+using Licitaciones.Application.Licitaciones.Eliminar;
 using Licitaciones.Application.Licitaciones.Publicar;
 using Licitaciones.Application.Ofertas.Consultar;
 using Licitaciones.Application.Ofertas.Crear;
+using Licitaciones.Application.Ofertas.Editar;
+using Licitaciones.Application.Ofertas.Eliminar;
 using Licitaciones.Application.Proveedores;
 using Licitaciones.Application.Proveedores.Consultar;
 using Licitaciones.Application.Proveedores.Crear;
@@ -23,7 +27,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(HtmlEncoder.Create(
     UnicodeRanges.BasicLatin,
@@ -40,12 +43,19 @@ builder.Services.AddScoped<IProveedorBajaRepository, ProveedorRepository>();
 builder.Services.AddScoped<CrearLicitacionService>();
 builder.Services.AddScoped<ConsultarLicitacionService>();
 builder.Services.AddScoped<PublicarLicitacionService>();
+builder.Services.AddScoped<EditarLicitacionService>();
+builder.Services.AddScoped<EliminarLicitacionService>();
 builder.Services.AddScoped<ILicitacionRepository, LicitacionRepository>();
 builder.Services.AddScoped<ILicitacionConsultaRepository, LicitacionConsultaRepository>();
+builder.Services.AddScoped<ILicitacionBajaRepository, LicitacionRepository>();
 builder.Services.AddScoped<IOfertaRepository, OfertaRepository>();
 builder.Services.AddScoped<IOfertaConsultaRepository, OfertaRepository>();
+builder.Services.AddScoped<IEditarOfertaRepository, OfertaRepository>();
+builder.Services.AddScoped<IEliminarOfertaRepository, OfertaRepository>();
 builder.Services.AddScoped<ConsultarOfertaService>();
 builder.Services.AddScoped<CrearOfertaService>();
+builder.Services.AddScoped<EditarOfertaService>();
+builder.Services.AddScoped<EliminarOfertaService>();
 builder.Services.AddScoped<AdministrarNivelesAprobacionService>();
 builder.Services.AddScoped<INivelAprobacionRepository, NivelAprobacionRepository>();
 builder.Services.AddScoped<AdministrarTipoCambioService>();
@@ -63,7 +73,6 @@ if (builder.Configuration.GetValue("Database:ApplyMigrationsOnStartup", true))
     await dbContext.Database.MigrateAsync();
 }
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

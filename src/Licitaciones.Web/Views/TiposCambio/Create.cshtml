@@ -4,24 +4,32 @@
     ViewData["Title"] = "Registrar tipo de cambio";
 }
 
-<h1>Registrar tipo de cambio</h1>
+<div class="section-header">
+    <h1>Registrar tipo de cambio</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+</div>
 
 <partial name="_Mensajes" />
 
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label asp-for="Valor" class="form-label"></label>
-        <input asp-for="Valor" type="number" min="0.01" step="0.0001" class="form-control" />
-        <span asp-validation-for="Valor" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="Fecha" class="form-label"></label>
-        <input asp-for="Fecha" class="form-control" />
-        <span asp-validation-for="Fecha" class="text-danger"></span>
-    </div>
-    <p class="text-muted">La conversión se registra de USD a CRC.</p>
-    <button type="submit" class="btn btn-primary">Registrar</button>
-</form>
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        <div class="mb-3">
+            <label asp-for="Valor" class="form-label"></label>
+            <input asp-for="Valor" type="number" min="0.01" step="0.0001" class="form-control" placeholder="Ej: 520.5000" />
+            <span asp-validation-for="Valor" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Fecha" class="form-label"></label>
+            <input asp-for="Fecha" type="date" class="form-control" />
+            <span asp-validation-for="Fecha" class="text-danger"></span>
+        </div>
+        <p class="text-muted" style="font-size:0.8rem;">La conversión se registra de USD a CRC.</p>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Registrar</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

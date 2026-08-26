@@ -1,0 +1,50 @@
+@using Licitaciones.Application.Ofertas.Consultar
+@model PaginaOfertas
+
+@{
+    ViewData["Title"] = $"Ofertas de licitación";
+    var licitacionCodigo = ViewData["LicitacionCodigo"] as string;
+    var licitacionId = (Guid)ViewData["LicitacionId"]!;
+}
+
+<div class="section-header">
+    <h1>Ofertas - @licitacionCodigo</h1>
+    <div class="actions">
+        <a asp-controller="Licitaciones" asp-action="Details" asp-route-id="@licitacionId" class="btn btn-outline-secondary">Volver al detalle</a>
+    </div>
+</div>
+
+<partial name="_Mensajes" />
+
+<div class="table-responsive">
+<table class="table align-middle">
+    <thead>
+        <tr>
+            <th>Proveedor</th>
+            <th>Monto</th>
+            <th>Fecha de registro</th>
+            <th class="text-end">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var oferta in Model.Items)
+    {
+        <tr class="@(oferta.EsMejorOferta ? "table-success" : "")">
+            <td><strong>@oferta.ProveedorNombre</strong></td>
+            <td>@oferta.Monto.ToString("N2") @oferta.Moneda</td>
+            <td>@oferta.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+            <td class="text-end">
+                <a asp-controller="Ofertas" asp-action="Details" asp-route-id="@oferta.Id">Ver detalle</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty-state">
+        <p>No se encontraron ofertas para esta licitación.</p>
+    </div>
+}

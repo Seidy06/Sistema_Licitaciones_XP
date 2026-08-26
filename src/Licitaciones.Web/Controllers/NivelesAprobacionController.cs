@@ -7,15 +7,24 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Licitaciones.Web.Controllers;
 
+/// <summary>
+/// Controlador MVC para la administración de niveles de aprobación de licitaciones.
+/// </summary>
 public sealed class NivelesAprobacionController : Controller
 {
     private readonly AdministrarNivelesAprobacionService _service;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del controlador de niveles de aprobación.
+    /// </summary>
     public NivelesAprobacionController(AdministrarNivelesAprobacionService service)
     {
         _service = service;
     }
 
+    /// <summary>
+    /// Muestra el listado paginado de niveles de aprobación con filtros de búsqueda.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index(
         string? nombre = null,
@@ -58,12 +67,18 @@ public sealed class NivelesAprobacionController : Controller
         }
     }
 
+    /// <summary>
+    /// Muestra el formulario para crear un nuevo nivel de aprobación.
+    /// </summary>
     [HttpGet]
     public IActionResult Create()
     {
         return View(new CrearNivelAprobacionViewModel());
     }
 
+    /// <summary>
+    /// Procesa la creación de un nuevo nivel de aprobación con los datos del formulario.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
@@ -100,6 +115,9 @@ public sealed class NivelesAprobacionController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    /// <summary>
+    /// Muestra la confirmación de desactivación de un nivel de aprobación.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
@@ -113,6 +131,9 @@ public sealed class NivelesAprobacionController : Controller
             nivel.Id, nivel.Nombre, nivel.MontoMinimo, nivel.MontoMaximo));
     }
 
+    /// <summary>
+    /// Confirma la desactivación de un nivel de aprobación y redirige al listado.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(
@@ -127,5 +148,82 @@ public sealed class NivelesAprobacionController : Controller
 
         TempData["MensajeExito"] = "El nivel de aprobación fue desactivado.";
         return RedirectToAction(nameof(Index));
+    }
+
+    /// <summary>
+    /// Muestra el detalle completo de un nivel de aprobación por su identificador.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Details(
+        int id, CancellationToken cancellationToken = default)
+    {
+        var nivel = await _service.ObtenerPorIdAsync(id, cancellationToken);
+        if (nivel is null) return NotFound();
+
+        var model = new DetalleNivelAprobacionViewModel
+        {
+            Id = nivel.Id,
+            Nombre = nivel.Nombre,
+            MontoMinimo = nivel.MontoMinimo,
+            MontoMaximo = nivel.MontoMaximo,
+            Activo = nivel.Activo
+        };
+
+        return View(model);
+    }
+
+    /// <summary>
+    /// Muestra el formulario de edición con los datos actuales del nivel de aprobación.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Edit(
+        int id, CancellationToken cancellationToken = default)
+    {
+        var nivel = await _service.ObtenerPorIdAsync(id, cancellationToken);
+        if (nivel is null) return NotFound();
+
+        var model = new EditarNivelAprobacionViewModel
+        {
+            Id = nivel.Id,
+            Nombre = nivel.Nombre,
+            MontoMinimo = nivel.MontoMinimo,
+            MontoMaximo = nivel.MontoMaximo
+        };
+
+        return View(model);
+    }
+
+    /// <summary>
+    /// Procesa la actualización de un nivel de aprobación existente.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        int id, EditarNivelAprobacionViewModel model, CancellationToken cancellationToken)
+    {
+        if (id != model.Id) return BadRequest();
+        if (!ModelState.IsValid) return View(model);
+
+        try
+        {
+            var resultado = await _service.ActualizarAsync(
+                id, model.Nombre, model.MontoMinimo, model.MontoMaximo, cancellationToken);
+
+            if (resultado is null) return NotFound();
+        }
+        catch (NivelAprobacionConflictoException)
+        {
+            ModelState.AddModelError(string.Empty,
+                "Ya existe un nivel de aprobación activo cuyo rango se traslape con el indicado.");
+            return View(model);
+        }
+        catch (DomainException exception)
+        {
+            ModelState.AddModelError(string.Empty, exception.Message);
+            return View(model);
+        }
+
+        TempData["MensajeExito"] = "El nivel de aprobación se actualizó correctamente.";
+        return RedirectToAction(nameof(Details), new { id });
     }
 }

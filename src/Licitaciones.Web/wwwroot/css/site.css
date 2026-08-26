@@ -1,58 +1,687 @@
+/* ─────────────────────────────────────────────
+   0.  CSS Variables  –  Tema claro
+   ───────────────────────────────────────────── */
+:root {
+  /* Paleta principal */
+  --lic-primary:       #2563eb;
+  --lic-primary-hover: #1d4ed8;
+  --lic-primary-light: #dbeafe;
+  --lic-success:       #16a34a;
+  --lic-success-light: #dcfce7;
+  --lic-danger:        #dc2626;
+  --lic-danger-light:  #fee2e2;
+  --lic-warning:       #f59e0b;
+  --lic-warning-light: #fef3c7;
+  --lic-info:          #0891b2;
+  --lic-info-light:    #cffafe;
+
+  /* Superficie / texto / bordes */
+  --lic-superficie:      #ffffff;
+  --lic-superficie-alt:  #f8fafc;
+  --lic-texto:           #1e293b;
+  --lic-texto-muted:     #64748b;
+  --lic-borde:           #e2e8f0;
+  --lic-borde-hover:     #cbd5e1;
+
+  /* Navbar */
+  --lic-nav-bg:          #ffffff;
+  --lic-nav-texto:       #1e293b;
+  --lic-nav-border:      #e2e8f0;
+  --lic-nav-brand:       #2563eb;
+
+  /* Tabla */
+  --lic-table-stripe:    #f8fafc;
+  --lic-table-hover:     #eff6ff;
+
+  /* Sidebar / cards */
+  --lic-card-bg:         #ffffff;
+  --lic-card-border:     #e2e8f0;
+  --lic-card-shadow:     0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+
+  /* Hero */
+  --lic-hero-bg:         linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --lic-hero-text:       #ffffff;
+
+  /* Footer */
+  --lic-footer-bg:       #f8fafc;
+  --lic-footer-text:     #64748b;
+  --lic-footer-border:   #e2e8f0;
+
+  /* Form */
+  --lic-input-bg:        #ffffff;
+  --lic-input-border:    #cbd5e1;
+  --lic-input-focus:     #2563eb;
+
+  /* Sombras utilitarias */
+  --lic-shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+  --lic-shadow:    0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+  --lic-shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --lic-shadow-lg: 0 10px 15px rgba(0,0,0,.1), 0 4px 6px rgba(0,0,0,.05);
+
+  /* Transiciones */
+  --lic-transition: 0.2s ease;
+  --lic-radius:     0.5rem;
+  --lic-radius-lg:  0.75rem;
+}
+
+/* ─────────────────────────────────────────────
+   1.  Tema oscuro
+   ───────────────────────────────────────────── */
+[data-bs-theme="dark"] {
+  color-scheme: dark;
+
+  --lic-primary:       #60a5fa;
+  --lic-primary-hover: #93bbfd;
+  --lic-primary-light: #1e3a5f;
+  --lic-success:       #4ade80;
+  --lic-success-light: #14532d;
+  --lic-danger:        #f87171;
+  --lic-danger-light:  #7f1d1d;
+  --lic-warning:       #fbbf24;
+  --lic-warning-light: #78350f;
+  --lic-info:          #22d3ee;
+  --lic-info-light:    #164e63;
+
+  --lic-superficie:      #0f172a;
+  --lic-superficie-alt:  #1e293b;
+  --lic-texto:           #e2e8f0;
+  --lic-texto-muted:     #94a3b8;
+  --lic-borde:           #334155;
+  --lic-borde-hover:     #475569;
+
+  --lic-nav-bg:          #0f172a;
+  --lic-nav-texto:       #e2e8f0;
+  --lic-nav-border:      #1e293b;
+  --lic-nav-brand:       #60a5fa;
+
+  --lic-table-stripe:    #1e293b;
+  --lic-table-hover:     #1e3a5f;
+
+  --lic-card-bg:         #1e293b;
+  --lic-card-border:     #334155;
+  --lic-card-shadow:     0 1px 3px rgba(0,0,0,.3);
+
+  --lic-hero-bg:         linear-gradient(135deg, #1e40af 0%, #6d28d9 100%);
+  --lic-hero-text:       #ffffff;
+
+  --lic-footer-bg:       #0f172a;
+  --lic-footer-text:     #94a3b8;
+  --lic-footer-border:   #1e293b;
+
+  --lic-input-bg:        #1e293b;
+  --lic-input-border:    #475569;
+  --lic-input-focus:     #60a5fa;
+
+  --lic-shadow-sm: 0 1px 2px rgba(0,0,0,.2);
+  --lic-shadow:    0 1px 3px rgba(0,0,0,.3);
+  --lic-shadow-md: 0 4px 6px rgba(0,0,0,.35);
+  --lic-shadow-lg: 0 10px 15px rgba(0,0,0,.4);
+}
+
+/* ─────────────────────────────────────────────
+   2.  Base / Reset
+   ───────────────────────────────────────────── */
 html {
   font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
   min-height: 100%;
+}
+@media (min-width: 768px) {
+  html { font-size: 16px; }
 }
 
 body {
-  margin-bottom: 60px;
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--lic-texto);
+  background-color: var(--lic-superficie-alt);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
+a { color: var(--lic-primary); transition: color var(--lic-transition); }
+a:hover { color: var(--lic-primary-hover); }
+
+/* ─────────────────────────────────────────────
+   3.  Navbar
+   ───────────────────────────────────────────── */
+header nav.navbar {
+  background-color: var(--lic-nav-bg);
+  border-bottom: 1px solid var(--lic-nav-border) !important;
+  box-shadow: var(--lic-shadow-sm);
+  padding: 0.5rem 1rem;
+}
+
+header nav.navbar .navbar-brand {
+  color: var(--lic-nav-brand) !important;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
+}
+
+header nav.navbar .nav-link {
+  color: var(--lic-nav-texto) !important;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem !important;
+  border-radius: var(--lic-radius);
+  transition: background-color var(--lic-transition), color var(--lic-transition);
+  font-size: 0.875rem;
+}
+
+header nav.navbar .nav-link:hover {
+  background-color: var(--lic-table-hover);
+}
+
+header nav.navbar .nav-link.active {
+  background-color: var(--lic-primary-light);
+  color: var(--lic-primary) !important;
+  font-weight: 600;
+}
+
+#theme-toggle {
+  border-color: var(--lic-borde) !important;
+  color: var(--lic-nav-texto) !important;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 1.1rem;
+  transition: background-color var(--lic-transition), border-color var(--lic-transition);
+}
+
+#theme-toggle:hover {
+  background-color: var(--lic-table-hover);
+  border-color: var(--lic-borde-hover) !important;
+}
+
+/* ─────────────────────────────────────────────
+   4.  Contenedor principal
+   ───────────────────────────────────────────── */
+.container-flex {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+main { padding-top: 1rem; padding-bottom: 2rem; }
+
+/* ─────────────────────────────────────────────
+   5.  Hero (Landing Page)
+   ───────────────────────────────────────────── */
+.hero {
+  background: var(--lic-hero-bg);
+  color: var(--lic-hero-text);
+  border-radius: var(--lic-radius-lg);
+  padding: 3rem 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  box-shadow: var(--lic-shadow-md);
+}
+
+.hero h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.025em;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 640px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+  .hero { padding: 4rem 3rem; }
+  .hero h1 { font-size: 2.75rem; }
+}
+
+/* ─────────────────────────────────────────────
+   6.  KPI Cards (Landing Page)
+   ───────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: var(--lic-card-bg);
+  border: 1px solid var(--lic-card-border);
+  border-radius: var(--lic-radius-lg);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--lic-card-shadow);
+  transition: box-shadow var(--lic-transition), transform var(--lic-transition);
+  text-decoration: none;
+  color: var(--lic-texto);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.kpi-card:hover {
+  box-shadow: var(--lic-shadow-md);
+  transform: translateY(-2px);
+  color: var(--lic-texto);
+}
+
+.kpi-card .kpi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--lic-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.kpi-card .kpi-icon.blue   { background: var(--lic-primary-light); color: var(--lic-primary); }
+.kpi-card .kpi-icon.green  { background: var(--lic-success-light); color: var(--lic-success); }
+.kpi-card .kpi-icon.amber  { background: var(--lic-warning-light); color: var(--lic-warning); }
+.kpi-card .kpi-icon.red    { background: var(--lic-danger-light);  color: var(--lic-danger); }
+.kpi-card .kpi-icon.cyan   { background: var(--lic-info-light);    color: var(--lic-info); }
+
+.kpi-card .kpi-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--lic-texto-muted);
+}
+
+.kpi-card .kpi-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.kpi-card .kpi-desc {
+  font-size: 0.8rem;
+  color: var(--lic-texto-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ─────────────────────────────────────────────
+   7.  Section Headers
+   ───────────────────────────────────────────── */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.section-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.section-header .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ─────────────────────────────────────────────
+   8.  Cards
+   ───────────────────────────────────────────── */
+.card {
+  background: var(--lic-card-bg);
+  border: 1px solid var(--lic-card-border);
+  border-radius: var(--lic-radius-lg);
+  box-shadow: var(--lic-card-shadow);
+}
+
+.card .card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--lic-texto);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--lic-borde);
+}
+
+/* ─────────────────────────────────────────────
+   9.  Tablas
+   ───────────────────────────────────────────── */
+.table-responsive {
+  background: var(--lic-card-bg);
+  border: 1px solid var(--lic-card-border);
+  border-radius: var(--lic-radius-lg);
+  box-shadow: var(--lic-card-shadow);
+  overflow: hidden;
+}
+
+.table {
+  margin: 0;
+  color: var(--lic-texto);
+}
+
+.table thead th {
+  background-color: var(--lic-superficie-alt);
+  border-bottom: 2px solid var(--lic-borde);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--lic-texto-muted);
+  padding: 0.75rem 1rem;
+  white-space: nowrap;
+}
+
+.table tbody tr {
+  transition: background-color var(--lic-transition);
+}
+
+.table tbody tr:nth-child(odd) {
+  background-color: var(--lic-table-stripe);
+}
+
+.table tbody tr:hover {
+  background-color: var(--lic-table-hover);
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+  border-color: var(--lic-borde);
+  font-size: 0.875rem;
+}
+
+.table td a {
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.table td a:hover {
+  text-decoration: underline;
+}
+
+/* ─────────────────────────────────────────────
+   10.  Formularios
+   ───────────────────────────────────────────── */
+.form-control, .form-select {
+  border-color: var(--lic-input-border);
+  background-color: var(--lic-input-bg);
+  color: var(--lic-texto);
+  border-radius: var(--lic-radius);
+  transition: border-color var(--lic-transition), box-shadow var(--lic-transition);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--lic-input-focus);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  background-color: var(--lic-input-bg);
+  color: var(--lic-texto);
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--lic-texto);
+  margin-bottom: 0.35rem;
+}
+
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+  color: var(--lic-texto-muted);
   text-align: end;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
 
-:root {
-  --lic-superficie: #ffffff;
-  --lic-texto: #212529;
-  --lic-borde: rgba(0, 0, 0, 0.175);
+/* ─────────────────────────────────────────────
+   11.  Botones
+   ───────────────────────────────────────────── */
+.btn {
+  border-radius: var(--lic-radius);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  transition: all var(--lic-transition);
 }
 
-[data-bs-theme='dark'] {
-  color-scheme: dark;
-  --lic-superficie: #1b1f22;
-  --lic-texto: #e9ecef;
-  --lic-borde: rgba(255, 255, 255, 0.175);
+.btn-primary {
+  background-color: var(--lic-primary);
+  border-color: var(--lic-primary);
+}
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--lic-primary-hover);
+  border-color: var(--lic-primary-hover);
+  box-shadow: var(--lic-shadow-sm);
 }
 
-[data-bs-theme='dark'] header nav.navbar {
-  background-color: var(--lic-superficie) !important;
+.btn-outline-primary {
+  color: var(--lic-primary);
+  border-color: var(--lic-primary);
+}
+.btn-outline-primary:hover {
+  background-color: var(--lic-primary);
+  border-color: var(--lic-primary);
+  color: #fff;
 }
 
-[data-bs-theme='dark'] header nav.navbar .nav-link,
-[data-bs-theme='dark'] header nav.navbar .navbar-brand {
-  color: var(--lic-texto) !important;
+.btn-outline-secondary {
+  color: var(--lic-texto-muted);
+  border-color: var(--lic-borde);
+}
+.btn-outline-secondary:hover {
+  background-color: var(--lic-superficie-alt);
+  border-color: var(--lic-borde-hover);
+  color: var(--lic-texto);
 }
 
-[data-bs-theme='dark'] footer.footer {
-  background-color: var(--lic-superficie);
-  border-top-color: var(--lic-borde) !important;
+.btn-outline-success {
+  color: var(--lic-success);
+  border-color: var(--lic-success);
+}
+.btn-outline-success:hover {
+  background-color: var(--lic-success);
+  color: #fff;
+}
+
+.btn-danger {
+  background-color: var(--lic-danger);
+  border-color: var(--lic-danger);
+}
+.btn-danger:hover {
+  background-color: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.btn-outline-danger {
+  color: var(--lic-danger);
+  border-color: var(--lic-danger);
+}
+.btn-outline-danger:hover {
+  background-color: var(--lic-danger);
+  color: #fff;
+}
+
+/* ─────────────────────────────────────────────
+   12.  Badges / Pills
+   ───────────────────────────────────────────── */
+.badge {
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  padding: 0.3em 0.65em;
+  border-radius: 9999px;
+}
+
+.badge-success { background-color: var(--lic-success-light); color: var(--lic-success); }
+.badge-danger  { background-color: var(--lic-danger-light);  color: var(--lic-danger); }
+.badge-warning { background-color: var(--lic-warning-light); color: var(--lic-warning); }
+.badge-info    { background-color: var(--lic-info-light);    color: var(--lic-info); }
+.badge-secondary { background-color: var(--lic-borde); color: var(--lic-texto-muted); }
+
+/* Estado de licitación */
+.badge-borrador   { background: var(--lic-warning-light); color: var(--lic-warning); }
+.badge-publicada  { background: var(--lic-success-light); color: var(--lic-success); }
+.badge-cerrada    { background: var(--lic-danger-light);  color: var(--lic-danger); }
+
+/* ─────────────────────────────────────────────
+   13.  Paginación
+   ───────────────────────────────────────────── */
+.pagination {
+  margin-top: 1rem;
+  gap: 0.25rem;
+}
+
+.page-link {
+  border-radius: var(--lic-radius);
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--lic-primary);
+  border: 1px solid var(--lic-borde);
+  padding: 0.4rem 0.75rem;
+  transition: all var(--lic-transition);
+}
+
+.page-link:hover {
+  background-color: var(--lic-primary-light);
+  border-color: var(--lic-primary);
+  color: var(--lic-primary);
+}
+
+.page-item.active .page-link {
+  background-color: var(--lic-primary);
+  border-color: var(--lic-primary);
+  color: #fff;
+}
+
+/* ─────────────────────────────────────────────
+   14.  Alertas
+   ───────────────────────────────────────────── */
+.alert {
+  border-radius: var(--lic-radius-lg);
+  border: none;
+  font-size: 0.875rem;
+  padding: 0.85rem 1.25rem;
+}
+
+.alert-success { background-color: var(--lic-success-light); color: var(--lic-success); }
+.alert-danger  { background-color: var(--lic-danger-light);  color: var(--lic-danger); }
+.alert-info    { background-color: var(--lic-info-light);    color: var(--lic-info); }
+
+.alert .btn-close { filter: none; opacity: 0.6; }
+
+/* ─────────────────────────────────────────────
+   15.  Footer
+   ───────────────────────────────────────────── */
+footer.footer {
+  background-color: var(--lic-footer-bg);
+  border-top: 1px solid var(--lic-footer-border) !important;
+  color: var(--lic-footer-text);
+  padding: 1rem 0;
+  font-size: 0.8rem;
+}
+
+footer.footer a {
+  color: var(--lic-texto-muted);
+  text-decoration: none;
+}
+
+footer.footer a:hover {
+  color: var(--lic-texto);
+}
+
+/* ─────────────────────────────────────────────
+   16.  Page titles (h1 en vistas CRUD)
+   ───────────────────────────────────────────── */
+main > .container > h1,
+main h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 1rem;
+  color: var(--lic-texto);
+}
+
+/* ─────────────────────────────────────────────
+   17.  Detail list (dl / dt / dd)
+   ───────────────────────────────────────────── */
+dl dt {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--lic-texto-muted);
+}
+
+dl dd {
+  font-size: 0.9rem;
+  color: var(--lic-texto);
+  margin-bottom: 0.5rem;
+}
+
+/* ─────────────────────────────────────────────
+   18.  Empty state
+   ───────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--lic-texto-muted);
+}
+
+.empty-state p {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────
+   19.  Form container
+   ───────────────────────────────────────────── */
+.form-card {
+  background: var(--lic-card-bg);
+  border: 1px solid var(--lic-card-border);
+  border-radius: var(--lic-radius-lg);
+  box-shadow: var(--lic-card-shadow);
+  padding: 1.5rem;
+  max-width: 560px;
+}
+
+/* ─────────────────────────────────────────────
+   20.  Responsive helpers
+   ───────────────────────────────────────────── */
+@media (max-width: 575.98px) {
+  .hero { padding: 2rem 1rem; }
+  .hero h1 { font-size: 1.5rem; }
+  .hero p { font-size: 0.95rem; }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .section-header { flex-direction: column; align-items: flex-start; }
+  .section-header .actions { width: 100%; }
+  .section-header .actions .btn { flex: 1; }
+}
+
+/* ─────────────────────────────────────────────
+   21.  Scrollbar (dark mode)
+   ───────────────────────────────────────────── */
+[data-bs-theme="dark"] ::-webkit-scrollbar { width: 8px; height: 8px; }
+[data-bs-theme="dark"] ::-webkit-scrollbar-track { background: var(--lic-superficie); }
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background: var(--lic-borde); border-radius: 4px; }
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: var(--lic-borde-hover); }
+
+/* ─────────────────────────────────────────────
+   22.  Utility: text truncation
+   ───────────────────────────────────────────── */
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

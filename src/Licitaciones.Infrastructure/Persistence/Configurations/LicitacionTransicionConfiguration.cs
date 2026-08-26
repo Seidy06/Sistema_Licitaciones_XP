@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Licitaciones.Infrastructure.Persistence.Configurations;
 
+/// <summary>
+/// Configuración de Entity Framework para las transiciones de estado de licitaciones.
+/// </summary>
 public sealed class LicitacionTransicionConfiguration
     : IEntityTypeConfiguration<LicitacionTransicion>
 {

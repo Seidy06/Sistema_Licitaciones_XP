@@ -66,9 +66,9 @@ namespace Licitaciones.Infrastructure.Persistence.Migrations
                             Id = 1,
                             Activo = true,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            MontoMaximo = 1000000m,
-                            MontoMinimo = 0m,
-                            Nombre = "Operativo",
+                            MontoMaximo = 999999.99m,
+                            MontoMinimo = 0.01m,
+                            Nombre = "Encargado de area",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         },
                         new
@@ -76,9 +76,9 @@ namespace Licitaciones.Infrastructure.Persistence.Migrations
                             Id = 2,
                             Activo = true,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            MontoMaximo = 10000000m,
+                            MontoMaximo = 9999999.99m,
                             MontoMinimo = 1000000m,
-                            Nombre = "Gerencial",
+                            Nombre = "Gerencia",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         },
                         new
@@ -87,7 +87,7 @@ namespace Licitaciones.Infrastructure.Persistence.Migrations
                             Activo = true,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             MontoMinimo = 10000000m,
-                            Nombre = "Directivo",
+                            Nombre = "Junta Directiva",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         });
                 });
@@ -233,6 +233,9 @@ namespace Licitaciones.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTimeOffset>("FechaRegistro")
                         .HasColumnType("timestamp with time zone");
 
@@ -248,13 +251,20 @@ namespace Licitaciones.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProveedorId");
 
                     b.HasIndex("LicitacionId", "ProveedorId")
                         .IsUnique()
-                        .HasDatabaseName("IX_Ofertas_LicitacionId_ProveedorId");
+                        .HasDatabaseName("IX_Ofertas_LicitacionId_ProveedorId")
+                        .HasFilter("\"DeletedAt\" IS NULL");
 
                     b.ToTable("Ofertas", null, t =>
                         {

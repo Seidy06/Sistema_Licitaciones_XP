@@ -41,6 +41,8 @@ public sealed class LicitacionesE2EFixture : IAsyncLifetime
 
     public string DireccionBase { get; private set; } = string.Empty;
 
+    public IBrowser Navegador => _navegador!;
+
     public IPage Pagina { get; private set; } = null!;
 
     public bool NavegadorHeadless { get; private set; }

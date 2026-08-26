@@ -3,6 +3,9 @@ using Licitaciones.Domain.Common;
 
 namespace Licitaciones.Application.Licitaciones.Publicar;
 
+/// <summary>
+/// Servicio para publicar licitaciones cambiando su estado a Publicada.
+/// </summary>
 public sealed class PublicarLicitacionService
 {
     private readonly ILicitacionRepository _repository;
@@ -14,6 +17,12 @@ public sealed class PublicarLicitacionService
         _clock = clock;
     }
 
+    /// <summary>
+    /// Publica una licitación existente.
+    /// </summary>
+    /// <param name="id">Identificador de la licitación a publicar.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>DTO con los datos de la licitación publicada.</returns>
     public async Task<LicitacionDto> PublicarAsync(
         Guid id,
         CancellationToken cancellationToken = default)

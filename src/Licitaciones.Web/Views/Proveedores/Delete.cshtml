@@ -4,14 +4,21 @@
     ViewData["Title"] = "Eliminar proveedor";
 }
 
-<h1>Eliminar proveedor</h1>
-
-<div class="alert alert-warning" role="alert">
-    Confirme que desea eliminar al proveedor <strong>@Model.Nombre</strong>.
+<div class="section-header">
+    <h1>Eliminar proveedor</h1>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancelar</a>
 </div>
 
-<form asp-action="DeleteConfirmed" method="post">
-    <input asp-for="Id" type="hidden" />
-    <button type="submit" class="btn btn-danger">Confirmar eliminación</button>
-    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancelar</a>
-</form>
+<div class="alert alert-danger" role="alert">
+    ¿Está seguro que desea eliminar al proveedor <strong>@Model.Nombre</strong>?
+</div>
+
+<div class="form-card">
+    <form asp-action="DeleteConfirmed" method="post">
+        <input asp-for="Id" type="hidden" />
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">Confirmar eliminación</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

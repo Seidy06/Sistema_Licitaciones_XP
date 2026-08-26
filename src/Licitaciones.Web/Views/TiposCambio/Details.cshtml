@@ -1,0 +1,51 @@
+@model DetalleTipoCambioViewModel
+
+@{
+    ViewData["Title"] = "Detalle de tipo de cambio";
+}
+
+<div class="section-header">
+    <h1>Tipo de cambio</h1>
+    <div class="actions">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Editar</a>
+        @if (!Model.Activo)
+        {
+            <form asp-action="Activar" asp-route-id="@Model.Id" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-success">Activar</button>
+            </form>
+        }
+        <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Información del tipo de cambio</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Moneda origen</dt>
+                    <dd class="col-sm-8">@Model.MonedaOrigen</dd>
+                    <dt class="col-sm-4">Moneda destino</dt>
+                    <dd class="col-sm-8">@Model.MonedaDestino</dd>
+                    <dt class="col-sm-4">Valor</dt>
+                    <dd class="col-sm-8"><strong>@Model.Valor.ToString("N4")</strong></dd>
+                    <dt class="col-sm-4">Fecha</dt>
+                    <dd class="col-sm-8">@Model.Fecha.ToString("dd/MM/yyyy")</dd>
+                    <dt class="col-sm-4">Estado</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Activo)
+                        {
+                            <span class="badge badge-success">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">Inactivo</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

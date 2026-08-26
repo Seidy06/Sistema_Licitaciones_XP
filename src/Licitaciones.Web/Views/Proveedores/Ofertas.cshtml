@@ -1,0 +1,42 @@
+@using Licitaciones.Application.Common
+@model ProveedorOfertasViewModel
+
+@{
+    ViewData["Title"] = $"Ofertas de {Model.Proveedor.Nombre}";
+}
+
+<div class="section-header">
+    <h1>Ofertas de @Model.Proveedor.Nombre</h1>
+    <div class="actions">
+        <a asp-action="Details" asp-route-id="@Model.Proveedor.Id" class="btn btn-outline-secondary">Volver al detalle</a>
+    </div>
+</div>
+
+<div class="table-responsive">
+<table class="table align-middle">
+    <thead>
+        <tr>
+            <th>Monto</th>
+            <th>Moneda</th>
+            <th>Fecha de registro</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var oferta in Model.Ofertas.Items)
+    {
+        <tr>
+            <td><strong>@oferta.Monto.ToString("N2")</strong></td>
+            <td><span class="badge badge-info">@oferta.Moneda</span></td>
+            <td>@oferta.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>
+
+@if (Model.Ofertas.Items.Count == 0)
+{
+    <div class="empty-state">
+        <p>No se encontraron ofertas para este proveedor.</p>
+    </div>
+}

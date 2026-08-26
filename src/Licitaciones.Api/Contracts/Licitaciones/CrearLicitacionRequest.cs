@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Licitaciones.Api.Contracts.Licitaciones;
 
+/// <summary>
+/// Contrato HTTP para crear una nueva licitación.
+/// </summary>
 public sealed record CrearLicitacionRequest(
     [Required] string Codigo,
     [Required] string Titulo,
