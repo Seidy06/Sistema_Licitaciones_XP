@@ -21,7 +21,8 @@
 <form asp-action="Index" method="get" class="row g-2 mb-3">
     <div class="col-md-3">
         <label for="licitacionId" class="visually-hidden">Licitación</label>
-        <input id="licitacionId" name="licitacionId" value="@licitacionId" class="form-control" placeholder="Identificador de la licitación" />
+        <input id="licitacionId" name="licitacionId" value="@licitacionId" class="form-control"
+               placeholder="ID de la licitación (obtener desde detalle)" readonly="@licitacionId.HasValue" />
     </div>
     <div class="col-md-3">
         <label for="proveedor" class="visually-hidden">Proveedor</label>

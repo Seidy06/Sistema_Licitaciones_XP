@@ -325,29 +325,26 @@ public sealed class ProveedoresController : Controller
         var proveedor = await _consultarService.ObtenerPorIdAsync(id, cancellationToken);
         if (proveedor is null) return NotFound();
 
-        var licitaciones = await _consultarOfertaService.ListarAsync(
-            new ConsultarOfertasRequest(Guid.Empty),
+        var resultado = await _consultarOfertaService.ListarPorProveedorAsync(
+            proveedor.Id,
+            "CRC",
+            null,
+            "monto",
+            false,
+            1,
+            100,
             cancellationToken);
-
-        var todasLasOfertas = new List<OfertaConsultaDto>();
-        foreach (var item in licitaciones.Items)
-        {
-            if (item.ProveedorNombre == proveedor.Nombre)
-            {
-                todasLasOfertas.Add(item);
-            }
-        }
 
         var model = new ProveedorOfertasViewModel
         {
             Proveedor = new ProveedorResumenViewModel(
                 proveedor.Id, proveedor.Nombre, proveedor.CreatedAt),
             Ofertas = new PaginaResultado<ProveedorOfertaItemViewModel>(
-                todasLasOfertas
+                resultado.Items
                     .Select(o => new ProveedorOfertaItemViewModel(
-                        o.Id, "", o.Monto, o.Moneda, o.FechaRegistro))
+                        o.Id, o.LicitacionId.ToString(), o.Monto, o.Moneda, o.FechaRegistro))
                     .ToArray(),
-                todasLasOfertas.Count, 1, 100),
+                resultado.Total, 1, 100),
             Moneda = "CRC"
         };
 
