@@ -16,8 +16,8 @@ using Licitaciones.Domain.Common;
 using Microsoft.AspNetCore.Mvc;
 
 using ApplicationRequest = Licitaciones.Application.Licitaciones.Crear.CrearLicitacionRequest;
-using CrearOfertaHttpRequest = Licitaciones.Api.Contracts.Ofertas.CrearOfertaRequest;
 using CrearOfertaAppRequest = Licitaciones.Application.Ofertas.Crear.CrearOfertaRequest;
+using CrearOfertaHttpRequest = Licitaciones.Api.Contracts.Ofertas.CrearOfertaRequest;
 using EditarApplicationRequest = Licitaciones.Application.Licitaciones.Editar.EditarLicitacionRequest;
 using EditarHttpRequest = Licitaciones.Api.Contracts.Licitaciones.EditarLicitacionRequest;
 using HttpRequest = Licitaciones.Api.Contracts.Licitaciones.CrearLicitacionRequest;
