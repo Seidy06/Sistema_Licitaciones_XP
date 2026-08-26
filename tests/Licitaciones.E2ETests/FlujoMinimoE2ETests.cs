@@ -36,7 +36,7 @@ public sealed class FlujoMinimoE2ETests : IClassFixture<LicitacionesE2EFixture>
         await IrAsync("/Proveedores");
         var fila = _e2e.Pagina.Locator($"tr:has-text('{_e2e.NombreProveedorPrincipal}')");
         await Expect(fila).ToBeVisibleAsync();
-        await Expect(fila.Locator("a:has-text('Ver detalle')")).ToBeVisibleAsync();
+        await Expect(fila.Locator("a:has-text('Detalle')")).ToBeVisibleAsync();
 
         var idProveedor = await IdDeProveedorAsync(_e2e.NombreProveedorPrincipal);
         Assert.NotEqual(Guid.Empty, idProveedor);
